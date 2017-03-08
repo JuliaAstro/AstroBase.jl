@@ -1,5 +1,5 @@
 module AstrodynamicsBase
 
-# package code goes here
+include("bodies.jl")
 
 end # module
