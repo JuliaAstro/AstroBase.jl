@@ -1,5 +1,9 @@
 module AstroDynBase
 
+using Reexport
+
+@reexport using AstronomicalTime
+
 include("bodies.jl")
 include("constants/planets.jl")
 include("constants/satellites.jl")
