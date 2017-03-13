@@ -1,4 +1,4 @@
 export AbstractEphemeris
 
-@compat abstract type AbstractEphemeris end
+abstract type AbstractEphemeris end
 
