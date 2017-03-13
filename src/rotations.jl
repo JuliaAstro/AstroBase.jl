@@ -31,21 +31,21 @@ function getgraph()
     graph
 end
 
-function gen_rotation(F1, F2, t)
+function gen_rotation(F1, F2, ep)
     graph = getgraph()
-    if !Convertible.haspath(graph, F1, F2)
+    if !haspath(graph, F1, F2)
         error("No conversion path '$F1' -> '$F2' found.")
     end
-    path = Convertible.findpath(graph, F1, F2)
-    ex = :(Rotation($F1, $(path[1]), t))
+    path = findpath(graph, F1, F2)
+    ex = :(Rotation($F1, $(path[1]), ep))
     for i in eachindex(path[2:end])
         t1 = path[i]
         t2 = path[i+1]
-        ex = :(compose($ex, Rotation($t1, $t2, t)))
+        ex = :(compose($ex, Rotation($t1, $t2, ep)))
     end
     return ex
 end
 
-@generated function Rotation{F1<:Frame,F2<:Frame}(::Type{F1}, ::Type{F2}, t::Float64)
-    gen_transform(F1, F2, t)
+@generated function Rotation{F1<:Frame,F2<:Frame}(::Type{F1}, ::Type{F2}, ep)
+    gen_rotation(F1, F2, ep)
 end

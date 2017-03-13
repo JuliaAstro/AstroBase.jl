@@ -3,9 +3,7 @@ using Base.Test
 
 
 @testset "AstroDynBase" begin
-    @testset "Rotations" begin
-        include("rotations.jl")
-    end
+    include("rotations.jl")
     @testset "States" begin
     end
 end
