@@ -25,8 +25,4 @@ struct Sun <: CelestialBody end
 mean_radius(::Type{Sun}) = 696000.0
 id(::Type{Sun}) = 10
 
-include("constants/planets.jl")
-include("constants/satellites.jl")
-include("constants/minorbodies.jl")
-
 const mu = μ
