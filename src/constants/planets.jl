@@ -15,3 +15,5 @@ for planet in PLANETS
         export $planet
     end
 end
+
+μ(::Type{Earth}) = 3.986004418e5km^3/s^2

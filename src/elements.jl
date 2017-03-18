@@ -1,4 +1,4 @@
-export keplerian, cartesian
+export keplerian, cartesian, perifocal
 
 keplerian(rv, μ) = keplerian(rv[1:3], rv[4:6], μ)
 
@@ -45,7 +45,7 @@ function keplerian(r, v, µ)
         ano = mod2pi(atan2(r⋅cross(h, ec) / hm, r⋅ec))
     end
 
-    [sma, ecc, inc, node, peri, ano]
+    sma, ecc, inc, node, peri, ano
 end
 
 function cartesian(sma, ecc, inc, node, peri, ano, μ)
@@ -61,8 +61,8 @@ function cartesian(sma, ecc, inc, node, peri, ano, μ)
 end
 
 function perifocal(p, ecc, ano, μ)
-    r_pqw = [p * cos(ano) / (1 + ecc * cos(ano)), p * sin(ano) / (1 + ecc * cos(ano)), 0.0]
-    v_pqw = [-sqrt(μ/p) * sin(ano), sqrt(μ/p) * (ecc + cos(ano)), 0.0]
+    r_pqw = [p * cos(ano) / (1 + ecc * cos(ano)), p * sin(ano) / (1 + ecc * cos(ano)), zero(p)]
+    v_pqw = [-sqrt(μ/p) * sin(ano), sqrt(μ/p) * (ecc + cos(ano)), zero(sqrt(μ/p))]
     return r_pqw, v_pqw
 end
 

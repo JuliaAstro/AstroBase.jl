@@ -38,23 +38,25 @@ rotation_matrix(axis::AbstractString, angle) = rotation_matrix(rotation_axis(axi
 
 function rotation_matrix(axis::Int, angle)
     mat = zeros(3, 3)
+    cosa = cos(angle)
+    sina = sin(angle)
     if axis == 1
         mat[1,1] = 1
-        mat[2,2] = cos(angle)
-        mat[2,3] = sin(angle)
-        mat[3,2] = -sin(angle)
-        mat[3,3] = cos(angle)
+        mat[2,2] = cosa
+        mat[2,3] = sina
+        mat[3,2] = -sina
+        mat[3,3] = cosa
     elseif axis == 2
-        mat[1,1] = cos(angle)
-        mat[1,3] = sin(angle)
+        mat[1,1] = cosa
+        mat[1,3] = sina
         mat[2,2] = 1
-        mat[3,1] = -sin(angle)
-        mat[3,3] = cos(angle)
+        mat[3,1] = -sina
+        mat[3,3] = cosa
     elseif axis == 3
-        mat[1,1] = cos(angle)
-        mat[1,2] = sin(angle)
-        mat[2,1] = -sin(angle)
-        mat[2,2] = cos(angle)
+        mat[1,1] = cosa
+        mat[1,2] = sina
+        mat[2,1] = -sina
+        mat[2,2] = cosa
         mat[3,3] = 1
     else
         throw(ArgumentError("'$axis' is not a valid rotation axis."))
@@ -64,21 +66,23 @@ end
 
 function rate_matrix(axis::Int, angle, rate)
     mat = zeros(3, 3)
+    cosa = cos(angle)
+    sina = sin(angle)
     if axis == 1
-        mat[2,2] = -rate * sin(angle)
-        mat[2,3] = rate * cos(angle)
-        mat[3,2] = -rate * cos(angle)
-        mat[3,3] = -rate * sin(angle)
+        mat[2,2] = -rate * sina
+        mat[2,3] = rate * cosa
+        mat[3,2] = -rate * cosa
+        mat[3,3] = -rate * sina
     elseif axis == 2
-        mat[1,1] = -rate * sin(angle)
-        mat[1,3] = rate * cos(angle)
-        mat[3,1] = -rate * cos(angle)
-        mat[3,3] = -rate * sin(angle)
+        mat[1,1] = -rate * sina
+        mat[1,3] = rate * cosa
+        mat[3,1] = -rate * cosa
+        mat[3,3] = -rate * sina
     elseif axis == 3
-        mat[1,1] = -rate * sin(angle)
-        mat[1,2] = rate * cos(angle)
-        mat[2,1] = -rate * cos(angle)
-        mat[2,2] = -rate * sin(angle)
+        mat[1,1] = -rate * sina
+        mat[1,2] = rate * cosa
+        mat[2,1] = -rate * cosa
+        mat[2,2] = -rate * sina
     else
         throw(ArgumentError("'$axis' is not a valid rotation axis."))
     end
