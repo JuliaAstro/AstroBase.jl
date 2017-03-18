@@ -1,6 +1,6 @@
-import Astrodynamics.rotation_axes, Astrodynamics.rotation_axis
+import AstroDynBase.rotation_axes, AstroDynBase.rotation_axis
 
-@testset "Rotations" begin
+@testset "Rotation Matrices" begin
     @test_throws ArgumentError rotation_axes("XYP")
     @test_throws ArgumentError rotation_axes("XY1")
     @test_throws ArgumentError rotation_axes("124")

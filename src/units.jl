@@ -1,8 +1,9 @@
 using Unitful
 
-import Unitful: km, s, kg, 𝐋, 𝐓, Length, Time
+import Unitful: km, s, kg, °, rad,
+    𝐋, 𝐓, Length, Time
 
-export km, s, kps
+export km, s, kg, °, rad, kps
 
 const kps = km/s
 
