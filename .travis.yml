@@ -4,14 +4,18 @@ os:
   - linux
   - osx
 julia:
-  - release
-  - nightly
+  - 0.6
 notifications:
   email: false
 # uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("AstroDynCoordinates"); Pkg.test("AstroDynCoordinates"; coverage=true)'
+script:
+ - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+ - julia -e 'Pkg.clone("https://github.com/helgee/Convertible.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/helgee/RemoteFiles.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/helgee/EarthOrientation.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/AstronomicalTime.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/AstroDynBase.jl.git")'
+ - julia -e 'Pkg.clone(pwd()); Pkg.build("AstroDynCoordinates"); Pkg.test("AstroDynCoordinates"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("AstroDynCoordinates")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
