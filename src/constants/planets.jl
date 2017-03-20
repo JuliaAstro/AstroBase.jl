@@ -9,16 +9,17 @@ const PLANETS = (
     :Neptune
 )
 
-for planet in PLANETS
+for (i, planet) in enumerate(PLANETS)
+    barycenter = Symbol(planet, "Barycenter")
     @eval begin
         struct $planet <: Planet end
-        export $planet
+        struct $barycenter <: Barycenter end
+        export $planet, $barycenter
+
+        naif_id(::Type{$barycenter}) = $i
+        parent(::Type{$barycenter}) = SSB
     end
 end
-
-struct EarthBarycenter <: Barycenter end
-naif_id(::Type{EarthBarycenter}) = 3
-parent(::Type{EarthBarycenter}) = SSB
 
 μ(::Type{Earth}) = 3.986004418e5km^3/s^2
 j2(::Type{Earth}) = 1.08262668e-3

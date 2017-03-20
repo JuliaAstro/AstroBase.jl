@@ -1,9 +1,10 @@
+import Base: parent
 import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter
 export Sun, SSB
 
 export naif_id, μ, mu, j2, mean_radius, equatorial_radius, polar_radius
-export maximum_elevation, maximum_depression, deviation
+export maximum_elevation, maximum_depression, deviation, parent
 
 abstract type CelestialBody end
 abstract type Barycenter <: CelestialBody end
