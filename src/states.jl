@@ -1,6 +1,7 @@
 using AstronomicalTime
 
 export AbstractState, State, ThreeBodyState
+export body
 
 abstract type AbstractState end
 
@@ -17,6 +18,8 @@ struct State{
         new{T,F,C}(ep, r, v)
     end
 end
+
+body(::State{<:Timescale,<:Frame,C}) where C<:CelestialBody = C
 
 struct ThreeBodyState{
         T<:Timescale,
