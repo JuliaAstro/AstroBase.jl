@@ -1,3 +1,4 @@
+import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter
 export Sun, SSB
 
@@ -46,11 +47,12 @@ for c in CONSTANTS
     end
 end
 
+const mu = μ
+
 struct SolarSystemBarycenter <: Barycenter end
 const SSB = SolarSystemBarycenter
 
 naif_id(::Type{SSB}) = 0
-parent(::Type{SSB}) = SSB
 
 struct Sun <: CelestialBody end
 
@@ -58,5 +60,58 @@ struct Sun <: CelestialBody end
 mean_radius(::Type{Sun}) = 696000.0km
 naif_id(::Type{Sun}) = 10
 parent(::Type{Sun}) = SSB
+ra₀(::Type{Sun}) = deg2rad(286.13)
+ra₁(::Type{Sun}) = 0.0
+ra₂(::Type{Sun}) = 0.0
+dec₀(::Type{Sun}) = deg2rad(63.87)
+dec₁(::Type{Sun}) = 0.0
+dec₂(::Type{Sun}) = 0.0
+w₀(::Type{Sun}) = deg2rad(84.176)
+w₁(::Type{Sun}) = deg2rad(84.176)
+w₂(::Type{Sun}) = 0.0
+a(::Type{Sun}) = [0.0]
+d(::Type{Sun}) = [0.0]
+w(::Type{Sun}) = [0.0]
+θ₀(::Type{Sun}) = [0.0]
+θ₁(::Type{Sun}) = [0.0]
 
-const mu = μ
+Θ(t, b) = Θ₀(b) .+ Θ₁(b) .* t/SEC_PER_CENTURY
+
+function right_ascension(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    mod2pi(ra₀(b) + ra₁(b) * t / SEC_PER_CENTURY
+        + ra₂(b) * t^2 / SEC_PER_CENTURY^2
+        + sum(a(b) .* sin.(Θ(t, b))))
+end
+
+function declination(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    mod2pi(dec₀(b) + dec₁(b) * t / SEC_PER_CENTURY
+        + dec₂(b) * t^2 / SEC_PER_CENTURY^2
+        + sum(d(b) .* cos.(Θ(t, b))))
+end
+
+function rotation_angle(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    mod2pi(w₀(b) + w₁(b) * t / SEC_PER_DAY
+        + w₂(b) * t^2 / SEC_PER_DAY^2
+        + sum(w(b) .* sin.(Θ(t, b))))
+end
+
+function right_ascension_rate(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    ra₁(b) / SEC_PER_CENTURY + 2 * ra₂(b) * t / SEC_PER_CENTURY^2
+        + sum(a(b) .* Θ₁(b) / SEC_PER_CENTURY .* cos.(Θ(t, b)))
+end
+
+function declination_rate(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    dec₁(b) / SEC_PER_CENTURY + 2 * dec₂(b) * t / SEC_PER_CENTURY^2
+        + sum(d(b) .* Θ₁(b) / SEC_PER_CENTURY .* sin.(Θ(t, b)))
+end
+
+function rotation_rate(b::CelestialBody, ep)
+    t = in_seconds(ep)
+    w₁(b) / SEC_PER_DAY + 2 * w₂(b) * t / SEC_PER_DAY^2
+        + sum(w(b) .* Θ₁(b) / SEC_PER_CENTURY .* cos.(Θ(t, b)))
+end
