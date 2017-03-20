@@ -1,5 +1,7 @@
 using AstroDynCoordinates
+using AstroDynBase
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+@testset "AstroDynCoordinates" begin
+    include("iau.jl")
+end
