@@ -5,6 +5,8 @@ export Sun, SSB
 
 export naif_id, μ, mu, j2, mean_radius, equatorial_radius, polar_radius
 export maximum_elevation, maximum_depression, deviation, parent
+export right_ascension, right_ascension_rate, declination, declination_rate
+export rotation_angle, rotation_rate
 
 abstract type CelestialBody end
 abstract type Barycenter <: CelestialBody end
@@ -76,43 +78,43 @@ w(::Type{Sun}) = [0.0]
 θ₀(::Type{Sun}) = [0.0]
 θ₁(::Type{Sun}) = [0.0]
 
-Θ(t, b) = Θ₀(b) .+ Θ₁(b) .* t/SEC_PER_CENTURY
+θ(t, b) = θ₀(b) .+ θ₁(b) .* t/SEC_PER_CENTURY
 
-function right_ascension(b::CelestialBody, ep)
+function right_ascension(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    mod2pi(ra₀(b) + ra₁(b) * t / SEC_PER_CENTURY
-        + ra₂(b) * t^2 / SEC_PER_CENTURY^2
-        + sum(a(b) .* sin.(Θ(t, b))))
+    mod2pi(ra₀(b) + ra₁(b) * t / SEC_PER_CENTURY +
+        ra₂(b) * t^2 / SEC_PER_CENTURY^2 +
+        sum(a(b) .* sin.(θ(t, b))))
 end
 
-function declination(b::CelestialBody, ep)
+function declination(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    mod2pi(dec₀(b) + dec₁(b) * t / SEC_PER_CENTURY
-        + dec₂(b) * t^2 / SEC_PER_CENTURY^2
-        + sum(d(b) .* cos.(Θ(t, b))))
+    mod2pi(dec₀(b) + dec₁(b) * t / SEC_PER_CENTURY +
+        dec₂(b) * t^2 / SEC_PER_CENTURY^2 +
+        sum(d(b) .* cos.(θ(t, b))))
 end
 
-function rotation_angle(b::CelestialBody, ep)
+function rotation_angle(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    mod2pi(w₀(b) + w₁(b) * t / SEC_PER_DAY
-        + w₂(b) * t^2 / SEC_PER_DAY^2
-        + sum(w(b) .* sin.(Θ(t, b))))
+    mod2pi(w₀(b) + w₁(b) * t / SEC_PER_DAY +
+        w₂(b) * t^2 / SEC_PER_DAY^2 +
+        sum(w(b) .* sin.(θ(t, b))))
 end
 
-function right_ascension_rate(b::CelestialBody, ep)
+function right_ascension_rate(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    ra₁(b) / SEC_PER_CENTURY + 2 * ra₂(b) * t / SEC_PER_CENTURY^2
-        + sum(a(b) .* Θ₁(b) / SEC_PER_CENTURY .* cos.(Θ(t, b)))
+    ra₁(b) / SEC_PER_CENTURY + 2 * ra₂(b) * t / SEC_PER_CENTURY^2 +
+        sum(a(b) .* θ₁(b) / SEC_PER_CENTURY .* cos.(θ(t, b)))
 end
 
-function declination_rate(b::CelestialBody, ep)
+function declination_rate(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    dec₁(b) / SEC_PER_CENTURY + 2 * dec₂(b) * t / SEC_PER_CENTURY^2
-        + sum(d(b) .* Θ₁(b) / SEC_PER_CENTURY .* sin.(Θ(t, b)))
+    dec₁(b) / SEC_PER_CENTURY + 2 * dec₂(b) * t / SEC_PER_CENTURY^2 +
+        sum(d(b) .* θ₁(b) / SEC_PER_CENTURY .* sin.(θ(t, b)))
 end
 
-function rotation_rate(b::CelestialBody, ep)
+function rotation_rate(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
-    w₁(b) / SEC_PER_DAY + 2 * w₂(b) * t / SEC_PER_DAY^2
-        + sum(w(b) .* Θ₁(b) / SEC_PER_CENTURY .* cos.(Θ(t, b)))
+    w₁(b) / SEC_PER_DAY + 2 * w₂(b) * t / SEC_PER_DAY^2 +
+        sum(w(b) .* θ₁(b) / SEC_PER_CENTURY .* cos.(θ(t, b)))
 end
