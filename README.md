@@ -6,7 +6,7 @@
 
 [travis-badge]: https://travis-ci.org/JuliaAstrodynamics/AstroDynCoordinates.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/JuliaAstrodynamics/AstroDynCoordinates.jl
-[av-badge]: https://ci.appveyor.com/api/projects/status/m9g7kka51x4ks0xu?svg=true
+[av-badge]: https://ci.appveyor.com/api/projects/status/0h96rmdkbfruyu75?svg=true
 [av-url]: https://ci.appveyor.com/project/JuliaAstrodynamics/AstroDynCoordinates-jl
 [coveralls-badge]: https://coveralls.io/repos/JuliaAstrodynamics/AstroDynCoordinates.jl/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/JuliaAstrodynamics/AstroDynCoordinates.jl?branch=master
