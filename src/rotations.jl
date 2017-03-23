@@ -15,11 +15,15 @@ end
 function getgraph()
     graph = Dict{DataType,Set{DataType}}()
     for m in methods(Rotation)
-        m.sig isa UnionAll && continue
-        length(m.sig.parameters) != 4 && continue
+        params = m.sig isa UnionAll ? Base.unwrap_unionall(m.sig).parameters :
+            m.sig.parameters
+        length(params) != 4 && continue
 
-        t1 = m.sig.parameters[2].parameters[1]
-        t2 = m.sig.parameters[3].parameters[1]
+        t1 = params[2].parameters[1]
+        t2 = params[3].parameters[1]
+        t1 = isleaftype(t1) ? t1 : t1.ub
+        t2 = isleaftype(t2) ? t2 : t2.ub
+
         if !haskey(graph, t1)
             merge!(graph, Dict(t1=>Set{DataType}()))
         end
@@ -33,16 +37,19 @@ end
 
 function gen_rotation(F1, F2, ep)
     graph = getgraph()
-    if !haspath(graph, F1, F2)
+    FF1 = supertype(F1) == Frame ? F1 : supertype(F1)
+    FF2 = supertype(F2) == Frame ? F2 : supertype(F2)
+    if !haspath(graph, FF1, FF2)
         error("No conversion path '$F1' -> '$F2' found.")
     end
-    path = findpath(graph, F1, F2)
+    path = findpath(graph, FF1, FF2)
     ex = :(Rotation($F1, $(path[1]), ep))
-    for i in eachindex(path[2:end])
+    for i in eachindex(path[2:end-1])
         t1 = path[i]
         t2 = path[i+1]
         ex = :(compose($ex, Rotation($t1, $t2, ep)))
     end
+    ex = :(compose($ex, Rotation($(path[end-1]), $F2, ep)))
     return ex
 end
 
