@@ -31,17 +31,17 @@ function rotation(b::Type{C}, ep::TDBEpoch) where C<:CelestialBody
 end
 
 # GCRF -> IAU
-function Rotation(::Type{F}, ::Type{GCRF}, ep::Epoch) where F<:IAUFrame
+function Rotation(::Type{GCRF}, ::Type{F}, ep::Epoch) where F<:IAUFrame
     m, δm = rotation(body(F), TDBEpoch(ep))
     M = zeros(6, 6)
     M[1:3,1:3] = m
     M[4:6,4:6] = m
     M[4:6,1:3] = δm
-    Rotation{F,GCRF}(M)
+    Rotation{GCRF,F}(M)
 end
 
 # IAU -> GCRF
-function Rotation(::Type{GCRF}, ::Type{F}, ep::Epoch) where F<:IAUFrame
+function Rotation(::Type{F}, ::Type{GCRF}, ep::Epoch) where F<:IAUFrame
     m, δm = rotation(body(F), TDBEpoch(ep))
     M = zeros(6, 6)
     M[1:3,1:3] = m'

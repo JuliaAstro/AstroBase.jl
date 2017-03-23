@@ -387,7 +387,9 @@
         p = string(planet)
         f = Symbol("IAU", planet)
         @eval begin
-            @test Rotation($f, GCRF, $ep).matrix ≈ $matrices[$p]
+            rot = Rotation(GCRF, $f, $ep)
+            @test rot isa Rotation{GCRF,$f}
+            @test rot.matrix ≈ $matrices[$p]
         end
     end
     # for satellite in Astrodynamics.SATELLITES
@@ -396,5 +398,7 @@
     #         @test rotation(IAU{$s}, GCRF, $ep) ≈ $matrices[$satellite]
     #     end
     # end
-    @test Rotation(GCRF, IAUEarth, ep).matrix ≈ matrices["GCRF"]
+    rot = Rotation(IAUEarth, GCRF, ep)
+    @test rot.matrix ≈ matrices["GCRF"]
+    @test rot isa Rotation{IAUEarth,GCRF}
 end
