@@ -1,7 +1,7 @@
 import Base: parent
 import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter
-export Sun, SSB
+export Sun, SSB, SolarSystemBarycenter
 
 export naif_id, μ, mu, j2, mean_radius, equatorial_radius, polar_radius
 export maximum_elevation, maximum_depression, deviation, parent
@@ -16,41 +16,20 @@ abstract type MinorBody <: CelestialBody end
 
 Base.show{T<:CelestialBody}(io::IO, ::Type{T}) = print(io, Base.datatype_name(T))
 
-const CONSTANTS = (
-    :parent,
-    :naif_id,
-    :μ,
-    :j2,
-    :mean_radius,
-    :equatorial_radius,
-    :polar_radius,
-    :deviation,
-    :maximum_elevation,
-    :maximum_depression,
-    :ra₀,
-    :ra₁,
-    :ra₂,
-    :dec₀,
-    :dec₁,
-    :dec₂,
-    :w₀,
-    :w₁,
-    :w₂,
-    :a,
-    :d,
-    :w,
-    :θ₀,
-    :θ₁,
-)
-
-for c in CONSTANTS
-    @eval begin
-        ($c){T<:CelestialBody}(::Type{T}) = error(
-            "No constant '", $(string(c)), "' available for body '", T, "'.")
-    end
-end
-
-const mu = μ
+ra₀(::Type{<:CelestialBody}) = 0.0
+ra₁(::Type{<:CelestialBody}) = 0.0
+ra₂(::Type{<:CelestialBody}) = 0.0
+dec₀(::Type{<:CelestialBody}) = 0.0
+dec₁(::Type{<:CelestialBody}) = 0.0
+dec₂(::Type{<:CelestialBody}) = 0.0
+w₀(::Type{<:CelestialBody}) = 0.0
+w₁(::Type{<:CelestialBody}) = 0.0
+w₂(::Type{<:CelestialBody}) = 0.0
+a(::Type{<:CelestialBody}) = [0.0]
+d(::Type{<:CelestialBody}) = [0.0]
+w(::Type{<:CelestialBody}) = [0.0]
+θ₀(::Type{<:CelestialBody}) = [0.0]
+θ₁(::Type{<:CelestialBody}) = [0.0]
 
 struct SolarSystemBarycenter <: Barycenter end
 const SSB = SolarSystemBarycenter
@@ -64,21 +43,11 @@ mean_radius(::Type{Sun}) = 696000.0km
 naif_id(::Type{Sun}) = 10
 parent(::Type{Sun}) = SSB
 ra₀(::Type{Sun}) = deg2rad(286.13)
-ra₁(::Type{Sun}) = 0.0
-ra₂(::Type{Sun}) = 0.0
 dec₀(::Type{Sun}) = deg2rad(63.87)
-dec₁(::Type{Sun}) = 0.0
-dec₂(::Type{Sun}) = 0.0
 w₀(::Type{Sun}) = deg2rad(84.176)
 w₁(::Type{Sun}) = deg2rad(84.176)
-w₂(::Type{Sun}) = 0.0
-a(::Type{Sun}) = [0.0]
-d(::Type{Sun}) = [0.0]
-w(::Type{Sun}) = [0.0]
-θ₀(::Type{Sun}) = [0.0]
-θ₁(::Type{Sun}) = [0.0]
 
-θ(t, b) = θ₀(b) .+ θ₁(b) .* t/SEC_PER_CENTURY
+θ(t::Float64, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t/SEC_PER_CENTURY
 
 function right_ascension(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)
@@ -118,3 +87,5 @@ function rotation_rate(b::Type{C}, ep) where C<:CelestialBody
     w₁(b) / SEC_PER_DAY + 2 * w₂(b) * t / SEC_PER_DAY^2 +
         sum(w(b) .* θ₁(b) / SEC_PER_CENTURY .* cos.(θ(t, b)))
 end
+
+const mu = μ
