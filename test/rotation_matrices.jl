@@ -8,9 +8,11 @@ import AstroDynBase.rotation_axes, AstroDynBase.rotation_axis
     @test_throws ArgumentError rotation_axes("XYZX")
     @test_throws ArgumentError rotation_axes("XXZ")
     @test_throws ArgumentError rotation_axes("ZXX")
-    @test rotation_axes("XYZ") == [1,2,3]
-    @test rotation_axes("xyz") == [1,2,3]
-    @test rotation_axes("123") == [1,2,3]
+    @test_throws ArgumentError rotation_axes(134)
+    @test rotation_axes("XYZ") == (1,2,3)
+    @test rotation_axes("xyz") == (1,2,3)
+    @test rotation_axes("123") == (1,2,3)
+    @test rotation_axes(123) == (1,2,3)
 
     @test rotation_axis("X") == 1
     @test rotation_axis("Y") == 2

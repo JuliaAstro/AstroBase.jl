@@ -12,7 +12,24 @@ function rotation_axes(ord::AbstractString)
     if length(order) == 3 && (order[1] == order[2] || order[2] == order[3])
         throw(ArgumentError("Subsequent rotations around the same axis are meaningless."))
     end
-    Int[parse(Int, c) for c in order]
+    parse(Int, order[1]), parse(Int, order[2]), parse(Int, order[3])
+end
+
+isinvalid(x) = x < 1 || x > 3
+
+function rotation_axes(ord::Int)
+    ord = abs(ord)
+    ax1 = trunc(Int, ord/100)
+    ax2 = trunc(Int, (ord-100ax1)/10)
+    ax3 = ord - 100ax1 - 10ax2
+    if any(isinvalid.((ax1, ax2, ax3)))
+        throw(ArgumentError("Rotation axes must be either 1, 2, or 3."))
+    end
+
+    if ax1 == ax2 || ax2 == ax3
+        throw(ArgumentError("Subsequent rotations around the same axis are meaningless."))
+    end
+    ax1, ax2, ax3
 end
 
 function rotation_axis(axis::AbstractString)
@@ -23,15 +40,15 @@ function rotation_axis(axis::AbstractString)
 end
 
 function rotation_matrix(order, angle1, angle2, angle3)
-    axes = rotation_axes(string(order))
-    rotation_matrix(axes[3], angle3)*rotation_matrix(axes[2], angle2)*rotation_matrix(axes[1], angle1)
+    ax1, ax2, ax3 = rotation_axes(order)
+    rotation_matrix(ax3, angle3)*rotation_matrix(ax2, angle2)*rotation_matrix(ax1, angle1)
 end
 
 function rate_matrix(order, angle1, rate1, angle2, rate2, angle3, rate3)
-    axes = rotation_axes(string(order))
-    ((rate_matrix(axes[3], angle3, rate3) * rotation_matrix(axes[2], angle2) * rotation_matrix(axes[1], angle1))
-    + (rotation_matrix(axes[3], angle3) * rate_matrix(axes[2], angle2, rate2) * rotation_matrix(axes[1], angle1))
-    + (rotation_matrix(axes[3], angle3) * rotation_matrix(axes[2], angle2) * rate_matrix(axes[1], angle1, rate1)))
+    ax1, ax2, ax3 = rotation_axes(order)
+    ((rate_matrix(ax3, angle3, rate3) * rotation_matrix(ax2, angle2) * rotation_matrix(ax1, angle1))
+    + (rotation_matrix(ax3, angle3) * rate_matrix(ax2, angle2, rate2) * rotation_matrix(ax1, angle1))
+    + (rotation_matrix(ax3, angle3) * rotation_matrix(ax2, angle2) * rate_matrix(ax1, angle1, rate1)))
 end
 
 rotation_matrix(axis::AbstractString, angle) = rotation_matrix(rotation_axis(axis), angle)
