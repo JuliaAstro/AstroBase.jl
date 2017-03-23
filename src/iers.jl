@@ -1,8 +1,9 @@
 using ERFA
 import EarthOrientation: polarmotion, precession_nutation00
 import AstronomicalTime: fjd1, fjd2
+import AstroDynBase: Rotation
 
-export CIRF, TIRF, ITRF
+export CIRF, TIRF, ITRF, Rotation
 
 struct CIRF <: Frame end
 struct TIRF <: Frame end
