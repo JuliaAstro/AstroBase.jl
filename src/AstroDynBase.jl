@@ -4,6 +4,8 @@ using Reexport
 
 @reexport using AstronomicalTime
 
+update() = AstronomicalTime.update()
+
 include("units.jl")
 include("rotation_matrices.jl")
 include("bodies.jl")
