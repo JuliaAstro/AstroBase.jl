@@ -35,6 +35,7 @@ struct SolarSystemBarycenter <: Barycenter end
 const SSB = SolarSystemBarycenter
 
 naif_id(::Type{SSB}) = 0
+parent(::Type{SSB}) = SSB
 
 struct Sun <: CelestialBody end
 
