@@ -1,3 +1,5 @@
+export SATELLITES
+
 const SATELLITES = (
     :Moon,
 )

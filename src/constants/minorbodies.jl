@@ -1,3 +1,5 @@
+export MINOR_BODIES
+
 const MINOR_BODIES = (
     :Pluto,
 )
