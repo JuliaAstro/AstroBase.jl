@@ -1,4 +1,4 @@
-@testset "IAU rotations" begin
+@testset "IAU" begin
     # Reference data form WebGeocalc (http://wgc.jpl.nasa.gov/)
     ep = TDBEpoch(2000, 1, 1, 12) + 1000seconds
     matrices = Dict(
@@ -383,16 +383,22 @@
         0.91097926
     ], (6, 6))',
     )
-    for body in [PLANETS; SATELLITES]
+    @testset for body in [PLANETS; SATELLITES]
         b = string(body)
         f = Symbol("IAU", body)
+        m = matrices[b][1:3,1:3]
+        δm = matrices[b][4:6,1:3] * (1.0/s)
         @eval begin
             rot = Rotation(GCRF, $f, $ep)
             @test rot isa Rotation{GCRF,$f}
-            @test rot.matrix ≈ $matrices[$b]
+            @test rot.m ≈ $m
+            @test rot.δm ≈ $δm
         end
     end
     rot = Rotation(IAUEarth, GCRF, ep)
-    @test rot.matrix ≈ matrices["GCRF"]
+    m = matrices["GCRF"][1:3,1:3]
+    δm = matrices["GCRF"][4:6,1:3] * (1.0/s)
     @test rot isa Rotation{IAUEarth,GCRF}
+    @test rot.m ≈ m
+    @test rot.δm ≈ δm
 end
