@@ -1,8 +1,8 @@
 export SATELLITES
 
-const SATELLITES = (
+const SATELLITES = [
     :Moon,
-)
+]
 
 for satellite in SATELLITES
     @eval begin
