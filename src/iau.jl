@@ -1,6 +1,6 @@
 using AstroDynBase
 
-import AstroDynBase: Rotation, body
+import AstroDynBase: Rotation
 
 export IAUFrame, body, Rotation, rotation
 

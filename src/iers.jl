@@ -1,6 +1,5 @@
 using ERFA
 import EarthOrientation: polarmotion, precession_nutation00
-import AstronomicalTime: fjd1, fjd2
 import AstroDynBase: Rotation
 
 export CIRF, TIRF, ITRF, Rotation
@@ -27,7 +26,7 @@ end
 
 function Rotation(::Type{CIRF}, ::Type{TIRF}, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = eraEra00(fjd1(ut1), fjd2(ut1))
+    era = eraEra00(julian1(ut1), julian2(ut1))
     rate = rotation_rate(Earth, TDBEpoch(ep))
     m = rotation_matrix(3, era)
     M = zeros(6,6)
@@ -39,7 +38,7 @@ end
 
 function Rotation(::Type{TIRF}, ::Type{CIRF}, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = eraEra00(fjd1(ut1), fjd2(ut1))
+    era = eraEra00(julian1(ut1), julian2(ut1))
     rate = rotation_rate(Earth, TDBEpoch(ep))
     m = rotation_matrix(3, -era)
     M = zeros(6,6)
@@ -53,13 +52,13 @@ function polarmotion(ep::TTEpoch)
     xp, yp = polarmotion(julian(ep))
     xp = dms2rad(0, 0, xp)
     yp = dms2rad(0, 0, yp)
-    reshape(eraPom00(xp, yp, eraSp00(fjd1(ep), fjd2(ep))), (3,3))
+    reshape(eraPom00(xp, yp, eraSp00(julian1(ep), julian2(ep))), (3,3))
 end
 
 function precession_nutation(ep::TTEpoch)
     dx, dy = precession_nutation00(julian(ep))
-    x, y = eraXy06(fjd1(ep), fjd2(ep))
-    s = eraS06(fjd1(ep), fjd2(ep), x, y)
+    x, y = eraXy06(julian1(ep), julian2(ep))
+    s = eraS06(julian1(ep), julian2(ep), x, y)
     x += dms2rad(0, 0, dx/1000.0)
     y += dms2rad(0, 0, dy/1000.0)
     reshape(eraC2ixys(x, y, s), (3,3))
