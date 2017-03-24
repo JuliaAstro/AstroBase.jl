@@ -383,21 +383,15 @@
         0.91097926
     ], (6, 6))',
     )
-    for planet in PLANETS
-        p = string(planet)
-        f = Symbol("IAU", planet)
+    for body in [PLANETS; SATELLITES]
+        b = string(body)
+        f = Symbol("IAU", body)
         @eval begin
             rot = Rotation(GCRF, $f, $ep)
             @test rot isa Rotation{GCRF,$f}
-            @test rot.matrix ≈ $matrices[$p]
+            @test rot.matrix ≈ $matrices[$b]
         end
     end
-    # for satellite in Astrodynamics.SATELLITES
-    #     s = Symbol(satellite)
-    #     @eval begin
-    #         @test rotation(IAU{$s}, GCRF, $ep) ≈ $matrices[$satellite]
-    #     end
-    # end
     rot = Rotation(IAUEarth, GCRF, ep)
     @test rot.matrix ≈ matrices["GCRF"]
     @test rot isa Rotation{IAUEarth,GCRF}

@@ -6,11 +6,11 @@ export IAUFrame, body, Rotation, rotation
 
 abstract type IAUFrame <: Frame end
 
-for planet in PLANETS
-    frame = Symbol("IAU", planet)
+for body in [PLANETS; SATELLITES; MINOR_BODIES]
+    frame = Symbol("IAU", body)
     @eval begin
         struct $frame <: IAUFrame end
-        body(::Type{$frame}) = $planet
+        body(::Type{$frame}) = $body
         export $frame
     end
 end
