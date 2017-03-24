@@ -1,15 +1,27 @@
 import Convertible: haspath, findpath
+import Base: ∘
 
-export Rotation
+export Rotation, ∘
 
-struct Rotation{F1<:Frame,F2<:Frame}
-    matrix::Matrix{Float64}
+abstract type AbstractRotation end
+
+struct Rotation{F1<:Frame,F2<:Frame} <: AbstractRotation
+    m::Matrix{Float64}
+    δm::Matrix{typeof(1.0/s)}
 end
 
-(t::Rotation)(rv) = t.matrix*rv
+(rot::Rotation)(r, v) = rot.m * r, rot.δm * r + rot.m * v
 
-function compose{F<:Frame,F1<:Frame,F2<:Frame}(t1::Rotation{F1,F}, t2::Rotation{F,F2})
-    Rotation{F1,F2}(t2.matrix*t1.matrix)
+struct ComposedRotation{R1<:AbstractRotation,R2<:AbstractRotation}
+    rot1::R1
+    rot2::R2
+end
+
+(rot::ComposedRotation)(r, v) = rot.rot2(rot.rot1(r, v)...)
+
+
+function ∘{F<:Frame,F1<:Frame,F2<:Frame}(rot1::Rotation{F1,F}, rot2::Rotation{F,F2})
+    ComposedRotation(rot1, rot2)
 end
 
 function getgraph()
@@ -47,9 +59,9 @@ function gen_rotation(F1, F2, ep)
     for i in eachindex(path[2:end-1])
         t1 = path[i]
         t2 = path[i+1]
-        ex = :(compose($ex, Rotation($t1, $t2, ep)))
+        ex = :($ex ∘ Rotation($t1, $t2, ep))
     end
-    ex = :(compose($ex, Rotation($(path[end-1]), $F2, ep)))
+    ex = :($ex ∘ Rotation($(path[end-1]), $F2, ep))
     return ex
 end
 

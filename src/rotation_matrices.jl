@@ -82,7 +82,7 @@ function rotation_matrix(axis::Int, angle)
 end
 
 function rate_matrix(axis::Int, angle, rate)
-    mat = zeros(3, 3)
+    mat = zeros(typeof(rate), 3, 3)
     cosa = cos(angle)
     sina = sin(angle)
     if axis == 1
