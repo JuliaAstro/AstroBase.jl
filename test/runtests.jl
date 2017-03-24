@@ -5,8 +5,9 @@ struct DefunctEphemeris <: Ephemeris end
 
 @testset "AstroDynBase" begin
     include("elements.jl")
-    include("rotations.jl")
+    # include("rotations.jl")
     include("rotation_matrices.jl")
+    include("bodies.jl")
     @testset "States" begin
     end
     @testset "Ephemerides" begin
