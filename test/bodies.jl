@@ -69,12 +69,12 @@
         ep = TDBEpoch(2000, 1, 1)
         b = string(body)
         @eval begin
-            @test right_ascension($body, $ep) == $α[$b]
-            @test right_ascension_rate($body, $ep) == $δα[$b]/s
-            @test declination($body, $ep) == $δ[$b]
-            @test declination_rate($body, $ep) == $δδ[$b]/s
-            @test rotation_angle($body, $ep) == $w[$b]
-            @test rotation_rate($body, $ep) == $δw[$b]/s
+            @test right_ascension($body, $ep) ≈ $α[$b]
+            @test right_ascension_rate($body, $ep) ≈ $δα[$b]/s
+            @test declination($body, $ep) ≈ $δ[$b]
+            @test declination_rate($body, $ep) ≈ $δδ[$b]/s
+            @test rotation_angle($body, $ep) ≈ $w[$b]
+            @test rotation_rate($body, $ep) ≈ $δw[$b]/s
         end
     end
 end
