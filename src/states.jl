@@ -1,11 +1,12 @@
 using AstronomicalTime
 
 import AstroDynBase: AbstractState, keplerian, velocity
-import Base.show
+import Base: show, isapprox
+import Base.Operators: ==
 
 export State, ThreeBodyState
 export timescale, frame, body, primary, secondary, keplerian, radius, velocity,
-    epoch
+    epoch, isapprox, ==
 
 struct State{
         F<:Frame,
@@ -49,6 +50,20 @@ function State(s::State{F1, T1, C1};
     T1<:Timescale, T2<:Timescale, C1<:CelestialBody, C2<:CelestialBody}
     convert(State{F2, T2, C2}, s)
 end
+
+function (==)(s1::State{F, T, C}, s2::State{F, T, C}) where {
+    F<:Frame, T<:Timescale, C<:CelestialBody}
+    s1.epoch == s2.epoch && s1.r == s2.r && s1.v == s2.v
+end
+(==)(s1::State{<:Frame, <:Timescale, <:CelestialBody},
+    s2::State{<:Frame, <:Timescale, <:CelestialBody}) = false
+
+function isapprox(s1::State{F, T, C}, s2::State{F, T, C}) where {
+    F<:Frame, T<:Timescale, C<:CelestialBody}
+    s1.epoch ≈ s2.epoch && s1.r ≈ s2.r && s1.v ≈ s2.v
+end
+isapprox(s1::State{<:Frame, <:Timescale, <:CelestialBody},
+    s2::State{<:Frame, <:Timescale, <:CelestialBody}) = false
 
 function show(io::IO, s::State)
     sma, ecc, inc, node, peri, ano = keplerian(s)

@@ -7,14 +7,14 @@ convert(::Type{State{F, T, C}}, s::State{F, T, C}) where {
 function convert(::Type{State{F2, T, C}}, s::State{F1, T, C}) where {
     F1<:Frame, F2<:Frame, T<:Timescale, C<:CelestialBody}
     rot = Rotation(F1, F2, epoch(s))
-    rv1 = rot(rv(s))
-    State(epoch(s), rv1[1:3], rv1[4:6], F2, body(s))
+    r1, v1 = rot(radius(s), velocity(s))
+    State(epoch(s), r1, v1, F2, C)
 end
 
 # T1 -> T2
 function convert(::Type{State{F, T2, C}}, s::State{F, T1, C}) where {
     F<:Frame, T1<:Timescale, T2<:Timescale, C<:CelestialBody}
-    State(Epoch(T2, s.epoch), s.rv, F, s.body)
+    State(Epoch{T2}(epoch(s)), radius(s), velocity(s), F, C)
 end
 
 # C1 -> C2
@@ -31,8 +31,9 @@ end
 # F1 -> F2, T1 -> T2
 function convert(::Type{State{F2, T2, C}}, s::State{F1, T1, C}) where {
     F1<:Frame, F2<:Frame, T1<:Timescale, T2<:Timescale, C<:CelestialBody}
-    M = rotation_matrix(F2, F1, s.epoch)
-    State(Epoch(T2, s.epoch), M * s.rv, F2, s.body)
+    rot = Rotation(F1, F2, epoch(s))
+    r1, v1 = rot(radius(s), velocity(s))
+    State(Epoch{T2}(epoch(s)), r1, v1, F2, C)
 end
 
 # F1 -> F2, C1 -> C2
