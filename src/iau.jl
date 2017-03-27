@@ -15,7 +15,7 @@ for body in [PLANETS; SATELLITES; MINOR_BODIES]
     end
 end
 
-function rotation(b::Type{C}, ep::TDBEpoch) where C<:CelestialBody
+function rotation_matrices(b::Type{C}, ep::TDBEpoch) where C<:CelestialBody
     α = right_ascension(b, ep)
     δα = right_ascension_rate(b, ep)
     δ = declination(b, ep)
@@ -32,12 +32,12 @@ end
 
 # GCRF -> IAU
 function Rotation(::Type{GCRF}, ::Type{F}, ep::Epoch) where F<:IAUFrame
-    m, δm = rotation(body(F), TDBEpoch(ep))
+    m, δm = rotation_matrices(body(F), TDBEpoch(ep))
     Rotation{GCRF,F}(m, δm)
 end
 
 # IAU -> GCRF
 function Rotation(::Type{F}, ::Type{GCRF}, ep::Epoch) where F<:IAUFrame
-    m, δm = rotation(body(F), TDBEpoch(ep))
+    m, δm = rotation_matrices(body(F), TDBEpoch(ep))
     Rotation{F,GCRF}(m', δm')
 end
