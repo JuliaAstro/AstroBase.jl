@@ -1,7 +1,7 @@
 import Convertible: haspath, findpath
 import Base: ∘
 
-export Rotation, ∘
+export ComposedRotation, Rotation, ∘, origin, target
 
 abstract type AbstractRotation end
 
@@ -10,12 +10,17 @@ struct Rotation{F1<:Frame,F2<:Frame} <: AbstractRotation
     δm::Matrix{typeof(1.0/s)}
 end
 
+origin(::Rotation{F1,<:Frame}) where F1<:Frame = F1
+target(::Rotation{<:Frame,F2}) where F2<:Frame = F2
+
 (rot::Rotation)(r, v) = rot.m * r, rot.δm * r + rot.m * v
 
-struct ComposedRotation{R1<:AbstractRotation,R2<:AbstractRotation}
+struct ComposedRotation{R1<:AbstractRotation,R2<:AbstractRotation} <: AbstractRotation
     rot1::R1
     rot2::R2
 end
+origin(rot::ComposedRotation) = origin(rot.rot1)
+target(rot::ComposedRotation) = target(rot.rot2)
 
 (rot::ComposedRotation)(r, v) = rot.rot2(rot.rot1(r, v)...)
 
@@ -59,9 +64,9 @@ function gen_rotation(F1, F2, ep)
     for i in eachindex(path[2:end-1])
         t1 = path[i]
         t2 = path[i+1]
-        ex = :($ex ∘ Rotation($t1, $t2, ep))
+        ex = :(ComposedRotation($ex, Rotation($t1, $t2, ep)))
     end
-    ex = :($ex ∘ Rotation($(path[end-1]), $F2, ep))
+    ex = :(ComposedRotation($ex, Rotation($(path[end-1]), $F2, ep)))
     return ex
 end
 
