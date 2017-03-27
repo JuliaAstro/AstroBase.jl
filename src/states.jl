@@ -1,6 +1,6 @@
 using AstronomicalTime
 
-import AstroDynBase: AbstractState, keplerian, velocity
+import AstroDynBase: AbstractState, keplerian, velocity, Rotation
 import Base: show, isapprox
 import Base.Operators: ==
 
@@ -32,6 +32,12 @@ function State(ep::Epoch{T},
     State(ep, r, v, frame, body)
 end
 
+function State(ep::Epoch{T}, rv,
+    frame::Type{F}=GCRF, body::Type{C}=Earth) where {
+    T<:Timescale,F<:Frame,C<:CelestialBody}
+    State(ep, rv[1], rv[2], frame, body)
+end
+
 radius(s::State) = s.r
 velocity(s::State) = s.v
 rv(s::State) = [s.r; s.v]
@@ -43,6 +49,7 @@ timescale(::State{<:Frame, T}) where T<:Timescale = T
 _timescale = timescale
 body(::State{<:Frame, <:Timescale, C}) where C<:CelestialBody = C
 _body = body
+(rot::Rotation)(s::State) = rot(radius(s), velocity(s))
 
 function State(s::State{F1, T1, C1};
     frame::Type{F2}=_frame(s), timescale::Type{T2}=_timescale(s),

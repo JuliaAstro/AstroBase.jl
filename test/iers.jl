@@ -46,12 +46,12 @@
     @test all(itrf_tirf(tirf_itrf(r_tirf, v_tirf)...) .≈ (r_tirf, v_tirf))
     @test all((itrf_tirf ∘ tirf_itrf)(r_tirf, v_tirf) .≈ (r_tirf, v_tirf))
 
-    #= s_gcrf = State(tdb, rv) =#
-    #= s_cirf = State(tdb, rv_cirf, CIRF) =#
-    #= s_tirf = State(tdb, rv_tirf, TIRF) =#
-    #= s_itrf = State(tdb, rv_itrf, ITRF) =#
-    #= @test s_gcrf ≈ State(State(s_gcrf, frame=CIRF), frame=GCRF) =#
-    #= @test s_cirf ≈ State(State(s_cirf, frame=TIRF), frame=CIRF) =#
-    #= @test s_tirf ≈ State(State(s_tirf, frame=ITRF), frame=TIRF) =#
-    #= @test s_gcrf ≈ State(State(s_gcrf, frame=ITRF), frame=GCRF) =#
+    s_gcrf = State(tdb, r, v)
+    s_cirf = State(tdb, r_cirf, v_cirf, CIRF)
+    s_tirf = State(tdb, r_tirf, v_tirf, TIRF)
+    s_itrf = State(tdb, r_itrf, v_itrf, ITRF)
+    @test s_gcrf ≈ State(State(s_gcrf, frame=CIRF), frame=GCRF)
+    @test s_cirf ≈ State(State(s_cirf, frame=TIRF), frame=CIRF)
+    @test s_tirf ≈ State(State(s_tirf, frame=ITRF), frame=TIRF)
+    @test s_gcrf ≈ State(State(s_gcrf, frame=ITRF), frame=GCRF)
 end
