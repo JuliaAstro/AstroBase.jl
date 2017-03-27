@@ -22,6 +22,7 @@ script:
  - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/SPICE.jl.git"); Pkg.build("SPICE")'
  - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/AstronomicalTime.jl.git")'
  - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/AstroDynBase.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/JuliaAstrodynamics/JPLEphemeris.jl.git")'
  - julia -e 'Pkg.clone(pwd()); Pkg.build("AstroDynCoordinates"); Pkg.test("AstroDynCoordinates"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
