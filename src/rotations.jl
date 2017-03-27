@@ -1,5 +1,5 @@
 import Convertible: haspath, findpath
-import Base: ∘
+import Base: ∘, inv
 
 export ComposedRotation, Rotation, ∘, origin, target
 
@@ -10,10 +10,19 @@ struct Rotation{F1<:Frame,F2<:Frame} <: AbstractRotation
     δm::Matrix{typeof(1.0/s)}
 end
 
+function Rotation(::Type{F}, ::Type{F}, ep::Epoch) where F<:Frame
+    Rotation{F,F}(eye(3), zeros(3,3)*(1/s))
+end
+
 origin(::Rotation{F1,<:Frame}) where F1<:Frame = F1
 target(::Rotation{<:Frame,F2}) where F2<:Frame = F2
 
+function inv(rot::Rotation{F1, F2}) where {F1<:Frame, F2<:Frame}
+    Rotation{F2, F1}(rot.m', rot.δm')
+end
+
 (rot::Rotation)(r, v) = rot.m * r, rot.δm * r + rot.m * v
+(rot::Rotation)(rv) = rot.m * rv[1], rot.δm * rv[1] + rot.m * rv[2]
 
 struct ComposedRotation{R1<:AbstractRotation,R2<:AbstractRotation} <: AbstractRotation
     rot1::R1
@@ -22,8 +31,9 @@ end
 origin(rot::ComposedRotation) = origin(rot.rot1)
 target(rot::ComposedRotation) = target(rot.rot2)
 
-(rot::ComposedRotation)(r, v) = rot.rot2(rot.rot1(r, v)...)
+(rot::ComposedRotation)(args...) = rot.rot2(rot.rot1(args...))
 
+inv(rot::ComposedRotation) = ComposedRotation(inv(rot.rot2), inv(rot.rot1))
 
 function ∘{F<:Frame,F1<:Frame,F2<:Frame}(rot1::Rotation{F1,F}, rot2::Rotation{F,F2})
     ComposedRotation(rot1, rot2)
