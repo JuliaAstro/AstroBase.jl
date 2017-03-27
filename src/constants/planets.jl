@@ -22,6 +22,7 @@ for (i, planet) in enumerate(PLANET_NAMES)
 
         naif_id(::Type{$barycenter}) = $i
         parent(::Type{$barycenter}) = SSB
+        planet(::Type{$barycenter}) = $planet
     end
 end
 @eval const PLANETS = [$(PLANET_NAMES...)]

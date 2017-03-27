@@ -34,10 +34,14 @@ w(::Type{<:CelestialBody}) = [0.0]
 θ₁(::Type{<:CelestialBody}) = [0.0]
 
 struct SolarSystemBarycenter <: Barycenter end
+struct ParentOfSSB <: Barycenter end
 const SSB = SolarSystemBarycenter
 
 naif_id(::Type{SSB}) = 0
-parent(::Type{SSB}) = SSB
+parent(::Type{SSB}) = ParentOfSSB
+parent(::Type{ParentOfSSB}) = ParentOfSSB
+
+μ(::Type{B}) where B<:Barycenter = μ(planet(B))
 
 struct Sun <: CelestialBody end
 

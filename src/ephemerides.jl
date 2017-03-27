@@ -9,12 +9,14 @@ abstract type Ephemeris end
 
 for f in (:state, :position, :velocity)
     @eval begin
-        function $f(ep::Epoch, from::Type{<:CelestialBody}, to::Type{<:CelestialBody})
+        function $f(ep::Epoch, from::Type{<:CelestialBody},
+            to::Type{<:CelestialBody})
             $f(get(EPHEMERIS), TDBEpoch(ep), to, from)
         end
-        $f(ep::Epoch, to::Type{<:CelestialBody}) = $f(ep, parent(to), to)
+        $f(ep::Epoch, to::Type{<:CelestialBody}) = $f(ep, SSB, to)
 
-        function $f(eph::E, ep::Epoch, to::Type{<:CelestialBody}, from::Type{<:CelestialBody}) where E<:Ephemeris
+        function $f(eph::E, ep::Epoch, to::Type{<:CelestialBody},
+            from::Type{<:CelestialBody}) where E<:Ephemeris
             error($f, " not implemented for ephemeris $E.")
         end
 
