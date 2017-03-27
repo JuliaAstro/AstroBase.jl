@@ -1,6 +1,8 @@
 using AstroDynBase
 using Base.Test
 
+AstroDynBase.update()
+
 struct DefunctEphemeris <: Ephemeris end
 
 @testset "AstroDynBase" begin
