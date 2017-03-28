@@ -1,4 +1,4 @@
-import Base: parent
+import Base: parent, show
 import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
 import Unitful: rad, °, Time
 
@@ -6,7 +6,7 @@ export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter,
     Sun, SSB, SolarSystemBarycenter
 
 export naif_id, μ, mu, j2, mean_radius, equatorial_radius, polar_radius,
-    maximum_elevation, maximum_depression, deviation, parent,
+    maximum_elevation, maximum_depression, deviation, parent, show,
     right_ascension, right_ascension_rate, declination, declination_rate,
     rotation_angle, rotation_rate, euler_angles, euler_derivatives
 
@@ -34,14 +34,15 @@ w(::Type{<:CelestialBody}) = [0.0]
 θ₁(::Type{<:CelestialBody}) = [0.0]
 
 struct SolarSystemBarycenter <: Barycenter end
-struct ParentOfSSB <: Barycenter end
 const SSB = SolarSystemBarycenter
+struct ParentOfSSB <: Barycenter end
 
 naif_id(::Type{SSB}) = 0
+body(::Type{SSB}) = Sun
 parent(::Type{SSB}) = ParentOfSSB
 parent(::Type{ParentOfSSB}) = ParentOfSSB
 
-μ(::Type{B}) where B<:Barycenter = μ(planet(B))
+μ(::Type{B}) where B<:Barycenter = μ(body(B))
 
 struct Sun <: CelestialBody end
 

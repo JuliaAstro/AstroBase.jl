@@ -24,6 +24,13 @@ for f in (:state, :position, :velocity)
     end
 end
 
+state(ep::Epoch, to::Type{SSB}) = zeros(3)km, zeros(3)kps
+position(ep::Epoch, to::Type{SSB}) = zeros(3)km
+velocity(ep::Epoch, to::Type{SSB}) = zeros(3)kps
+state(ep::Epoch, from::Type{ParentOfSSB}, to::Type{SSB}) = zeros(3)km, zeros(3)kps
+position(ep::Epoch, from::Type{ParentOfSSB}, to::Type{SSB}) = zeros(3)km
+velocity(ep::Epoch, from::Type{ParentOfSSB}, to::Type{SSB}) = zeros(3)kps
+
 function load_ephemeris!(eph::E) where E<:Ephemeris
     push!(EPHEMERIS, eph)
 end
