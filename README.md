@@ -4,9 +4,8 @@
 
 [![Build Status][travis-badge]][travis-url] [![Build status][av-badge]][av-url] [![Coverage Status][coveralls-badge]][coveralls-url] [![codecov.io][codecov-badge]][codecov-url]
 
-This package is part of [Astrodynamics.jl](https://github.com/JuliaAstrodynamics/Astrodynamics.jl).
-It provides coordinate frames and transformations for astrodynamics applications.
-While the package can be used independently, new users should [get started with Astrodynamics.jl](https://juliaastrodynamics.github.io/Astrodynamics.jl/latest/).
+This package is part of [Astrodynamics.jl](https://github.com/JuliaAstrodynamics/Astrodynamics.jl) and provides coordinate frames and transformations for astrodynamics applications.
+While it can be used independently, new users should [get started with Astrodynamics.jl](https://juliaastrodynamics.github.io/Astrodynamics.jl/latest/).
 
 [travis-badge]: https://travis-ci.org/JuliaAstrodynamics/AstroDynCoordinates.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/JuliaAstrodynamics/AstroDynCoordinates.jl
