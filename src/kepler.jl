@@ -28,8 +28,9 @@ function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))
     end
 
     rm = norm(r₀)
-    rdotv = r₀⋅v₀
-    α = -v₀⋅v₀ / μ + 2 /rm
+    rdv = r₀ ⋅ v₀
+    vdv = v₀ ⋅ v₀
+    α = -vdv / μ + 2 /rm
 
     # Elliptic orbit
     if α > rtol
@@ -54,25 +55,25 @@ function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))
         a = 1/α
         χ₁ = (sign(Δt) * sqrt(-a)
             * log(-2 * μ * Δt
-            / (a * (rdotv + sign(Δt) * sqrt(-μ * α) * (1 - rm * alpha)))))
+            / (a * (rdv + sign(Δt) * sqrt(-μ * α) * (1 - rm * alpha)))))
     end
 
     counter = 0
     converged = false
     χ = 0.0
-    c2 = 0.0
-    c3 = 0.0
+    c₂ = 0.0
+    c₃ = 0.0
     r = 0.0
     ψ = 0.0
     while counter < numiter
         counter += 1
         χ = χ₁
-        χ2 = χ^2
-        ψ = χ2 * α
-        c2 = findc2(ψ)
-        c3 = findc3(ψ)
-        r = χ2*c2 + rdotv / √μ * χ * (1 - ψ * c3) + rm * (1 - ψ * c2)
-        δt = χ^3 * c3 + rdotv / √μ * χ2 * c2 + rm * χ * (1 - ψ * c3)
+        χ² = χ^2
+        ψ = χ² * α
+        c₂ = c2(ψ)
+        c₃ = c3(ψ)
+        r = χ²*c₂ + rdv / √μ * χ * (1 - ψ * c₃) + rm * (1 - ψ * c₂)
+        δt = χ^3 * c₃ + rdv / √μ * χ² * c₂ + rm * χ * (1 - ψ * c₃)
         χ₁ = χ + (Δt * √μ - δt) / r
         if abs(χ - χ₁) < rtol
             converged = true
@@ -84,11 +85,18 @@ function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))
         error("Not converged.")
     end
 
-    f = 1 - χ^2 / rm * c2
-    g = Δt - χ^3 / √μ * c3
-    fdot = √μ / (r * rm) * χ * (ψ * c3 - 1)
-    gdot = 1 - χ^2 / r * c2
+    f = 1 - χ^2 / rm * c₂
+    g = Δt - χ^3 / √μ * c₃
+    fdot = √μ / (r * rm) * χ * (ψ * c₃ - 1)
+    gdot = 1 - χ^2 / r * c₂
     @assert f * gdot - fdot * g ≈ 1
 
     return f * r₀ + g * v₀, fdot * r₀ + gdot * v₀
+end
+
+function kepler(μ, r₀::Array{<:Quantity}, v₀::Array{<:Quantity}, Δt, numiter=50, rtol=sqrt(eps()))
+    ur = unit(r₀[1])
+    uv = unit(v₀[1])
+    r₁, v₁ = kepler(ustrip(μ), ustrip(r₀), ustrip(v₀), ustrip(Δt), numiter, rtol)
+    r₁ * ur, v₁ * uv
 end
