@@ -10,14 +10,12 @@ struct ITRF <: Frame end
 
 function Rotation(::Type{GCRF}, ::Type{CIRF}, ep::Epoch)
     m = precession_nutation(TTEpoch(ep))
-    δm = zeros(3,3) * (1.0/s)
-    Rotation{GCRF,CIRF}(m', δm)
+    Rotation{GCRF,CIRF}(m')
 end
 
 function Rotation(::Type{CIRF}, ::Type{GCRF}, ep::Epoch)
     m = precession_nutation(TTEpoch(ep))
-    δm = zeros(3,3) * (1.0/s)
-    Rotation{CIRF,GCRF}(m, δm)
+    Rotation{CIRF,GCRF}(m)
 end
 
 function Rotation(::Type{CIRF}, ::Type{TIRF}, ep::Epoch)
@@ -56,12 +54,10 @@ end
 
 function Rotation(::Type{TIRF}, ::Type{ITRF}, ep::Epoch)
     m = polarmotion(TTEpoch(ep))
-    δm = zeros(3, 3) * (1.0/s)
-    Rotation{TIRF,ITRF}(m', δm)
+    Rotation{TIRF,ITRF}(m')
 end
 
 function Rotation(::Type{ITRF}, ::Type{TIRF}, ep::Epoch)
     m = polarmotion(TTEpoch(ep))
-    δm = zeros(3, 3) * (1.0/s)
-    Rotation{ITRF,TIRF}(m, δm)
+    Rotation{ITRF,TIRF}(m)
 end
