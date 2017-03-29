@@ -1,4 +1,4 @@
-import Base: parent, show
+import Base: parent, show, datatype_name
 import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
 import Unitful: rad, °, Time
 
@@ -16,7 +16,7 @@ abstract type Planet <: CelestialBody end
 abstract type NaturalSatellite <: CelestialBody end
 abstract type MinorBody <: CelestialBody end
 
-Base.show{T<:CelestialBody}(io::IO, ::Type{T}) = print(io, Base.datatype_name(T))
+show{T<:CelestialBody}(io::IO, ::Type{T}) = print(io, datatype_name(T))
 
 α₀(::Type{<:CelestialBody}) = 0.0
 α₁(::Type{<:CelestialBody}) = 0.0
