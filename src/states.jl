@@ -43,6 +43,17 @@ velocity(s::State) = s.v
 rv(s::State) = [s.r; s.v]
 epoch(s::State) = s.epoch
 keplerian(s::State) = keplerian(radius(s), velocity(s), μ(body(s)))
+function period(s::State)
+    ele = keplerian(s)
+    period(ele[1], μ(body(s)))
+end
+
+semimajor(s::State) = keplerian(s)[1]
+eccentricity(s::State) = keplerian(s)[2]
+inclination(s::State) = keplerian(s)[3]
+ascendingnode(s::State) = keplerian(s)[4]
+argofpericenter(s::State) = keplerian(s)[5]
+trueanomaly(s::State) = keplerian(s)[6]
 frame(::State{F}) where F<:Frame = F
 _frame = frame
 timescale(::State{<:Frame, T}) where T<:Timescale = T
