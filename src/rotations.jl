@@ -9,6 +9,7 @@ struct Rotation{F1<:Frame,F2<:Frame} <: AbstractRotation
     m::Matrix{Float64}
     δm::Matrix{typeof(1.0/s)}
 end
+Rotation{F1, F2}(m) where {F1<:Frame, F2<:Frame} = Rotation{F1, F2}(m, zeros(3,3)*(1/s))
 
 function Rotation(::Type{F}, ::Type{F}, ep::Epoch) where F<:Frame
     Rotation{F,F}(eye(3), zeros(3,3)*(1/s))
