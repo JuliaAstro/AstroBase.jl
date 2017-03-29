@@ -1,24 +1,24 @@
 export kepler, period
 
-function meantoecc(M::Float64, ecc::Float64)
+function meantoecc(M, ecc)
     kepler(E) = E - ecc*sin(E) - M
     kepler_der(E) = 1 - ecc*cos(E)
     return newton(M, kepler, kepler_der)
 end
 
-function ecctomean(E::Float64, ecc::Float64)
+function ecctomean(E, ecc)
     return E - ecc*sin(E)
 end
 
-function ecctotrue(E::Float64, ecc::Float64)
+function ecctotrue(E, ecc)
     return 2*atan2(sqrt(1 + ecc)*sin(E/2), sqrt(1 - ecc)*cos(E/2))
 end
 
-function truetoecc(T::Float64, ecc::Float64)
+function truetoecc(T, ecc)
     return 2*atan2(sqrt(1 - ecc)*sin(T/2), sqrt(1 + ecc)*cos(T/2))
 end
 
-function period(a::Float64, μ::Float64)
+function period(a, μ)
     return 2π*sqrt(abs(a)^3/μ)
 end
 
