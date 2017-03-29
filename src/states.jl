@@ -86,8 +86,8 @@ isapprox(s1::State{<:Frame, <:Timescale, <:CelestialBody},
 function show(io::IO, s::State)
     sma, ecc, inc, node, peri, ano = keplerian(s)
     print(io, "State{",
-    timescale(s), ", ",
     frame(s), ", ",
+    timescale(s), ", ",
     body(s), "}\n",
     " Epoch: ", s.epoch, "\n",
     " Frame: ", frame(s), "\n",
@@ -103,7 +103,7 @@ function show(io::IO, s::State)
     " i: ", °(inc), "\n",
     " ω: ", °(node), "\n",
     " Ω: ", °(peri), "\n",
-    " ν: ", °(ano), "\n")
+    " ν: ", °(ano))
 end
 
 struct ThreeBodyState{
