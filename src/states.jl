@@ -1,4 +1,5 @@
 using AstronomicalTime
+using Unitful
 
 import AstroDynBase: AbstractState, keplerian, velocity, Rotation, period
 import Base: show, isapprox
@@ -6,7 +7,7 @@ import Base.Operators: ==
 
 export State, ThreeBodyState, period
 export timescale, frame, body, primary, secondary, keplerian, radius, velocity,
-    epoch, isapprox, ==
+    epoch, isapprox, ==, r_unit, v_unit, r_type, v_type, array
 
 struct State{
         F<:Frame,
@@ -40,9 +41,14 @@ end
 
 radius(s::State) = s.r
 velocity(s::State) = s.v
-rv(s::State) = [s.r; s.v]
+array(s::State) = [ustrip(s.r); ustrip(s.v)]
+r_unit(s::State) = unit(s.r[1])
+v_unit(s::State) = unit(s.v[1])
+r_type(s::State) = typeof(1.0*unit(s.r[1]))
+v_type(s::State) = typeof(1.0*unit(s.v[1]))
 epoch(s::State) = s.epoch
 keplerian(s::State) = keplerian(radius(s), velocity(s), μ(body(s)))
+
 function period(s::State)
     ele = keplerian(s)
     period(ele[1], μ(body(s)))
