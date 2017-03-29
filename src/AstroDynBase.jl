@@ -16,7 +16,6 @@ include("constants/minorbodies.jl")
 include("ephemerides.jl")
 include("rotations.jl")
 include("elements.jl")
-# include("trajectories.jl")
 include("stumpff.jl")
 include("kepler.jl")
 
