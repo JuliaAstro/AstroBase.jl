@@ -1,10 +1,10 @@
 using AstronomicalTime
 
-import AstroDynBase: AbstractState, keplerian, velocity, Rotation
+import AstroDynBase: AbstractState, keplerian, velocity, Rotation, period
 import Base: show, isapprox
 import Base.Operators: ==
 
-export State, ThreeBodyState
+export State, ThreeBodyState, period
 export timescale, frame, body, primary, secondary, keplerian, radius, velocity,
     epoch, isapprox, ==
 
@@ -55,11 +55,11 @@ ascendingnode(s::State) = keplerian(s)[4]
 argofpericenter(s::State) = keplerian(s)[5]
 trueanomaly(s::State) = keplerian(s)[6]
 frame(::State{F}) where F<:Frame = F
-_frame = frame
+const _frame = frame
 timescale(::State{<:Frame, T}) where T<:Timescale = T
-_timescale = timescale
+const _timescale = timescale
 body(::State{<:Frame, <:Timescale, C}) where C<:CelestialBody = C
-_body = body
+const _body = body
 (rot::Rotation)(s::State) = rot(radius(s), velocity(s))
 
 function State(s::State{F1, T1, C1};
