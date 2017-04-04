@@ -1,4 +1,5 @@
-abstract AbstractSpacecraft
+abstract type AbstractSpacecraft end
+abstract type AbstractModule end
 
 type SimpleSpacecraft <: AbstractSpacecraft
     name::Symbol
@@ -15,7 +16,7 @@ type Spacecraft <: AbstractSpacecraft
     modules::Array{SCModule, 1}
 end
 
-type SCModule
+struct InertModule <: AbstractModule
     name::Symbol
     drymass::Float64
 end

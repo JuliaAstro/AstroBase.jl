@@ -3,9 +3,10 @@ using Unitful
 import Unitful: km, s, kg, °, rad,
     𝐋, 𝐓, Length, Time
 
-export km, s, kg, °, rad, kps, dms2rad, rad2dms, VectorKM, VectorKPS
+export km, s, kg, °, rad, kps, kps2, dms2rad, rad2dms, VectorKM, VectorKPS
 
 const kps = km/s
+const kps2 = km/s^2
 
 @derived_dimension Velocity 𝐋/𝐓
 
