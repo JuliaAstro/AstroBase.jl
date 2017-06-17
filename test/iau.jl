@@ -12,18 +12,18 @@ furnsh(path(PCK_FILE))
     jd = in_seconds(ep)
     @testset for body in [PLANETS; SATELLITES]
         @eval f = $(Symbol("IAU", body))
-        ref = tisbod("J2000", naif_id(body), jd.val)
+        ref = tisbod("J2000", naif_id(body), jd)
         m = ref[1:3,1:3]
-        δm = ref[4:6,1:3] * (1.0/s)
+        δm = ref[4:6,1:3]
         rot = Rotation(GCRF, f, ep)
         @test rot isa Rotation{GCRF, f}
         @test rot.m ≈  m
         @test rot.δm ≈  δm
     end
     rot = Rotation(IAUEarth, GCRF, ep)
-    ref = tisbod("J2000", naif_id(Earth), jd.val)
+    ref = tisbod("J2000", naif_id(Earth), jd)
     m = ref[1:3,1:3]'
-    δm = ref[4:6,1:3]' * (1.0/s)
+    δm = ref[4:6,1:3]'
     @test rot isa Rotation{IAUEarth, GCRF}
     @test rot.m ≈ m
     @test rot.δm ≈ δm

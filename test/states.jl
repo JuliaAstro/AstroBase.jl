@@ -10,13 +10,13 @@ load_ephemeris!(SPK, path(de430))
     6068279.27,
     -1692843.94,
     -2516619.18,
-    ]/1000*km
+    ]/1000
 
     v = [
     -660.415582,
     5495.938726,
     -5303.093233,
-    ]/1000*kps
+    ]/1000
 
     rv = (r, v)
 
@@ -31,7 +31,7 @@ load_ephemeris!(SPK, path(de430))
     r_mars, v_mars = rv .+ earth .- mars
 
     @test iss == State(ep, r, v, GCRF, Earth)
-    @test iss ≈ State(ep, r + eps()*km, v + eps()*kps, GCRF, Earth)
+    @test iss ≈ State(ep, r + eps(), v + eps(), GCRF, Earth)
     @test State(iss, frame=IAUEarth) == State(ep, rot(r, v)..., IAUEarth)
     @test iss ≈ State(State(iss, frame=IAUEarth), frame=GCRF)
     @test State(iss, timescale=TDB) == State(tdb, r, v)
