@@ -6,13 +6,13 @@ export ComposedRotation, Rotation, ∘, origin, target
 abstract type AbstractRotation end
 
 struct Rotation{F1<:Frame,F2<:Frame} <: AbstractRotation
-    m::Matrix{Float64}
-    δm::Matrix{typeof(1.0/s)}
+    m::Matrix
+    δm::Matrix
 end
-Rotation{F1, F2}(m) where {F1<:Frame, F2<:Frame} = Rotation{F1, F2}(m, zeros(3,3)*(1/s))
+Rotation{F1, F2}(m) where {F1<:Frame, F2<:Frame} = Rotation{F1, F2}(m, zeros(3,3))
 
 function Rotation(::Type{F}, ::Type{F}, ep::Epoch) where F<:Frame
-    Rotation{F,F}(eye(3), zeros(3,3)*(1/s))
+    Rotation{F,F}(eye(3), zeros(3,3))
 end
 
 origin(::Rotation{F1,<:Frame}) where F1<:Frame = F1

@@ -1,6 +1,5 @@
 import Base: parent, show, datatype_name
 import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
-import Unitful: rad, °, Time
 
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter,
     Sun, SSB, SolarSystemBarycenter
@@ -27,11 +26,11 @@ show{T<:CelestialBody}(io::IO, ::Type{T}) = print(io, datatype_name(T))
 w₀(::Type{<:CelestialBody}) = 0.0
 w₁(::Type{<:CelestialBody}) = 0.0
 w₂(::Type{<:CelestialBody}) = 0.0
-α(::Type{<:CelestialBody}) = [0.0]
-δ(::Type{<:CelestialBody}) = [0.0]
-w(::Type{<:CelestialBody}) = [0.0]
-θ₀(::Type{<:CelestialBody}) = [0.0]
-θ₁(::Type{<:CelestialBody}) = [0.0]
+α(::Type{<:CelestialBody}) = zeros(1)
+δ(::Type{<:CelestialBody}) = zeros(1)
+w(::Type{<:CelestialBody}) = zeros(1)
+θ₀(::Type{<:CelestialBody}) = zeros(1)
+θ₁(::Type{<:CelestialBody}) = zeros(1)
 
 struct SolarSystemBarycenter <: Barycenter end
 const SSB = SolarSystemBarycenter
@@ -46,8 +45,8 @@ parent(::Type{ParentOfSSB}) = ParentOfSSB
 
 struct Sun <: CelestialBody end
 
-μ(::Type{Sun}) = 1.32712440041e11km^3/s^2
-mean_radius(::Type{Sun}) = 696000.0km
+μ(::Type{Sun}) = 1.32712440041e11
+mean_radius(::Type{Sun}) = 696000.0
 naif_id(::Type{Sun}) = 10
 parent(::Type{Sun}) = SSB
 α₀(::Type{Sun}) = deg2rad(286.13)
@@ -55,7 +54,7 @@ parent(::Type{Sun}) = SSB
 w₀(::Type{Sun}) = deg2rad(84.176)
 w₁(::Type{Sun}) = deg2rad(84.176)
 
-θ(t::Time, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SEC_PER_CENTURY
+θ(t, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SEC_PER_CENTURY
 
 function right_ascension(b::Type{C}, ep) where C<:CelestialBody
     t = in_seconds(ep)

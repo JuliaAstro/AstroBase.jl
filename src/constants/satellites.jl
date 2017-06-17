@@ -12,15 +12,15 @@ for satellite in SATELLITE_NAMES
 end
 @eval const SATELLITES = [$(SATELLITE_NAMES...)]
 
-μ(::Type{Moon}) = 4902.80007km^3/s^2
+μ(::Type{Moon}) = 4902.80007
 j2(::Type{Moon}) = 203.21568e-6
-mean_deg2radius(::Type{Moon}) = 1737.4km
-subplanetary_equatorial_deg2radius(::Type{Moon}) = 1737.4km
-along_orbit_equatorial_deg2radius(::Type{Moon}) = 1737.4km
-polar_deg2radius(::Type{Moon}) = 1737.4km
-deviation(::Type{Moon}) = 2.5km
-maximum_elevation(::Type{Moon}) = 7.5km
-maximum_depression(::Type{Moon}) = 5.6km
+mean_deg2radius(::Type{Moon}) = 1737.4
+subplanetary_equatorial_deg2radius(::Type{Moon}) = 1737.4
+along_orbit_equatorial_deg2radius(::Type{Moon}) = 1737.4
+polar_deg2radius(::Type{Moon}) = 1737.4
+deviation(::Type{Moon}) = 2.5
+maximum_elevation(::Type{Moon}) = 7.5
+maximum_depression(::Type{Moon}) = 5.6
 naif_id(::Type{Moon}) = 301
 parent(::Type{Moon}) = EarthBarycenter
 α₀(::Type{Moon}) = deg2rad(269.9949)
