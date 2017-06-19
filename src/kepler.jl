@@ -1,3 +1,5 @@
+import AstronomicalTime: seconds
+
 export kepler, period
 
 function meantoecc(M, ecc)
@@ -19,7 +21,7 @@ function truetoecc(T, ecc)
 end
 
 function period(a, μ)
-    return 2π*sqrt(abs(a)^3/μ)
+    return 2π*sqrt(abs(a)^3/μ)*seconds
 end
 
 function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))
