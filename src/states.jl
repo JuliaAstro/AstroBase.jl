@@ -1,7 +1,8 @@
 using AstronomicalTime
 using StaticArrays
 
-import AstroDynBase: AbstractState, keplerian, velocity, Rotation, period
+import AstroDynBase: AbstractState, keplerian, velocity, Rotation, period,
+    epoch
 import Base: show, isapprox
 import Base.Operators: ==
 
@@ -102,10 +103,10 @@ function show(io::IO, s::State)
     " vz: ", s.v[3], "\n\n",
     " a: ", sma, "\n",
     " e: ", ecc, "\n",
-    " i: ", °(inc), "\n",
-    " ω: ", °(node), "\n",
-    " Ω: ", °(peri), "\n",
-    " ν: ", °(ano))
+    " i: ", rad2deg(inc), "\n",
+    " ω: ", rad2deg(node), "\n",
+    " Ω: ", rad2deg(peri), "\n",
+    " ν: ", rad2deg(ano))
 end
 
 struct ThreeBodyState{
