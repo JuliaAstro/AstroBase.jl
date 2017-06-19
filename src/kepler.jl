@@ -95,10 +95,3 @@ function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))
 
     return f * r₀ + g * v₀, fdot * r₀ + gdot * v₀
 end
-
-function kepler(μ, r₀::Array{<:Quantity}, v₀::Array{<:Quantity}, Δt, numiter=50, rtol=sqrt(eps()))
-    ur = unit(r₀[1])
-    uv = unit(v₀[1])
-    r₁, v₁ = kepler(ustrip(μ), ustrip(r₀), ustrip(v₀), ustrip(Δt), numiter, rtol)
-    r₁ * ur, v₁ * uv
-end

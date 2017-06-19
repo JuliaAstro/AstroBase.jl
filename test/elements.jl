@@ -19,19 +19,4 @@
     r, v = cartesian(sma, ecc, inc, node, peri, ano, μ)
     @test r ≈ rexp
     @test v ≈ vexp
-
-    μ = 3.986004418e5km^3/s^2
-    rexp = [1131.340, -2282.343, 6672.423]km
-    vexp = [-5.64305, 4.30333, 2.42879]kps
-    sma_exp = 7200.470581180567km
-    sma, ecc, inc, node, peri, ano = keplerian(rexp, vexp, μ)
-    @test sma ≈ sma_exp
-    @test ecc ≈ ecc_exp
-    @test inc ≈ inc_exp
-    @test node ≈ node_exp
-    @test peri ≈ peri_exp
-    @test ano ≈ ano_exp
-    r, v = cartesian(sma, ecc, inc, node, peri, ano, μ)
-    @test r ≈ rexp
-    @test v ≈ vexp
 end
