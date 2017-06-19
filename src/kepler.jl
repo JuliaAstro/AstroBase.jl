@@ -1,9 +1,11 @@
+using Roots
+
 export kepler, period
 
 function meantoecc(M, ecc)
     kepler(E) = E - ecc*sin(E) - M
     kepler_der(E) = 1 - ecc*cos(E)
-    return newton(M, kepler, kepler_der)
+    return newton(kepler, kepler_der, M)
 end
 
 function ecctomean(E, ecc)
