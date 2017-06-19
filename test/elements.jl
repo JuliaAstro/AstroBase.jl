@@ -19,4 +19,8 @@
     r, v = cartesian(sma, ecc, inc, node, peri, ano, μ)
     @test r ≈ rexp
     @test v ≈ vexp
+
+    @test !isprograde(inc)
+    @test isretrograde(inc)
+    @test !ispolar(inc)
 end

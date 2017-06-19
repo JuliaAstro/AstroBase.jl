@@ -1,4 +1,4 @@
-export keplerian, cartesian, perifocal
+export keplerian, cartesian, perifocal, isprograde, isretrograde, ispolar
 
 keplerian(rv, μ) = keplerian(rv[1:3], rv[4:6], μ)
 
@@ -67,3 +67,7 @@ function perifocal(p, ecc, ano, μ)
 end
 
 cartesian(el, mu) = cartesian(el..., mu)
+
+isprograde(inc) = inc < π/2 && !(inc ≈ π/2)
+isretrograde(inc) = inc > π/2 && !(inc ≈ π/2)
+ispolar(inc) = inc ≈ π/2
