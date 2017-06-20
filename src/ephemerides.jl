@@ -1,7 +1,7 @@
 using OptionalData
 import Base: position
 
-export Ephemeris, load_ephemeris!
+export Ephemeris, load_ephemeris!, state, position, velocity
 
 abstract type Ephemeris end
 
