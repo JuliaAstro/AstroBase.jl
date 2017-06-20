@@ -1,13 +1,13 @@
 using AstronomicalTime
 using StaticArrays
 
-import AstroDynBase: AbstractState, keplerian, velocity, Rotation, period,
-    epoch
+import AstroDynBase: AbstractState, keplerian, velocity, position,
+    Rotation, period, epoch
 import Base: show, isapprox
 import Base.Operators: ==
 
 export State, ThreeBodyState, period
-export timescale, frame, body, primary, secondary, keplerian, radius, velocity,
+export timescale, frame, body, primary, secondary, keplerian, position, velocity,
     epoch, isapprox, ==, array
 
 struct State{
@@ -40,11 +40,11 @@ function State(ep::Epoch{T}, rv,
     State(ep, rv[1], rv[2], frame, body)
 end
 
-radius(s::State) = s.r
+position(s::State) = s.r
 velocity(s::State) = s.v
-array(s::State) = [s.r; s.v]
+array(s::State) = Array([s.r; s.v])
 epoch(s::State) = s.epoch
-keplerian(s::State) = keplerian(radius(s), velocity(s), μ(body(s)))
+keplerian(s::State) = keplerian(position(s), velocity(s), μ(body(s)))
 
 function period(s::State)
     ele = keplerian(s)
@@ -63,7 +63,7 @@ timescale(::State{<:Frame, T}) where T<:TimeScale = T
 const _timescale = timescale
 body(::State{<:Frame, <:TimeScale, C}) where C<:CelestialBody = C
 const _body = body
-(rot::Rotation)(s::State) = rot(radius(s), velocity(s))
+(rot::Rotation)(s::State) = rot(position(s), velocity(s))
 
 function State(s::State{F1, T1, C1};
     frame::Type{F2}=_frame(s), timescale::Type{T2}=_timescale(s),
