@@ -14,10 +14,10 @@ end
 
 μ(::Type{Moon}) = 4902.80007
 j2(::Type{Moon}) = 203.21568e-6
-mean_deg2radius(::Type{Moon}) = 1737.4
-subplanetary_equatorial_deg2radius(::Type{Moon}) = 1737.4
-along_orbit_equatorial_deg2radius(::Type{Moon}) = 1737.4
-polar_deg2radius(::Type{Moon}) = 1737.4
+mean_radius(::Type{Moon}) = 1737.4
+subplanetary_equatorial_radius(::Type{Moon}) = 1737.4
+along_orbit_equatorial_radius(::Type{Moon}) = 1737.4
+polar_radius(::Type{Moon}) = 1737.4
 deviation(::Type{Moon}) = 2.5
 maximum_elevation(::Type{Moon}) = 7.5
 maximum_depression(::Type{Moon}) = 5.6
