@@ -1,6 +1,6 @@
 using AstroDynBase
 
-import AstroDynBase: Rotation
+import AstroDynBase: Rotation, isrotating
 
 export IAUFrame, body, Rotation, rotation
 
@@ -11,6 +11,7 @@ for body in [PLANETS; SATELLITES; MINOR_BODIES]
     @eval begin
         struct $frame <: IAUFrame end
         body(::Type{$frame}) = $body
+        isrotating(::Type{$frame}) = true
         export $frame
     end
 end
