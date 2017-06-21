@@ -31,13 +31,9 @@ install:
 
 build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
-# - IF EXIST .git\shallow (git fetch --unshallow)
-# - C:\projects\julia\bin\julia -e "versioninfo();
-#     Pkg.clone(pwd(), \"AstroDynBase\"); Pkg.build(\"AstroDynBase\")"
+  - IF EXIST .git\shallow (git fetch --unshallow)
   - C:\projects\julia\bin\julia -e "versioninfo();
-      Pkg.clone(\"https://github.com/JuliaAstrodynamics/AstroDynDev.jl\");
-      using AstroDynDev; AstroDynDev.install(\"AstroDynBase\")"
-  - C:\projects\julia\bin\julia -e "Pkg.build(\"AstroDynBase\")"
+      Pkg.clone(pwd(), \"AstroDynBase\"); Pkg.build(\"AstroDynBase\")"
 
 test_script:
   - C:\projects\julia\bin\julia -e "Pkg.test(\"AstroDynBase\")"
