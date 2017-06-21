@@ -7,20 +7,34 @@ abstract type Ephemeris end
 
 @OptionalData EPHEMERIS Ephemeris
 
-for f in (:state, :position, :velocity)
+for (f, n) in zip((:state, :position, :velocity), (6, 3, 3))
+    fmut = Symbol(f, "!")
     @eval begin
+        function $fmut(arr, ep::Epoch, from::Type{<:CelestialBody},
+            to::Type{<:CelestialBody})
+            $fmut(arr, get(EPHEMERIS), TDBEpoch(ep), to, from)
+        end
+
         function $f(ep::Epoch, from::Type{<:CelestialBody},
             to::Type{<:CelestialBody})
-            $f(get(EPHEMERIS), TDBEpoch(ep), to, from)
+            arr = zeros($n)
+            $fmut(arr, ep, from, to)
         end
-        $f(ep::Epoch, to::Type{<:CelestialBody}) = $f(ep, SSB, to)
+
+        $fmut(arr, ep::Epoch, to::Type{<:CelestialBody}) = $fmut(arr, ep, SSB, to)
+        $f(ep::Epoch, to::Type{<:CelestialBody}) = $fmut(zeros($n), ep, SSB, to)
+
+        function $fmut(arr, eph::E, ep::Epoch, to::Type{<:CelestialBody},
+            from::Type{<:CelestialBody}) where E<:Ephemeris
+            error($fmut, " not implemented for ephemeris $E.")
+        end
 
         function $f(eph::E, ep::Epoch, to::Type{<:CelestialBody},
             from::Type{<:CelestialBody}) where E<:Ephemeris
             error($f, " not implemented for ephemeris $E.")
         end
 
-        export $f
+        export $f, $fmut
     end
 end
 
