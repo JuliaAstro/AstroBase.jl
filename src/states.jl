@@ -14,15 +14,18 @@ struct State{
         F<:Frame,
         T<:TimeScale,
         C<:CelestialBody,
+        R, V,
     } <: AbstractState
     epoch::Epoch{T}
-    r::SVector{3,Float64}
-    v::SVector{3,Float64}
+    r::SVector{3,R}
+    v::SVector{3,V}
 
     function State(ep::Epoch{T}, r, v,
         frame::Type{F}=GCRF, body::Type{C}=Earth) where {
         F<:Frame, T<:TimeScale, C<:CelestialBody}
-        new{F,T,C}(ep, r, v)
+        R = eltype(r)
+        V = eltype(v)
+        new{F,T,C,R,V}(ep, r, v)
     end
 end
 
@@ -64,6 +67,7 @@ const _timescale = timescale
 body(::State{<:Frame, <:TimeScale, C}) where C<:CelestialBody = C
 const _body = body
 (rot::Rotation)(s::State) = rot(position(s), velocity(s))
+splitrv(arr) = arr[1:3], arr[4:6]
 
 function State(s::State{F1, T1, C1};
     frame::Type{F2}=_frame(s), timescale::Type{T2}=_timescale(s),

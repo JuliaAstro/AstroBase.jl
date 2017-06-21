@@ -18,7 +18,7 @@ load_ephemeris!(SPK, path(de430))
     -5303.093233,
     ]/1000
 
-    rv = (r, v)
+    rv = [r; v]
 
     ep = UTCEpoch("2016-05-30T12:00:00.000")
     tdb = TDBEpoch(ep)
@@ -28,7 +28,9 @@ load_ephemeris!(SPK, path(de430))
     earth = state(ep, Earth)
     mars = state(ep, MarsBarycenter)
     mars_rot = State(tdb, r, v, IAUMars, MarsBarycenter)
-    r_mars, v_mars = rv .+ earth .- mars
+    rv_mars = rv .+ earth .- mars
+    r_mars = rv_mars[1:3]
+    v_mars = rv_mars[4:6]
 
     @test iss == State(ep, r, v, GCRF, Earth)
     @test iss ≈ State(ep, r + eps(), v + eps(), GCRF, Earth)

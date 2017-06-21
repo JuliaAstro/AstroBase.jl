@@ -13,7 +13,7 @@ end
 # T1 -> T2
 function convert(::Type{State{F, T2, C}}, s::State{F, T1, C}) where {
     F<:Frame, T1<:TimeScale, T2<:TimeScale, C<:CelestialBody}
-    State(Epoch{T2}(epoch(s)), radius(s), velocity(s), F, C)
+    State(Epoch{T2}(epoch(s)), position(s), velocity(s), F, C)
 end
 
 # C1 -> C2
@@ -21,8 +21,8 @@ function convert(::Type{State{F, T, C2}}, s::State{F, T, C1}) where {
     F<:Frame, T<:TimeScale, C1<:CelestialBody, C2<:CelestialBody}
     ep = epoch(s)
     rot = Rotation(F, GCRF, epoch(s))
-    body1 = state(ep, C1)
-    body2 = state(ep, C2)
+    body1 = splitrv(state(ep, C1))
+    body2 = splitrv(state(ep, C2))
 
     rv = inv(rot)(rot(s) .+ body1 .- body2)
     State(ep, rv, F, C2)
@@ -42,8 +42,8 @@ function convert(::Type{State{F2, T, C2}}, s::State{F1, T, C1}) where {
     ep = epoch(s)
     rot1 = Rotation(F1, GCRF, ep)
     rot2 = Rotation(GCRF, F2, ep)
-    body1 = state(ep, C1)
-    body2 = state(ep, C2)
+    body1 = splitrv(state(ep, C1))
+    body2 = splitrv(state(ep, C2))
 
     rv = rot2(rot1(s) .+ body1 .- body2)
     State(ep, rv, F2, C2)
@@ -54,8 +54,8 @@ function convert(::Type{State{F, T2, C2}}, s::State{F, T1, C1}) where {
     F<:Frame, T1<:TimeScale, T2<:TimeScale, C1<:CelestialBody, C2<:CelestialBody}
     ep = epoch(s)
     rot = Rotation(F, GCRF, epoch(s))
-    body1 = state(ep, C1)
-    body2 = state(ep, C2)
+    body1 = splitrv(state(ep, C1))
+    body2 = splitrv(state(ep, C2))
 
     rv = inv(rot)(rot(s) .+ body1 .- body2)
     State(Epoch{T2}(ep), rv, F, C2)
@@ -68,8 +68,8 @@ function convert(::Type{State{F2,T2,C2}}, s::State{F1,T1,C1}) where {
     ep = epoch(s)
     rot1 = Rotation(F1, GCRF, ep)
     rot2 = Rotation(GCRF, F2, ep)
-    body1 = state(ep, C1)
-    body2 = state(ep, C2)
+    body1 = splitrv(state(ep, C1))
+    body2 = splitrv(state(ep, C2))
 
     rv = rot2(rot1(s) .+ body1 .- body2)
     State(Epoch{T2}(ep), rv, F2, C2)
