@@ -36,7 +36,7 @@ build_script:
 #     Pkg.clone(pwd(), \"AstroDynBase\"); Pkg.build(\"AstroDynBase\")"
   - C:\projects\julia\bin\julia -e "versioninfo();
       Pkg.clone(\"https://github.com/JuliaAstrodynamics/AstroDynDev.jl\");
-      using AstroDynDev; AstroDynDev.install(ci=true)"
+      using AstroDynDev; AstroDynDev.install(\"AstroDynBase\")"
   - C:\projects\julia\bin\julia -e "Pkg.build(\"AstroDynBase\")"
 
 test_script:
