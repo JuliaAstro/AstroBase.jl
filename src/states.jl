@@ -8,7 +8,8 @@ import Base.Operators: ==
 
 export State, ThreeBodyState, period
 export timescale, frame, body, primary, secondary, keplerian, position, velocity,
-    epoch, isapprox, ==, array
+    epoch, isapprox, ==, array, semimajor, eccentricity, inclination,
+    ascendingnode, argofpericenter, trueanomaly
 
 struct State{
         F<:Frame,
