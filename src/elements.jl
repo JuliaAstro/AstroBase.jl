@@ -7,12 +7,13 @@ function keplerian(r, v, µ)
     vm = norm(v)
     h = cross(r, v)
     hm = norm(h)
-    n = cross([0.0, 0.0, 1.0], h)
+    k = [0.0, 0.0, 1.0]
+    n = cross(k, h)
     nm = norm(n)
     xi = vm^2/2 - µ/rm
     ec = ((vm^2 - µ/rm)*r - v*dot(r, v))/µ
     ecc = norm(ec)
-    inc = acos(h[3]/hm)
+    inc = angle(h, k)
 
     equatorial = abs(inc) ≈ 0
     circular = ecc ≈ 0
@@ -41,8 +42,22 @@ function keplerian(r, v, µ)
         ano = mod2pi(atan2(r[2], r[1]))
     else
         node = mod2pi(atan2(n[2], n[1]))
-        peri = mod2pi(atan2(ec⋅cross(h, n) / hm, ec⋅n))
-        ano = mod2pi(atan2(r⋅cross(h, ec) / hm, r⋅ec))
+        # peri = mod2pi(atan2(ec⋅cross(h, n) / hm, ec⋅n))
+        # ano = mod2pi(atan2(r⋅cross(h, ec) / hm, r⋅ec))
+        if sma > 0.0
+            ese = (r ⋅ v) / sqrt(μ * sma)
+            ece = rm * vm^2 / μ - 1.0
+            ano = ecctotrue(atan2(ese, ece), ecc)
+        else
+            @show r
+            @show v
+            @show ecc
+            error("$sma is certainly wrong.")
+        end
+        rnode = [cos(node), sin(node), 0.0]
+        px = r ⋅ rnode
+        py = r ⋅ (h × rnode) / hm
+        peri = atan2(py, px) - ano
     end
 
     sma, ecc, inc, node, peri, ano

@@ -7,6 +7,7 @@ using Reexport
 update() = AstronomicalTime.update()
 
 include("basetypes.jl")
+include("math.jl")
 include("units.jl")
 include("rotation_matrices.jl")
 include("bodies.jl")

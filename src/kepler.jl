@@ -1,7 +1,7 @@
 using Roots
 import AstronomicalTime: seconds
 
-export kepler, period
+export kepler, period, meantoecc, ecctomean, ecctotrue, truetoecc
 
 function meantoecc(M, ecc)
     kepler(E) = E - ecc*sin(E) - M

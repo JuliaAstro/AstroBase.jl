@@ -23,4 +23,19 @@
     @test !isprograde(inc)
     @test isretrograde(inc)
     @test !ispolar(inc)
+
+    ref_rv = readcsv(joinpath("data", "rv.csv"))
+    ref_el = readcsv(joinpath("data", "elements.csv"))
+
+    n, _ = size(ref_rv)
+    for i = 1:n
+        r_exp = ref_rv[i, 1:3]
+        v_exp = ref_rv[i, 4:6]
+        el_exp = ref_el[i, :]
+        r_act, v_act = cartesian(el_exp, μ)
+        @test r_act ≈ r_exp
+        @test v_act ≈ v_exp
+        el_act = collect(keplerian(r_exp, v_exp, μ))
+        @test el_act ≈ el_exp
+    end
 end
