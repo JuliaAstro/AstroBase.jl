@@ -44,6 +44,12 @@ function State(ep::Epoch{T}, rv,
     State(ep, rv[1], rv[2], frame, body)
 end
 
+function State(ep::Epoch{T}, rv::AbstractArray,
+    frame::Type{F}=GCRF, body::Type{C}=Earth) where {
+    T<:TimeScale,F<:Frame,C<:CelestialBody}
+    State(ep, rv[1:3], rv[4:6], frame, body)
+end
+
 position(s::State) = s.r
 velocity(s::State) = s.v
 array(s::State) = Array([s.r; s.v])
