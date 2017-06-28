@@ -49,10 +49,8 @@ function keplerian(r, v, µ)
             ece = rm * vm^2 / μ - 1.0
             ano = ecctotrue(atan2(ese, ece), ecc)
         else
-            @show r
-            @show v
-            @show ecc
-            error("$sma is certainly wrong.")
+            # TODO: Implement this.
+            error("Hyperbolic elements not implemented.")
         end
         rnode = [cos(node), sin(node), 0.0]
         px = r ⋅ rnode
