@@ -3,7 +3,7 @@ using AstroDynCoordinates
 using SmoothingSplines
 
 import Base: getindex, endof, show
-import AstroDynBase: state, epoch
+import AstroDynBase: AbstractTrajectory, state, epoch
 
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector
@@ -20,7 +20,7 @@ detector(l::LogEntry) = l.detector
 epoch(l::LogEntry) = l.epoch
 count_id(idx, log) = count(x->id(x) == idx, log)
 
-struct Trajectory{S<:AbstractState}
+struct Trajectory{S<:AbstractState} <: AbstractTrajectory
     initial::S
     final::S
     times::Vector
