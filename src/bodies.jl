@@ -1,5 +1,5 @@
 import Base: parent, show, datatype_name
-import AstronomicalTime: SEC_PER_CENTURY, SEC_PER_DAY, in_seconds
+import AstronomicalTime: SECONDS_PER_CENTURY, SECONDS_PER_DAY, J2000, seconds
 
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter,
     Sun, SSB, SolarSystemBarycenter
@@ -54,45 +54,45 @@ parent(::Type{Sun}) = SSB
 w₀(::Type{Sun}) = deg2rad(84.176)
 w₁(::Type{Sun}) = deg2rad(84.176)
 
-θ(t, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SEC_PER_CENTURY
+θ(t, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SECONDS_PER_CENTURY
 
 function right_ascension(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    α₀(b) + α₁(b) * t / SEC_PER_CENTURY +
-        α₂(b) * t^2 / SEC_PER_CENTURY^2 +
+    t = seconds(ep, J2000)
+    α₀(b) + α₁(b) * t / SECONDS_PER_CENTURY +
+        α₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(α(b) .* sin.(θ(t, b)))
 end
 
 function declination(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    δ₀(b) + δ₁(b) * t / SEC_PER_CENTURY +
-        δ₂(b) * t^2 / SEC_PER_CENTURY^2 +
+    t = seconds(ep, J2000)
+    δ₀(b) + δ₁(b) * t / SECONDS_PER_CENTURY +
+        δ₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(δ(b) .* cos.(θ(t, b)))
 end
 
 function rotation_angle(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    w₀(b) + w₁(b) * t / SEC_PER_DAY +
-        w₂(b) * t^2 / SEC_PER_DAY^2 +
+    t = seconds(ep, J2000)
+    w₀(b) + w₁(b) * t / SECONDS_PER_DAY +
+        w₂(b) * t^2 / SECONDS_PER_DAY^2 +
         sum(w(b) .* sin.(θ(t, b)))
 end
 
 function right_ascension_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    α₁(b) / SEC_PER_CENTURY + 2 * α₂(b) * t / SEC_PER_CENTURY^2 +
-        sum(α(b) .* θ₁(b) ./ SEC_PER_CENTURY .* cos.(θ(t, b)))
+    t = seconds(ep, J2000)
+    α₁(b) / SECONDS_PER_CENTURY + 2 * α₂(b) * t / SECONDS_PER_CENTURY^2 +
+        sum(α(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end
 
 function declination_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    δ₁(b) / SEC_PER_CENTURY + 2 * δ₂(b) * t / SEC_PER_CENTURY^2 -
-        sum(δ(b) .* θ₁(b) ./ SEC_PER_CENTURY .* sin.(θ(t, b)))
+    t = seconds(ep, J2000)
+    δ₁(b) / SECONDS_PER_CENTURY + 2 * δ₂(b) * t / SECONDS_PER_CENTURY^2 -
+        sum(δ(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* sin.(θ(t, b)))
 end
 
 function rotation_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = in_seconds(ep)
-    w₁(b) / SEC_PER_DAY + 2 * w₂(b) * t / SEC_PER_DAY^2 +
-        sum(w(b) .* θ₁(b) ./ SEC_PER_CENTURY .* cos.(θ(t, b)))
+    t = seconds(ep, J2000)
+    w₁(b) / SECONDS_PER_DAY + 2 * w₂(b) * t / SECONDS_PER_DAY^2 +
+        sum(w(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end
 
 function euler_angles(b::Type{C}, ep) where C<:CelestialBody
