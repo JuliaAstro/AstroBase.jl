@@ -9,7 +9,7 @@ furnsh(path(PCK_FILE))
 @testset "IAU" begin
     # Reference data from SPICE
     ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 4, 23, 789))
-    jd = in_seconds(ep)
+    jd = seconds(ep, J2000)
     @testset for body in [PLANETS; SATELLITES]
         @eval f = $(Symbol("IAU", body))
         ref = tisbod("J2000", naif_id(body), jd)

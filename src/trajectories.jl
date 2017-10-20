@@ -75,10 +75,10 @@ end
 function state(tra::Trajectory, ep::Epoch)
     ep0 = epoch(initial(tra))
     time = typeof(ep0)(ep) - ep0
-    tra(in_seconds(time))
+    tra(seconds(time))
 end
 
-state(tra::Trajectory, time::Period) = state(tra, in_seconds(time))
+state(tra::Trajectory, time::Period) = state(tra, seconds(time))
 
 (tra::Trajectory)(time) = state(tra, time)
 
