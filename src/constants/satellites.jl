@@ -1,4 +1,4 @@
-export SATELLITES
+export SATELLITES, SATELLITE_NAMES
 
 const SATELLITE_NAMES = (
     :Moon,

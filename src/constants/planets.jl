@@ -4,7 +4,7 @@
 # Archinal, Brent Allen, et al. "Report of the IAU working group on cartographic
 # coordinates and rotational elements: 2009." Celestial Mechanics and Dynamical
 # Astronomy 109.2 (2011): 101-135.
-export PLANETS
+export PLANETS, PLANET_NAMES
 
 const PLANET_NAMES = (
     :Mercury,
