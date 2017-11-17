@@ -10,6 +10,4 @@ isrotating(::Type{F}) where {F<:Frame} = false
 
 struct GCRF <: Frame end
 
-Base.show(io::IO, ::Type{F}) where F<:Frame = print(io, Base.datatype_name(F))
-
 function epoch() end

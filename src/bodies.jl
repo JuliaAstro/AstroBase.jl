@@ -15,8 +15,6 @@ abstract type Planet <: CelestialBody end
 abstract type NaturalSatellite <: CelestialBody end
 abstract type MinorBody <: CelestialBody end
 
-show{T<:CelestialBody}(io::IO, ::Type{T}) = print(io, datatype_name(T))
-
 α₀(::Type{<:CelestialBody}) = 0.0
 α₁(::Type{<:CelestialBody}) = 0.0
 α₂(::Type{<:CelestialBody}) = 0.0
@@ -57,40 +55,40 @@ w₁(::Type{Sun}) = deg2rad(84.176)
 θ(t, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SECONDS_PER_CENTURY
 
 function right_ascension(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     α₀(b) + α₁(b) * t / SECONDS_PER_CENTURY +
         α₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(α(b) .* sin.(θ(t, b)))
 end
 
 function declination(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     δ₀(b) + δ₁(b) * t / SECONDS_PER_CENTURY +
         δ₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(δ(b) .* cos.(θ(t, b)))
 end
 
 function rotation_angle(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     w₀(b) + w₁(b) * t / SECONDS_PER_DAY +
         w₂(b) * t^2 / SECONDS_PER_DAY^2 +
         sum(w(b) .* sin.(θ(t, b)))
 end
 
 function right_ascension_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     α₁(b) / SECONDS_PER_CENTURY + 2 * α₂(b) * t / SECONDS_PER_CENTURY^2 +
         sum(α(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end
 
 function declination_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     δ₁(b) / SECONDS_PER_CENTURY + 2 * δ₂(b) * t / SECONDS_PER_CENTURY^2 -
         sum(δ(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* sin.(θ(t, b)))
 end
 
 function rotation_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = seconds(ep, J2000)
+    t = get(seconds(ep, J2000))
     w₁(b) / SECONDS_PER_DAY + 2 * w₂(b) * t / SECONDS_PER_DAY^2 +
         sum(w(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end
