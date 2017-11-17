@@ -9,10 +9,11 @@ furnsh(path(PCK_FILE))
 @testset "IAU" begin
     # Reference data from SPICE
     ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 4, 23, 789))
-    jd = seconds(ep, J2000)
-    @testset for body in [PLANETS; SATELLITES]
+    jd = get(seconds(ep, J2000))
+    @testset for body in (PLANET_NAMES..., SATELLITE_NAMES...)
+        @eval b = $body
         @eval f = $(Symbol("IAU", body))
-        ref = tisbod("J2000", naif_id(body), jd)
+        ref = tisbod("J2000", naif_id(b), jd)
         m = ref[1:3,1:3]
         δm = ref[4:6,1:3]
         rot = Rotation(GCRF, f, ep)
