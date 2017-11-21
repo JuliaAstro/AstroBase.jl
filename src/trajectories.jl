@@ -78,7 +78,7 @@ function state(tra::Trajectory, ep::Epoch)
     tra(seconds(time))
 end
 
-state(tra::Trajectory, time::Period) = state(tra, seconds(time))
+state(tra::Trajectory, time::Period) = state(tra, get(seconds(time)))
 
 (tra::Trajectory)(time) = state(tra, time)
 
