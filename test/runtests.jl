@@ -1,4 +1,5 @@
 using AstroBase
+using ERFA
 using Base.Test
 
 # write your own tests here
