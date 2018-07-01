@@ -3,4 +3,4 @@ using ERFA
 using Base.Test
 
 # write your own tests here
-@test AstroBase.c2ixys(0.2, 0.2, 0.2) == ERFA.c2ixys(0.2, 0.2, 0.2)
+@test AstroBase.celestial_to_intermediate(0.2, 0.2, 0.2) == ERFA.c2ixys(0.2, 0.2, 0.2)
