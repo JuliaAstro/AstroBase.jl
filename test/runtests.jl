@@ -26,4 +26,5 @@ using Base.Test
         @test x1 ≈ x2
         @test y1 ≈ y2
     end
+    @test AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50) ≈ ERFA.s06(2.4578265e6, 0.30434616919175345, 20, 50)
 end

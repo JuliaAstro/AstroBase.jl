@@ -6,6 +6,7 @@ export earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, me
        mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
 
 include("mfals.jl")
+include("terms.jl")
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -33,6 +34,10 @@ function earth_rotation_angle(jd1, jd2)
     t = d1 + d2 - J2000
     f = mod(d1, 1.0) + mod(d2, 1.0)
     mod2pi(2pi * (f + 0.7790572732640 + 0.00273781191135448 * t))
+end
+
+if !isdefined(Base, :sincos)
+    sincos(x::Real) = (sin(x), cos(x))
 end
 
 """
@@ -340,6 +345,18 @@ function xy06(jd1, jd2)
     sec2rad((xypr[1] + (xyls[1] + xypl[1]) / 1e6)), sec2rad(xypr[2] + (xyls[2] + xypl[2]) / 1e6)
 end
 
+"""
+    s06(jd1, jd2, x, y)
+
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+
+# Example
+```jldoctest
+julia> AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50)
+-500.00000000383193
+```
+"""
 function s06(jd1, jd2, x, y)
 
     NS0 = length(s0)
@@ -349,61 +366,67 @@ function s06(jd1, jd2, x, y)
     NS4 = length(s4)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
-    # Fundamental Arguments (from IERS Conventions 2003)
+    fa = zeros(8)
+    fa[1] = mean_anomaly_of_moon(t)
+    fa[2] = mean_anomaly_of_sun(t)
+    fa[3] = mean_longitude_of_moon_minus_mean_longitude_of_ascending_node(t)
+    fa[4] = mean_elongation_of_moon_from_sun(t)
+    fa[5] = mean_longitude_ascending_node_moon(t)
+    fa[6] = mean_longitude_of_venus(t)
+    fa[7] = mean_longitude_of_earth(t)
+    fa[8] = general_precession_in_longitude(t)
 
-    # Mean anomaly of the Moon.
-     fa[0] = eraFal03(t)
-
-    # Mean anomaly of the Sun.
-     fa[1] = eraFalp03(t)
-
-    # Mean longitude of the Moon minus that of the ascending node.
-     fa[2] = eraFaf03(t)
-
-    # Mean elongation of the Moon from the Sun.
-     fa[3] = eraFad03(t)
-
-    # Mean longitude of the ascending node of the Moon.
-     fa[4] = eraFaom03(t)
-
-    # Mean longitude of Venus.
-     fa[5] = eraFave03(t)
-
-    # Mean longitude of Earth.
-     fa[6] = eraFae03(t)
-
-    # General precession in longitude.
-     fa[7] = eraFapa03(t)
-
-    # Evaluate s.
-     w0 = sp[0]
-     w1 = sp[1]
-     w2 = sp[2]
-     w3 = sp[3]
-     w4 = sp[4]
-     w5 = sp[5]
+    w0 = sp[1]
+    w1 = sp[2]
+    w2 = sp[3]
+    w3 = sp[4]
+    w4 = sp[5]
+    w5 = sp[6]
 
     for i in NS0:-1:1
-        w0 += s0[i][2] * sin(float(s0[i][1])' * fa) + s0[i][3] * cos(float(s0[i][1])' * fa)
+        a = 0.0
+        for j in 8:-1:1
+            a += s0[i][1][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w0 += s0[i][2] * s + s0[i][3] * c
     end
 
     for i in NS1:-1:1
-        w1 += s1[i][2] * sin(float(s1[i][1])' * fa) + s1[i][3] * cos(float(s1[i][1])' * fa)
+        a = 0.0
+        for j in 8:-1:1
+            a += s1[i][1][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w1 += s1[i][2] * s + s1[i][3] * c
     end
 
     for i in NS2:-1:1
-        w2 += s2[i][2] * sin(float(s2[i][1])' * fa) + s2[i][3] * cos(float(s2[i][1])' * fa)
+        a = 0.0
+        for j in 8:-1:1
+            a += s2[i][1][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w2 += s2[i][2] * s + s2[i][3] * c
     end
 
     for i in NS3:-1:1
-        w3 += s3[i][2] * sin(float(s3[i][1])' * fa) + s3[i][3] * cos(float(s3[i][1])' * fa)
+        a = 0.0
+        for j in 8:-1:1
+            a += s3[i][1][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w3 += s3[i][2] * s + s3[i][3] * c
     end
 
     for i in NS4:-1:1
-        w4 += s4[i][2] * sin(float(s0[i][1])' * fa) + s4[i][3] * cos(float(s0[i][1])' * fa)
+        a = 0.0
+        for j in 8:-1:1
+            a += s4[i][1][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w4 += s4[i][2] * s + s4[i][3] * c
     end
-
-    (@evalpoly t w0 w1 w2 w3 w4 w5) * ERFA_DAS2R - x * y / 2.0
-
+    sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end
 end # module
