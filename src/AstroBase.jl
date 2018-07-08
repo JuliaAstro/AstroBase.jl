@@ -31,14 +31,14 @@ function xy06(jd1, jd2)
     NFLS, NFPL, NA, MAXPT= length(mfals), length(mfapl), length(amp), 5
     pt, fa = Vector{Float64}(MAXPT + 1), Vector{Float64}(14)
     xypr, xypl, xyls, sc = zeros(2), zeros(2), zeros(2), zeros(2)
-    # Powers of T.
+
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    # Powers of T.
     w = 1.0
     for i in 1:MAXPT+1
         pt[i] = w
         w *= t
     end
-
     # ---------------------------------
     # Fundamental arguments (IERS 2003)
     # ---------------------------------
@@ -62,10 +62,7 @@ function xy06(jd1, jd2)
     # --------------------------------------
 
     for i in 1:2
-        for j in MAXPT+1:-1:1
-           xypr[i] += xyp[i][j] * pt[j]
-           arg = 0.0
-        end
+           xypr[i] = @evalpoly t xyp[1][1] xyp[1][2] xyp[1][3] xyp[1][4] xyp[1][5] xyp[1][6]
     end
 
     # ----------------------------------
