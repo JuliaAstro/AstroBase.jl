@@ -6,8 +6,7 @@ export celestial_to_intermediate
 """
     celestial_to_intermediate(x, y, s)
 
-Converts the celestial to intermediate-frame-of-date matrix given the CIP
-X,Y and the CIO locator s.
+Returns intermediate-frame-of-date matrix given the CIP (X,Y and the CIO locator 's').
 
 ```jldoctest
 julia> celestial_to_intermediate(0.2, 0.2, 0.1)
@@ -21,7 +20,7 @@ function celestial_to_intermediate(x, y, s)
     r2 = x^2 + y^2
     e = r2 > 0.0 ? atan2(y,x) : 0.0
     d = atan(sqrt(r2 / (1.0 - r2)))
-    RotZYZ(e, d, - (e + s))
+    RotZYZ(e, d, -(e + s))
 end
 
 end # module
