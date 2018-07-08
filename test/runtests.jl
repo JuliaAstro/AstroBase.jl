@@ -7,7 +7,7 @@ using Base.Test
 @test AstroBase.falp03(1) == ERFA.falp03(1)
 @test AstroBase.faf03(1)  == ERFA.faf03(1)
 @test AstroBase.fad03(1)  == ERFA.fad03(1)
-#@test AstroBase.faom03(1) ≈ ERFA.faom03(1)
+@test AstroBase.faom03(1) ≈ mod2pi(ERFA.faom03(1))
 @test AstroBase.fame03(1) ≈ ERFA.fame03(1)
 @test AstroBase.fave03(1) ≈ ERFA.fave03(1)
 @test AstroBase.fae03(1)  ≈ ERFA.fae03(1)
