@@ -339,4 +339,71 @@ function xy06(jd1, jd2)
 
     sec2rad((xypr[1] + (xyls[1] + xypl[1]) / 1e6)), sec2rad(xypr[2] + (xyls[2] + xypl[2]) / 1e6)
 end
+
+function s06(jd1, jd2, x, y)
+
+    NS0 = length(s0)
+    NS1 = length(s1)
+    NS2 = length(s2)
+    NS3 = length(s3)
+    NS4 = length(s4)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    # Fundamental Arguments (from IERS Conventions 2003)
+
+    # Mean anomaly of the Moon.
+     fa[0] = eraFal03(t)
+
+    # Mean anomaly of the Sun.
+     fa[1] = eraFalp03(t)
+
+    # Mean longitude of the Moon minus that of the ascending node.
+     fa[2] = eraFaf03(t)
+
+    # Mean elongation of the Moon from the Sun.
+     fa[3] = eraFad03(t)
+
+    # Mean longitude of the ascending node of the Moon.
+     fa[4] = eraFaom03(t)
+
+    # Mean longitude of Venus.
+     fa[5] = eraFave03(t)
+
+    # Mean longitude of Earth.
+     fa[6] = eraFae03(t)
+
+    # General precession in longitude.
+     fa[7] = eraFapa03(t)
+
+    # Evaluate s.
+     w0 = sp[0]
+     w1 = sp[1]
+     w2 = sp[2]
+     w3 = sp[3]
+     w4 = sp[4]
+     w5 = sp[5]
+
+    for i in NS0:-1:1
+        w0 += s0[i][2] * sin(float(s0[i][1])' * fa) + s0[i][3] * cos(float(s0[i][1])' * fa)
+    end
+
+    for i in NS1:-1:1
+        w1 += s1[i][2] * sin(float(s1[i][1])' * fa) + s1[i][3] * cos(float(s1[i][1])' * fa)
+    end
+
+    for i in NS2:-1:1
+        w2 += s2[i][2] * sin(float(s2[i][1])' * fa) + s2[i][3] * cos(float(s2[i][1])' * fa)
+    end
+
+    for i in NS3:-1:1
+        w3 += s3[i][2] * sin(float(s3[i][1])' * fa) + s3[i][3] * cos(float(s3[i][1])' * fa)
+    end
+
+    for i in NS4:-1:1
+        w4 += s4[i][2] * sin(float(s0[i][1])' * fa) + s4[i][3] * cos(float(s0[i][1])' * fa)
+    end
+
+    (@evalpoly t w0 w1 w2 w3 w4 w5) * ERFA_DAS2R - x * y / 2.0
+
+end
 end # module
