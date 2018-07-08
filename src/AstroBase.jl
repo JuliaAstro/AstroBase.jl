@@ -1,7 +1,6 @@
 module AstroBase
 
-# package code goes here
-export xy06, fal03, falp03, faf03, fad03, faom03, fame03, fave03, fae03, fama03, faju03, fasa03,
+export earth_rotation_angle, xy06, fal03, falp03, faf03, fad03, faom03, fame03, fave03, fae03, fama03, faju03, fasa03,
        faur03, fane03, fapa03
 
 include("mfals.jl")
@@ -9,6 +8,32 @@ include("mfals.jl")
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const TURNAS = 1296000.0
+
+"""
+    earth_rotation_angle(jd1, jd2)
+
+Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
+
+# Example
+```jldoctest
+julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
+4.912208135094597
+```
+"""
+function earth_rotation_angle(jd1, jd2)
+    if jd1 < jd2
+        d1 = jd1
+        d2 = jd2
+    else
+        d1 = jd2
+        d2 = jd1
+    end
+    t = d1 + d2 - J2000
+    f = mod(d1, 1.0) + mod(d2, 1.0)
+    mod2pi(2pi * (f + 0.7790572732640 + 0.00273781191135448 * t))
+end
+
+end
 
 """
     sec2rad(sec::Real)
