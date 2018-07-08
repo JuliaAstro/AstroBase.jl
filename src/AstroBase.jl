@@ -1,7 +1,28 @@
 module AstroBase
 
-export earth_rotation_angle
+using Rotations
+
+export J2000, polar_motion, earth_rotation_angle
+
 const J2000 = 2451545.0
+
+"""
+    polar_motion(rx, ry, sp)
+
+Form the matrix of polar motion for coordinates of the pole (radians).
+
+# Example
+```jldoctest
+julia> polar_motion(20, 30, 50)
+3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
+  0.393785  -0.829946  -0.395124
+ -0.10707    0.385514  -0.916469
+  0.912945   0.403198   0.0629472
+```
+"""
+function polar_motion(rx, ry, sp)
+    RotZYX{Float64}(sp, -rx, -ry)
+end
 
 """
     earth_rotation_angle(jd1, jd2)
