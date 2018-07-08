@@ -1,13 +1,15 @@
 module AstroBase
 
-export earth_rotation_angle, anp
+export earth_rotation_angle
 const J2000 = 2451545.0
 
 """
     earth_rotation_angle(jd1, jd2)
-Converts UT1 as a 2-part Julian Date (jd1, jd2) to Earth rotation angle (radians),
-```
-jldoctest
+
+Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
+
+# Example
+```jldoctest
 julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
 4.912208135094597
 ```
