@@ -1,4 +1,4 @@
-export mfals, mfapl, nc, a, jaxy, jasc, japt, xyp
+export mfals, mfapl, nc, amp, jaxy, jasc, japt, xyp
 
 const mfals= [
 # 1-10
@@ -1740,7 +1740,7 @@ const nc = [
 4737,  4740,  4741,  4742,  4745,  4746,  4749,  4752,  4753
 ]
 
-const a = [
+const amp = [
 
 # 1-105
    -6844318.44,     9205236.26,1328.67,1538.18,      205833.11,
@@ -2422,9 +2422,6 @@ const a = [
 const jaxy= [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 const jasc= [ 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1]
 const japt= [ 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
-
-
-const MAXPT = 5
 
 const xyp = [
 [    -0.016617,

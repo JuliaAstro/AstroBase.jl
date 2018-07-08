@@ -28,7 +28,7 @@ fane03(t) =  mod2pi(5.311886287 + 3.8133035638t)
 fapa03(t) =  (0.024381750 + 0.00000538691t) * t
 
 function xy06(jd1, jd2)
-    NFLS, NFPL, NA, MAXPT= length(mfals), length(mfapl), length(a), 5
+    NFLS, NFPL, NA, MAXPT= length(mfals), length(mfapl), length(amp), 5
     pt, fa = Vector{Float64}(MAXPT + 1), Vector{Float64}(14)
     xypr, xypl, xyls, sc = zeros(2), zeros(2), zeros(2), zeros(2)
     # Powers of T.
@@ -81,16 +81,15 @@ function xy06(jd1, jd2)
            end
         end
 
-        sc[1] = sin(arg)
-        sc[2] = cos(arg)
+        sc[2], sc[1] = reim(cis(arg))
 
         ia = nc[ifreq + NFLS] + 1
-        for i in ialast: -1: ia + 1
+        for i in ialast + 1: -1: ia + 1
                j = i - ia
                jxy = jaxy[j]
                jsc = jasc[j]
                jpt = japt[j]
-               xypl[jxy] += a[i] * sc[jsc] * pt[jpt]
+               xypl[jxy] += amp[i-1] * sc[jsc] * pt[jpt]
         end
         ialast = ia - 1
     end
@@ -107,16 +106,15 @@ function xy06(jd1, jd2)
            end
         end
 
-        sc[1] = sin(arg)
-        sc[2] = cos(arg)
+        sc[2], sc[1] = reim(cis(arg))
 
         ia = nc[ifreq] + 1
-        for i in ialast: -1: ia + 1
+        for i in ialast + 1: -1: ia + 1
                j = i - ia
                jxy = jaxy[j]
                jsc = jasc[j]
                jpt = japt[j]
-               xyls[jxy] += a[i] * sc[jsc] * pt[jpt]
+               xyls[jxy] += amp[i-1] * sc[jsc] * pt[jpt]
         end
         ialast = ia - 1
     end
