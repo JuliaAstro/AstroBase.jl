@@ -1,6 +1,8 @@
 module AstroBase
 
-export earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node, mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus, mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
+export earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node,
+       mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
+       mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
        mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
 
 include("mfals.jl")
