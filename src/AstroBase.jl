@@ -80,7 +80,7 @@ function xy06(jd1, jd2)
 
         sc[2], sc[1] = reim(cis(arg))
 
-        ia = nc[ifreq + NFLS] + 1
+        ia = nc[ifreq + NFLS]
         for i in ialast + 1: -1: ia + 1
                j = i - ia
                jxy = jaxy[j]
@@ -105,7 +105,7 @@ function xy06(jd1, jd2)
 
         sc[2], sc[1] = reim(cis(arg))
 
-        ia = nc[ifreq] + 1
+        ia = nc[ifreq]
         for i in ialast + 1: -1: ia + 1
                j = i - ia
                jxy = jaxy[j]
