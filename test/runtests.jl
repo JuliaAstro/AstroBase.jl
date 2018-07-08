@@ -17,3 +17,4 @@ using Base.Test
 @test AstroBase.faur03(1) ≈ ERFA.faur03(1)
 @test AstroBase.fane03(1) ≈ ERFA.fane03(1)
 @test AstroBase.fapa03(1) == ERFA.fapa03(1)
+@test AstroBase.xy06(2.4578265e6, 0.30440190993249416) == ERFA.xy06(2.4578265e6, 0.30440190993249416)

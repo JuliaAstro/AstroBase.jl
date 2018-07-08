@@ -62,7 +62,7 @@ function xy06(jd1, jd2)
     # --------------------------------------
 
     for i in 1:2
-           xypr[i] = @evalpoly t xyp[1][1] xyp[1][2] xyp[1][3] xyp[1][4] xyp[1][5] xyp[1][6]
+           xypr[i] = @evalpoly t xyp[i][1] xyp[i][2] xyp[i][3] xyp[i][4] xyp[i][5] xyp[i][6]
     end
 
     # ----------------------------------
