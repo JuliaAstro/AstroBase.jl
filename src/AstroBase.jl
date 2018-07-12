@@ -1,13 +1,57 @@
 module AstroBase
 
-export tio_locator, sec2rad, rad2sec
+using Rotations
+export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 # package code goes here
+
+"""
+    polar_motion(rx, ry, sp)
+
+Form the matrix of polar motion for coordinates of the pole (radians).
+
+# Example
+```jldoctest
+julia> polar_motion(20, 30, 50)
+3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
+  0.393785  -0.829946  -0.395124
+ -0.10707    0.385514  -0.916469
+  0.912945   0.403198   0.0629472
+```
+"""
+function polar_motion(rx, ry, sp)
+    RotZYX{Float64}(sp, -rx, -ry)
+end
+
+"""
+    earth_rotation_angle(jd1, jd2)
+
+Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
+
+# Example
+```jldoctest
+julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
+4.912208135094597
+```
+"""
+function earth_rotation_angle(jd1, jd2)
+    if jd1 < jd2
+        d1 = jd1
+        d2 = jd2
+    else
+        d1 = jd2
+        d2 = jd1
+    end
+    t = d1 + d2 - J2000
+    f = mod(d1, 1.0) + mod(d2, 1.0)
+    mod2pi(2pi * (f + 0.7790572732640 + 0.00273781191135448 * t))
+end
+
 """
     sec2rad(sec::Real)
 
-Returns radians for given seconds.
+Convert an angle in arcseconds to radians.
 
 # Example
 
@@ -20,7 +64,7 @@ sec2rad(sec::Real) = deg2rad(sec / 3600)
 
 """
     rad2sec(rad::Real)
-Returns angle (radians) for given seconds.
+Convert an angle in radians to arcseconds.
 
 # Example
 
@@ -48,4 +92,4 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
-end # module
+end
