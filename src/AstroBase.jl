@@ -79,7 +79,7 @@ rad2sec(rad::Real) = rad2deg(rad) * 3600
 """
     tio_locator(jd1, jd2)
 
-Returns TIO locator s' position for a given 2-part Julian date (jd1, jd2).
+Returns TIO locator s' position for a given TT 2-part Julian date (jd1, jd2).
 
 # Example
 
