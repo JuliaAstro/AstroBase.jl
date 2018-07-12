@@ -6,7 +6,8 @@ export celestial_to_intermediate
 """
     celestial_to_intermediate(x, y, s)
 
-Returns intermediate-frame-of-date matrix given the CIP (X,Y and the CIO locator 's').
+Returns celestial to intermediate-frame-of-date transformation matrix given 
+the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
 julia> celestial_to_intermediate(0.2, 0.2, 0.1)
