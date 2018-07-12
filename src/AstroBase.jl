@@ -1,10 +1,11 @@
 module AstroBase
 
 using Rotations
+
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle
+
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
-# package code goes here
 
 """
     polar_motion(rx, ry, sp)
