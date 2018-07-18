@@ -260,7 +260,7 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
         Base.show(io::IO, ::$typ) = print(io, $body)
-        parent(::$typ) = pluto
+        parent(::$typ) = pluto_barycenter
         naifid(::$typ) = $id
         export $sym, $typ
     end
