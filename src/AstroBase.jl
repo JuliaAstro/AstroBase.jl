@@ -1,5 +1,11 @@
 module AstroBase
 
+using Reexport
+
+include(joinpath("bodies", "Bodies.jl"))
+
+@reexport using .Bodies
+
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
@@ -11,7 +17,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
