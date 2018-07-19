@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, numat
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,22 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    numat(epsa, dpsi, deps)
+
+Returns nutation matrix for a given epsa(mean obliquity), dpsi and deps nutation.
+
+# Example
+
+```jldoctest
+julia> numat(0.7,1.4,1.3)
+3×3 RotXZX{Float64}(0.7, -1.4, -2.0):
+  0.169967  -0.410092   0.896067
+ -0.753714   0.531687   0.386296
+ -0.634844  -0.741035  -0.218722
+```
+"""
+function numat(epsa, dpsi, deps)
+    RotXZX{Float64}(epsa, -dpsi, -(epsa + deps))
+end
 end
