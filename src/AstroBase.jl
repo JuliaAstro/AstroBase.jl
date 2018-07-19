@@ -1,15 +1,57 @@
 module AstroBase
 
-export earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node,
-       mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
-       mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
-       mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
+using Rotations
 
-include("mfals.jl")
+export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
+        celestial_to_intermediate, earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node,
+         mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
+         mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
+         mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const TURNAS = 1296000.0
+include("mfals.jl")
+
+"""
+    celestial_to_intermediate(x, y, s)
+
+Returns celestial to intermediate-frame-of-date transformation matrix given
+the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
+
+```jldoctest
+julia> celestial_to_intermediate(0.2, 0.2, 0.1)
+3×3 RotZYZ{Float64}(0.785398, 0.286757, -0.885398):
+  0.976728   0.0774803  0.2
+ -0.11811    0.972651   0.2
+ -0.179034  -0.218968   0.959166
+```
+"""
+function celestial_to_intermediate(x, y, s)
+    r2 = x^2 + y^2
+    e = r2 > 0.0 ? atan2(y,x) : 0.0
+    d = atan(sqrt(r2 / (1.0 - r2)))
+    RotZYZ(e, d, -(e + s))
+end
+
+"""
+    polar_motion(rx, ry, sp)
+
+Form the matrix of polar motion for coordinates of the pole (radians).
+
+# Example
+```jldoctest
+julia> polar_motion(20, 30, 50)
+3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
+  0.393785  -0.829946  -0.395124
+ -0.10707    0.385514  -0.916469
+  0.912945   0.403198   0.0629472
+```
+"""
+function polar_motion(rx, ry, sp)
+    RotZYX{Float64}(sp, -rx, -ry)
+end
+
 
 """
     earth_rotation_angle(jd1, jd2)
@@ -38,7 +80,7 @@ end
 """
     sec2rad(sec::Real)
 
-Returns radians for given seconds.
+Convert an angle in arcseconds to radians.
 
 # Example
 
@@ -47,7 +89,37 @@ julia> sec2rad(3600 * 30)
 0.5235987755982988
 ```
 """
-sec2rad(sec::Real) = deg2rad(sec/3600)
+sec2rad(sec::Real) = deg2rad(sec / 3600)
+
+"""
+    rad2sec(rad::Real)
+Convert an angle in radians to arcseconds.
+
+# Example
+
+```jldoctest
+julia> rad2sec(0.5235987755982988)
+107999.99999999999
+```
+"""
+rad2sec(rad::Real) = rad2deg(rad) * 3600
+
+"""
+    tio_locator(jd1, jd2)
+
+Returns TIO locator s' position for a given TT 2-part Julian date (jd1, jd2).
+
+# Example
+
+'''jldoctest
+julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
+-3.9189245827947945e-11
+'''
+"""
+function tio_locator(jd1, jd2)
+    t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
+    -47e-6 * t * sec2rad(1)
+end
 
 """
     mean_anomaly_of_moon(t::Real)
@@ -247,7 +319,7 @@ general_precession_in_longitude(t::Real) =  (0.024381750 + 0.00000538691t) * t
 """
     xy06(jd1, jd2)
 
-Returns X, Y coordinates of celestial intermediate pole for a given 2-part Julian date.
+Returns X, Y coordinates of celestial intermediate pole for a given 2-part Julian date in TT.
 
 # Example
 

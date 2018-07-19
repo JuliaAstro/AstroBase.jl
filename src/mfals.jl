@@ -1,5 +1,3 @@
-export mfals, mfapl, nc, amp, jaxy, jasc, japt, xyp
-
 const mfals= [
 # 1-10
 [  0,   0,   0,   0,   1 ],
