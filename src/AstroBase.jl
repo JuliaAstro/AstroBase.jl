@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, greenwich_mean_sidereal_time
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,20 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    greenwich_mean_sidereal_time()
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+4.954654477986217
+```
+"""
+function greenwich_mean_sidereal_time(ut1, ut2, tt1, tt2)
+    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
+    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
+end
 end
