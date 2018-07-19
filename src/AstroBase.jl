@@ -329,8 +329,8 @@ julia> xy06(2.4578265e6, 0.30440190993249416)
 ```
 """
 function xy06(jd1, jd2)
-    NFLS = length(mfals)
-    NFPL = length(mfapl)
+    NFLS = length(fundamental_argument_multipliers)
+    NFPL = length(fundamental_argument_multipliers_pl)
     NA = length(amp)
     MAXPT= 5
     pt = Vector{Float64}(MAXPT + 1)
@@ -361,14 +361,14 @@ function xy06(jd1, jd2)
     fa[14] = general_precession_in_longitude(t)
 
     for i in 1:2
-           xypr[i] = @evalpoly t xyp[i][1] xyp[i][2] xyp[i][3] xyp[i][4] xyp[i][5] xyp[i][6]
+           xypr[i] = @evalpoly t xy_polynomial_coefficients[i][1] xy_polynomial_coefficients[i][2] xy_polynomial_coefficients[i][3] xy_polynomial_coefficients[i][4] xy_polynomial_coefficients[i][5] xy_polynomial_coefficients[i][6]
     end
 
     ialast = NA
     for ifreq in NFPL:-1:1
         arg = 0.0
         for i in range(1,14)
-           m = mfapl[ifreq][i]
+           m = fundamental_argument_multipliers_pl[ifreq][i]
            if (m != 0)
                arg += float(m) * fa[i]
            end
@@ -376,7 +376,7 @@ function xy06(jd1, jd2)
 
         sc[2], sc[1] = reim(cis(arg))
 
-        ia = nc[ifreq + NFLS]
+        ia = pointers_to_amp[ifreq + NFLS]
         for i in (ialast + 1):-1:(ia + 1)
                j = i - ia
                jxy = jaxy[j]
@@ -390,7 +390,7 @@ function xy06(jd1, jd2)
     for ifreq in NFLS:-1:1
         arg = 0.0
         for i in 1:5
-           m = mfals[ifreq][i]
+           m = fundamental_argument_multipliers[ifreq][i]
            if (m != 0)
                arg += float(m) * fa[i]
            end
@@ -398,7 +398,7 @@ function xy06(jd1, jd2)
 
         sc[2], sc[1] = reim(cis(arg))
 
-        ia = nc[ifreq]
+        ia = pointers_to_amp[ifreq]
         for i in (ialast + 1):-1:(ia + 1)
                j = i - ia
                jxy = jaxy[j]

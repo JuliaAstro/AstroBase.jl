@@ -1,4 +1,5 @@
-const mfals= [
+#mfals
+const fundamental_argument_multipliers= [
 # 1-10
 [  0,   0,   0,   0,   1 ],
 [  0,   0,   2,  -2,   2 ],
@@ -784,8 +785,8 @@ const mfals= [
 [  1,   0,  -2,   0,  -3 ],
 [  0,   0,   4,  -4,   4 ]
 ]
-
-const mfapl = [
+#mfapl
+const fundamental_argument_multipliers_pl = [
 
 # 1-10
 [  0,  0,  1, -1,  1,  0,  0, -1,  0, -2,  5,  0,  0,  0 ],
@@ -1575,8 +1576,8 @@ const mfapl = [
 [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2 ],
 [  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0 ]
 ]
-
-const nc = [
+#nc
+const pointers_to_amp = [
 
 # 1-100
  1,    21,    37,    51,    65,    79,    91,   103,   115,   127,
@@ -2421,7 +2422,8 @@ const jaxy= [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
 const jasc= [ 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1]
 const japt= [ 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
 
-const xyp = [
+#xyp
+const xy_polynomial_coefficients = [
 [    -0.016617,
    2004.191898,
      -0.4297829,
