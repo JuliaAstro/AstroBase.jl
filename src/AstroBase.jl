@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, precession_rate_part_of_nutation
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,22 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    precession_rate_part_of_nutation(jd1, jd2)
+
+Returns precession corrections for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+
+```
+"""
+function precession_rate_part_of_nutation(jd1, jd2)
+    PRECESSION = -sec2rad(0.29965)
+    OBLIQUITY = -sec2rad(0.02524)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    PRECESSION * t, OBLIQUITY * t
+end
 end
