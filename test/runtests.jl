@@ -18,5 +18,6 @@ using Base.Test
     # Radians <-> arcseconds
     @test AstroBase.sec2rad(3600) == deg2rad(1)
     @test AstroBase.rad2sec(1) == rad2deg(1) * 3600
-    @test AstroBase.greenwich_mean_sidereal_time(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+    @test AstroBase.greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+    @test AstroBase.greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
 end
