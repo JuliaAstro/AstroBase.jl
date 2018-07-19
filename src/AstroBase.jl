@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -113,6 +113,10 @@ julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
     -47e-6 * t * sec2rad(1)
+end
+
+function nutation()
+
 end
 
 end
