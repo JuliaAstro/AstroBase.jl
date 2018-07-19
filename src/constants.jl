@@ -1,4 +1,4 @@
-x[] = [
+multiples_of_arguments_and_coefficients = [
 
 # 1-10
 [  0,  0,  0,  0,  1, -171996.0, -174.2,  92025.0,    8.9 ],

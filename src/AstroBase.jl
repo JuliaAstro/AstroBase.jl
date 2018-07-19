@@ -3,11 +3,11 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+       celestial_to_intermediate, nutation, anpm
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
-
+include("constants.jl")
 """
     celestial_to_intermediate(x, y, s)
 
@@ -115,8 +115,78 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
-function nutation()
+"""
+    normalize_pi_angle(a)
 
+Returns an angle(radians) in the range [-π, π] for a given angle(radians).
+
+# Example
+
+```jldoctest
+julia> normalize_pi_angle(21)
+2.1504440784612413
+```
+"""
+function normalize_pi_angle(a)
+    w = mod2pi(a)
+    if abs(w) >= pi w -= (a < 0.0? -abs(w): abs(w)) end
+    w
+end
+
+"""
+    nutation(jd1, jd2)
+
+Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
+
+# Example
+
+```jldoctest
+```
+"""
+function nutation(jd1, jd2)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    U2R = sec2rad(1) / 1e4
+    NT = length(multiples_of_arguments_and_coefficients)
+
+
+    mean_longitude_moon_minus_mean_longitude_moon_perigee = normalize_pi_angle(
+        sec2rad(@evalpoly t 485866.733 715922.633 31.310 0.064 )
+      + mod(1325.0 * t, 1.0) * 2pi)
+
+    mean_longitude_sun_minus_mean_longitude_sun_perigee = normalize_pi_angle(
+        sec2rad(@evalpoly t 1287099.804 1292581.224 -0.577 - 0.012)
+      + mod(99.0 * t, 1.0) * 2pi)
+
+    mean_longitude_moon_minus_mean_longitude_moon_node = normalize_pi_angle(
+        sec2rad(@evalpoly t 335778.877 295263.137 -13.257 0.011)
+      + mod(1342.0 * t, 1.0) * 2pi)
+
+    mean_elongation_moon_from_sun = normalize_pi_angle(
+        sec2rad(@evalpoly t 1072261.307 1105601.328 -6.891 0.019)
+      + mod(1236.0 * t, 1.0) * 2pi)
+
+    mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date = normalize_pi_angle(
+        sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
+      + mod(-5.0 * t, 1.0) * 2pi)
+
+    dp = 0.0
+    de = 0.0
+
+    for j in NT:-1:1
+        arg = multiples_of_arguments_and_coefficients[j][1]  * mean_longitude_moon_minus_mean_longitude_moon_perigee
+        + multiples_of_arguments_and_coefficients[j][2] * mean_longitude_sun_minus_mean_longitude_sun_perigee
+        + multiples_of_arguments_and_coefficients[j][3]  * mean_longitude_moon_minus_mean_longitude_moon_node
+        + multiples_of_arguments_and_coefficients[j][4]  * mean_elongation_moon_from_sun
+        + multiples_of_arguments_and_coefficients[j][5] * mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date
+
+        s = multiples_of_arguments_and_coefficients[j][6] + multiples_of_arguments_and_coefficients[j][7] * t
+        c = multiples_of_arguments_and_coefficients[j][8] + multiples_of_arguments_and_coefficients[j][9] * t
+        if s != 0.0 dp += s * sin(arg) end
+        if c != 0.0 de += c * cos(arg) end
+    end
+
+    dp * U2R, de * U2R
 end
 
 end
