@@ -56,4 +56,5 @@ end
         @test x1 ≈ x2
         @test y1 ≈ y2
     end
+    @test AstroBase.equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345) ≈ ERFA.eect00(2.4578265e6, 0.30434616919175345)
 end

@@ -6,13 +6,14 @@ export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
         celestial_to_intermediate, earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node,
          mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
          mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
-         mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
+         mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude, equation_of_equinoxes_complementary_terms,
+         equation_of_equinoxes_complementary_terms
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const TURNAS = 1296000.0
 include("mfals.jl")
-
+include("constants.jl")
 """
     celestial_to_intermediate(x, y, s)
 
@@ -410,5 +411,54 @@ function xy06(jd1, jd2)
     end
 
     sec2rad((xypr[1] + (xyls[1] + xypl[1]) / 1e6)), sec2rad(xypr[2] + (xyls[2] + xypl[2]) / 1e6)
+end
+
+"""
+    equation_of_equinoxes_complementary_terms(jd1, jd2)
+
+Returns complementary terms for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345)
+5.706799075288604e-9
+```
+"""
+function equation_of_equinoxes_complementary_terms(jd1, jd2)
+    NE0 = length(e0)
+    NE1 = length(e1)
+    fa = Vector{Float64}(14)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    fa[1] = mean_anomaly_of_moon(t)
+    fa[2] = mean_anomaly_of_sun(t)
+    fa[3] = mean_longitude_of_moon_minus_mean_longitude_of_ascending_node(t)
+    fa[4] = mean_elongation_of_moon_from_sun(t)
+    fa[5] = mean_longitude_ascending_node_moon(t)
+    fa[6] = mean_longitude_of_venus(t)
+    fa[7] = mean_longitude_of_earth(t)
+    fa[8] = general_precession_in_longitude(t)
+
+    s0 = 0.0
+    s1 = 0.0
+
+    for i in NE0:-1:1
+    a = 0.0
+        for j in 1:8
+            a += e0[i][1][j] * fa[j]
+        end
+    s0 += e0[i][2] * sin(a) + e0[i][3] * cos(a)
+    end
+
+    for i in NE1:-1:1
+        a = 0.0;
+        for j in 1:8
+            a += e1[i][1][j] * fa[j]
+        end
+        s1 += e1[i][2] * sin(a) + e1[i][3] * cos(a)
+    end
+    sec2rad(s0 + s1 * t)
 end
 end # module
