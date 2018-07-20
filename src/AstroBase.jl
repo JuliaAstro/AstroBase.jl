@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, fukushima_williams_angles
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,22 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    fukushima_williams_angles(gamb, phib, psi, eps)
+
+Returns rotation matrix for the given Fukushima-williams angles.
+
+# Example
+
+```jldoctest
+julia> fukushima_williams_angles(0.2,0.3,0.5,0.6)
+3×3 RotMatrix{Float64}:
+  0.951082   0.21718   0.219716
+ -0.274534   0.920305  0.278692
+ -0.14168   -0.325378  0.93491
+```
+"""
+function fukushima_williams_angles(gamb, phib, psi, eps)
+    RotZXZ(gamb, phib, -psi)* RotX(-eps)
+end
 end
