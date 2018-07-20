@@ -3,10 +3,11 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate, greenwich_mean_sidereal_time00, greenwich_mean_sidereal_time06
+  celestial_to_intermediate, greenwich_mean_sidereal_time82, greenwich_mean_sidereal_time00, greenwich_mean_sidereal_time06
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
+const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
 
 """
     celestial_to_intermediate(x, y, s)
@@ -113,6 +114,26 @@ julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
     -47e-6 * t * sec2rad(1)
+end
+
+function greenwich_mean_sidereal_time82(jd1, jd2)
+    A = 24110.54841  -  DAYS_PER_CENTURY / 2.0
+    B = 8640184.812866
+    C = 0.093104
+    D = -6.2e-6
+
+    if jd1 < jd2
+        d1 = jd1
+        d2 = jd2
+    else
+        d1 = jd2
+        d2 = jd1
+    end
+    t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
+
+    f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
+
+    mod2pi(sec2rad(((A + (B + (C + D * t) * t) * t) + f)))
 end
 
 """
