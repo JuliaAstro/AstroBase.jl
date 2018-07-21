@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-       celestial_to_intermediate, nutation, anpm
+       celestial_to_intermediate, nutation, normalize_pi_angle
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -118,7 +118,7 @@ end
 """
     normalize_pi_angle(a)
 
-Returns an angle(radians) in the range [-π, π] for a given angle(radians).
+Returns an angle(radians) in the range [-π, π) for a given angle(radians).
 
 # Example
 
@@ -128,7 +128,7 @@ julia> normalize_pi_angle(21)
 ```
 """
 function normalize_pi_angle(a)
-    w = mod2pi(a)
+    w = mod(a, 2pi)
     if abs(w) >= pi w -= (a < 0.0? -abs(w): abs(w)) end
     w
 end
