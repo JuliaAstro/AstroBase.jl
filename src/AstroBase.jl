@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, obliquity_of_ecliptic_06
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,20 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    obliquity_of_ecliptic_06(jd1, jd2)
+
+Returns obliquity of ecliptic (radians) for a given 2 part Julain date (TT).
+
+# Example
+
+```jldoctest
+julia> obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345)
+0.409053547482157
+```
+"""
+function obliquity_of_ecliptic_06(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    sec2rad(@evalpoly t 84381.406 -46.836769 -0.0001831 0.00200340 -0.000000576 -0.0000000434)
+end
 end
