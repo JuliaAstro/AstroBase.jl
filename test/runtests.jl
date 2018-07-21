@@ -20,4 +20,12 @@ using Base.Test
     @test AstroBase.rad2sec(1) == rad2deg(1) * 3600
 
     @test AstroBase.obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
+
+    let (w1, x1, y1, z1) = AstroBase.precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
+        (w2, x2, y2, z2) = ERFA.pfw06(2.4578265e6, 0.30434616919175345)
+        @test w1 ≈ w2
+        @test x1 ≈ x2
+        @test y1 ≈ y2
+        @test z1 ≈ z2
+    end
 end
