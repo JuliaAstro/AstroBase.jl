@@ -116,6 +116,9 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+unknown error
+"""
 function greenwich_mean_sidereal_time82(jd1, jd2)
     A = 24110.54841  -  DAYS_PER_CENTURY / 2.0
     B = 8640184.812866
@@ -133,7 +136,7 @@ function greenwich_mean_sidereal_time82(jd1, jd2)
 
     f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
 
-    mod2pi(sec2rad(((A + (B + (C + D * t) * t) * t) + f)))
+    mod2pi(sec2rad((@evalpoly t A B C D) + f))
 end
 
 """
