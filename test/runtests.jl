@@ -24,4 +24,11 @@ using Base.Test
         @test ap ≈ ep
         @test ao ≈ eo
     end
+
+    let (b1, p1, bp1) = AstroBase.bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+        (b2, p2, bp2) = ERFA.bp00(2.4578265e6, 0.30434616919175345)
+        @test b1 ≈ b2
+        @test p1 ≈ p2
+        @test bp1 ≈ bp2
+    end
 end

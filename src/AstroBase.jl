@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate, precession_rate_part_of_nutation
+  celestial_to_intermediate, precession_rate_part_of_nutation, bias_precession_matrix_00
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -132,5 +132,47 @@ function precession_rate_part_of_nutation(jd1, jd2)
 
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
     PRECESSION * t, OBLIQUITY * t
+end
+
+function bias_component_00()
+    DPBIAS = sec2rad(-0.041775)
+    DEBIAS = sec2rad(-0.0068192)
+    DRA0 = sec2rad(-0.0146)
+
+    DPBIAS, DEBIAS, DRA0
+end
+
+"""
+    bias_precession_matrix_00(jd1, jd2)
+
+Returns a tuple of array, rb (frame bias), rp (precession matrix), rbp (bias precession matrix)
+given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+(RotZYX(-7.07828e-8, -8.05622e-8, 3.30604e-8), [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.2343e-6; -0.00167106 -3.1924e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.26705e-6; -0.00167098 -3.15946e-6 0.999999])
+```
+"""
+function bias_precession_matrix_00(jd1, jd2)
+    EPS0 = sec2rad(84381.448)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    dpsibi, depsbi, dra0 = bias_component_00()
+
+    psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
+    oma77  = EPS0 + sec2rad(((0.05127 + (-0.007726) * t) * t) * t)
+    chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
+
+    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
+    psia = psia77 + dpsipr
+    oma  = oma77 + depspr
+
+    rbw = RotZYX(dra0, dpsibi*sin(EPS0), -depsbi)
+    rb = copy(rbw)
+    rp = RotXZX(EPS0, -psia, -oma) * RotZ(chia)
+
+    rb, rp, rp * rbw
 end
 end
