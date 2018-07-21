@@ -56,4 +56,9 @@ end
         @test x1 ≈ x2
         @test y1 ≈ y2
     end
+    let (x1, y1) = AstroBase.nutation_00b(2.4578265e6, 0.30440190993249416)
+        (x2, y2) = ERFA.nut00b(2.4578265e6, 0.30440190993249416)
+        @test x1 ≈ x2
+        @test y1 ≈ y2
+    end
 end
