@@ -32,7 +32,8 @@ export tio_locator,
     s06,
     nutation,
     s00,
-    nutation_00b
+    nutation_00b,
+    nut00a
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -52,6 +53,7 @@ include("S06.jl")
 include("EE00.jl")
 include("S00.jl")
 include("NUTATION80.jl")
+include("nut_const.jl")
 
 """
     celestial_to_intermediate(x, y, s)
@@ -856,7 +858,7 @@ function nutation(jd1, jd2)
 
     dp * U2R, de * U2R
 end
-  
+
 """
     equation_of_equinoxes_complementary_terms(jd1, jd2)
 
@@ -992,6 +994,92 @@ function s00(jd1, jd2, x, y)
         w4 += s4_arg[i][1] * s + s4_arg[i][2] * c
     end
     sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
+end
+
+"""
+    nutation_00a(jd1, jd2)
+
+Returns luni-solar and planetary nutations for a given 2 part Julian date(TT).
+
+# Example
+
+```jldoctest
+julia> nutation_00a(2.4578265e6, 0.30440190993249416)
+(-3.7589903391357206e-5, -3.6659049617818334e-5)
+```
+"""
+function nutation_00a(jd1, jd2)
+    U2R = sec2rad(1/1e7)
+    NLS = length(xls_nutation)
+    NPL = length(xpl_nutation)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    el = mean_anomaly_of_moon(t)
+    f  = mean_longitude_of_moon_minus_mean_longitude_of_ascending_node(t)
+    om = mean_longitude_ascending_node_moon(t)
+
+    apa  = general_precession_in_longitude(t)
+    alme = mean_longitude_of_mercury(t)
+    alve = mean_longitude_of_venus(t)
+    alea = mean_longitude_of_earth(t)
+    alma = mean_longitude_of_mars(t)
+    alju = mean_longitude_of_jupiter(t)
+    alsa = mean_longitude_of_saturn(t)
+    alur = mean_longitude_of_uranus(t)
+
+    elp = sec2rad(mod((@evalpoly t 1287104.79305 129596581.0481 -0.5532 0.000136 -0.00001149), TURNAS))
+    d   = sec2rad(mod((@evalpoly t 1072260.70369 1602961601.2090 -6.3706 0.006593 -0.00003169), TURNAS))
+
+    al   = mod(2.35555598 + 8328.6914269554 * t, 2pi)
+    af   = mod(1.627905234 + 8433.466158131 * t, 2pi)
+    ad   = mod(5.198466741 + 7771.3771468121 * t, 2pi)
+    aom  = mod(2.18243920 - 33.757045 * t, 2pi)
+    alne = mod(5.321159000 + 3.8127774000 * t, 2pi)
+
+    dp = 0.0
+    de = 0.0
+
+    for i in NLS:-1:1
+        arg = mod(xls_nutation[i][1]  * el +
+                    xls_nutation[i][2] * elp +
+                    xls_nutation[i][3]  * f +
+                    xls_nutation[i][4]  * d +
+                    xls_nutation[i][5] * om, 2pi)
+        sarg, carg = sin(arg), cos(arg)
+        dp += (xls_nutation[i][6] + xls_nutation[i][7] * t) * sarg + xls_nutation[i][8] * carg
+        de += (xls_nutation[i][9] + xls_nutation[i][10] * t) * carg + xls_nutation[i][11] * sarg
+    end
+
+    dpsils, depsls = dp * U2R, de * U2R
+
+    dp, de = 0.0, 0.0
+    for i in NPL:-1:1
+        arg = mod(xpl_nutation[i][1] * al   +
+             xpl_nutation[i][2] * af   +
+             xpl_nutation[i][3] * ad   +
+             xpl_nutation[i][4] * aom  +
+             xpl_nutation[i][5] * alme +
+             xpl_nutation[i][6] * alve +
+             xpl_nutation[i][7] * alea +
+             xpl_nutation[i][8] * alma +
+             xpl_nutation[i][9] * alju +
+             xpl_nutation[i][10] * alsa +
+             xpl_nutation[i][11] * alur +
+             xpl_nutation[i][12] * alne +
+             xpl_nutation[i][13] * apa, 2pi)
+        sarg, carg = sin(arg), cos(arg)
+
+        dp += xpl_nutation[i][14] * sarg + xpl_nutation[i][15] * carg
+        de += xpl_nutation[i][16] * sarg + xpl_nutation[i][17] * carg
+
+    end
+
+    dpsipl = dp * U2R
+    depspl = de * U2R
+
+    dpsils + dpsipl, depsls + depspl
+
 end
 
 end # module
