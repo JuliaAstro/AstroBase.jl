@@ -7,7 +7,7 @@ export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
          mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
          mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
          mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude, equation_of_equinoxes_complementary_terms,
-         equation_of_equinoxes_complementary_terms
+         equation_of_equinoxes_complementary_terms, equation_of_equinoxes_00
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -460,5 +460,21 @@ function equation_of_equinoxes_complementary_terms(jd1, jd2)
         s1 += e1[i][2] * sin(a) + e1[i][3] * cos(a)
     end
     sec2rad(s0 + s1 * t)
+end
+
+"""
+    equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
+
+Return equation of equinoxes for given 2 part Julian date (TT), mean obliquity and nutation in longitude.
+
+# Example
+
+```jldoctest
+julia> equation_of_equinoxes_00(2.4578265e6, 0.30440190993249416, 1.5, 1.7)
+0.12025324854189404
+```
+"""
+function equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
+    dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
 end
 end # module
