@@ -123,7 +123,7 @@ Returns nutation matrix for a given epsa(mean obliquity), dpsi and deps nutation
 # Example
 
 ```jldoctest
-julia> numat(0.7,1.4,1.3)
+julia> numat(0.7, 1.4, 1.3)
 3×3 RotXZX{Float64}(0.7, -1.4, -2.0):
   0.169967  -0.410092   0.896067
  -0.753714   0.531687   0.386296
