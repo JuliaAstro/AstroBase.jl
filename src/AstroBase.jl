@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, celestial_to_terrestrial_matrix
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,9 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+function celestial_to_terrestrial_matrix(rc2i, era, rpom)
+    r_z = RotZ(era)
+    r = copy(rc2i) * r_z
+    rpom * r
+end
 end
