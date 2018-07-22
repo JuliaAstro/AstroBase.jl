@@ -611,5 +611,5 @@ function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
 end
-  
+
 end # module
