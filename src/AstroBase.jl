@@ -3,7 +3,7 @@ module AstroBase
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
-  celestial_to_intermediate
+  celestial_to_intermediate, equations_of_origins
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -11,7 +11,7 @@ const DAYS_PER_CENTURY = 36525.0
 """
     celestial_to_intermediate(x, y, s)
 
-Returns celestial to intermediate-frame-of-date transformation matrix given 
+Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
 ```jldoctest
@@ -115,4 +115,25 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+"""
+    equations_of_origins(rnpb, s)
+
+Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
+
+# Example
+
+```jldoctest
+
+```
+"""
+function equations_of_origins(rnpb, s)
+    x = rnpb[3, 1]
+    ax = x ÷ (1.0 + rnpb[3, 3])
+    xs = 1.0 - ax * x
+    ys = -ax * rnpb[3, 2]
+    zs = -x
+    p = rnpb[1, 1] * xs + rnpb[1, 2] * ys + rnpb[1, 3] * zs
+    q = rnpb[2, 1] * xs + rnpb[2, 2] * ys + rnpb[2, 3] * zs
+    ((p != 0) || (q != 0)) ? s - atan2(q, p) : s
+end
 end
