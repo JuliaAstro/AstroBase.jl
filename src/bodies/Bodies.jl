@@ -5,6 +5,7 @@ import Base: parent
 export CelestialBody, SolarSystemBarycenter, ssb, Sun, sun, parent, naifid
 
 abstract type CelestialBody end
+Base.show(io::IO, x::CelestialBody) = print(io, string(typeof(x)))
 
 abstract type Barycenter <: CelestialBody end
 
@@ -18,7 +19,6 @@ naifid(::SolarSystemBarycenter) = 0
 
 struct Sun <: CelestialBody end
 const sun = Sun()
-Base.show(io::IO, ::Sun) = print(io, "Sun")
 parent(::Sun) = ssb
 naifid(::Sun) = 10
 

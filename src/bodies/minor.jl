@@ -23,7 +23,6 @@ for body in MINOR_BODY_NAMES
     @eval begin
         struct $str_sym <: MinorBody end
         const $con_sym = $str_sym()
-        Base.show(io::IO, ::$str_sym) = print(io, $body)
         parent(::$str_sym) = ssb
         export $con_sym
     end

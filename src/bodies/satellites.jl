@@ -6,13 +6,11 @@ export deimos, Deimos, phobos, Phobos, luna, Luna, moon, charon, Charon
 
 struct Phobos <: NaturalSatellite end
 const phobos = Phobos()
-Base.show(io::IO, ::Phobos) = print(io, "Phobos")
 parent(::Phobos) = mars_barycenter
 naifid(::Phobos) = 401
 
 struct Deimos <: NaturalSatellite end
 const deimos = Deimos()
-Base.show(io::IO, ::Deimos) = print(io, "Deimos")
 parent(::Deimos) = mars_barycenter
 naifid(::Deimos) = 402
 
@@ -21,7 +19,6 @@ naifid(::Deimos) = 402
 struct Luna <: NaturalSatellite end
 const luna = Luna()
 const moon = luna
-Base.show(io::IO, ::Luna) = print(io, "Luna")
 parent(::Luna) = earth_barycenter
 naifid(::Luna) = 301
 
@@ -88,7 +85,6 @@ for (i, body) in enumerate(JUPITER_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = jupiter
         export $sym, $typ
     end
@@ -159,7 +155,6 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = saturn
         naifid(::$typ) = $id
         export $sym, $typ
@@ -203,7 +198,6 @@ for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = uranus
         naifid(::$typ) = $id
         export $sym, $typ
@@ -235,7 +229,6 @@ for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = neptune
         naifid(::$typ) = $id
         export $sym, $typ
@@ -259,7 +252,6 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = pluto_barycenter
         naifid(::$typ) = $id
         export $sym, $typ

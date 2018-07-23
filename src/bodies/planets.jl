@@ -27,7 +27,6 @@ for (i, body) in enumerate(PLANET_NAMES)
 
         struct $typ <: Planet end
         const $sym = $typ()
-        Base.show(io::IO, ::$typ) = print(io, $body)
         parent(::$typ) = $sym_bc
         naifid(::$typ) = $id
         export $sym, $typ
