@@ -1,6 +1,6 @@
 using AstroBase
 using ERFA
-using Base.Test
+using Test
 
 @testset "AstroBase" begin
     @testset "IERS" begin

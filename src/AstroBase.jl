@@ -40,7 +40,7 @@ julia> celestial_to_intermediate(0.2, 0.2, 0.1)
 """
 function celestial_to_intermediate(x, y, s)
     r2 = x^2 + y^2
-    e = r2 > 0.0 ? atan2(y,x) : 0.0
+    e = r2 > 0.0 ? atan(y, x) : 0.0
     d = atan(sqrt(r2 / (1.0 - r2)))
     RotZYZ(e, d, -(e + s))
 end
@@ -357,87 +357,73 @@ julia> xy06(2.4578265e6, 0.30440190993249416)
 ```
 """
 function xy06(jd1, jd2)
-    NFLS = length(fundamental_argument_multipliers)
-    NFPL = length(fundamental_argument_multipliers_pl)
-    NA = length(amp)
-    MAXPT= 5
-    pt = Vector{Float64}(MAXPT + 1)
-    fa = Vector{Float64}(14)
-    xypr, xypl, xyls, sc = zeros(2), zeros(2), zeros(2), zeros(2)
-
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
     # Powers of T.
-    w = 1.0
-    for i in 1:MAXPT+1
-        pt[i] = w
-        w *= t
-    end
+    pt = [t^i for i = 0:6]
 
-    fa[1]  = mean_anomaly(luna, t)
-    fa[2]  = mean_anomaly(sun, t)
-    fa[3]  = mean_longitude_minus_lan(luna, t)
-    fa[4]  = mean_elongation(luna, t)
-    fa[5]  = mean_longitude_ascending_node(luna, t)
-    fa[6]  = mean_longitude(mercury, t)
-    fa[7]  = mean_longitude(venus, t)
-    fa[8]  = mean_longitude(earth, t)
-    fa[9]  = mean_longitude(mars, t)
-    fa[10] = mean_longitude(jupiter, t)
-    fa[11] = mean_longitude(saturn, t)
-    fa[12] = mean_longitude(uranus, t)
-    fa[13] = mean_longitude(neptune, t)
-    fa[14] = general_precession_in_longitude(t)
+    fa = (mean_anomaly(luna, t),
+          mean_anomaly(sun, t),
+          mean_longitude_minus_lan(luna, t),
+          mean_elongation(luna, t),
+          mean_longitude_ascending_node(luna, t),
+          mean_longitude(mercury, t),
+          mean_longitude(venus, t),
+          mean_longitude(earth, t),
+          mean_longitude(mars, t),
+          mean_longitude(jupiter, t),
+          mean_longitude(saturn, t),
+          mean_longitude(uranus, t),
+          mean_longitude(neptune, t),
+          general_precession_in_longitude(t))
 
-    for i in 1:2
-       xypr[i] = @evalpoly t xy_polynomial_coefficients[i][1] xy_polynomial_coefficients[i][2] xy_polynomial_coefficients[i][3] xy_polynomial_coefficients[i][4] xy_polynomial_coefficients[i][5] xy_polynomial_coefficients[i][6]
-    end
+    xpr = @evalpoly t x_coeff[1] x_coeff[2] x_coeff[3] x_coeff[4] x_coeff[5] x_coeff[6]
+    ypr = @evalpoly t y_coeff[1] y_coeff[2] y_coeff[3] y_coeff[4] y_coeff[5] y_coeff[6]
 
-    ialast = NA
-    for ifreq in NFPL:-1:1
+    xypl = zeros(2)
+    xyls = zeros(2)
+
+    ialast = length(amp)
+    for ifreq in reverse(eachindex(planetary))
         arg = 0.0
-        for i in range(1,14)
-           m = fundamental_argument_multipliers_pl[ifreq][i]
-           if (m != 0)
-               arg += float(m) * fa[i]
-           end
+        for i in eachindex(fa)
+            m = planetary[ifreq][i]
+            arg += float(m) * fa[i]
         end
 
-        sc[2], sc[1] = reim(cis(arg))
+        sc = sincos(arg)
 
-        ia = pointers_to_amp[ifreq + NFLS]
-        for i in (ialast + 1):-1:(ia + 1)
-               j = i - ia
-               jxy = jaxy[j]
-               jsc = jasc[j]
-               jpt = japt[j]
-               xypl[jxy] += amp[i-1] * sc[jsc] * pt[jpt]
+        ia = pointers_to_amp[ifreq + length(luni_solar)]
+        for i in ialast:-1:ia
+            j = i - ia + 1
+            jxy = jaxy[j]
+            jsc = jasc[j]
+            jpt = japt[j]
+            xypl[jxy] += amp[i] * sc[jsc] * pt[jpt]
         end
         ialast = ia - 1
     end
 
-    for ifreq in NFLS:-1:1
+    for ifreq in reverse(eachindex(luni_solar))
         arg = 0.0
         for i in 1:5
-           m = fundamental_argument_multipliers[ifreq][i]
-           if (m != 0)
-               arg += float(m) * fa[i]
-           end
+           m = luni_solar[ifreq][i]
+           arg += float(m) * fa[i]
         end
 
-        sc[2], sc[1] = reim(cis(arg))
+        sc = sincos(arg)
 
         ia = pointers_to_amp[ifreq]
-        for i in (ialast + 1):-1:(ia + 1)
-               j = i - ia
-               jxy = jaxy[j]
-               jsc = jasc[j]
-               jpt = japt[j]
-               xyls[jxy] += amp[i-1] * sc[jsc] * pt[jpt]
+        for i in ialast:-1:ia
+            j = i - ia + 1
+            jxy = jaxy[j]
+            jsc = jasc[j]
+            jpt = japt[j]
+            xyls[jxy] += amp[i] * sc[jsc] * pt[jpt]
         end
         ialast = ia - 1
     end
 
-    sec2rad((xypr[1] + (xyls[1] + xypl[1]) / 1e6)), sec2rad(xypr[2] + (xyls[2] + xypl[2]) / 1e6)
+    sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
 end
 
 end # module
