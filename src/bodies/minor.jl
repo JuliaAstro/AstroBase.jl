@@ -36,7 +36,6 @@ naifid(::PlutoBarycenter) = 901
 
 struct Pluto <: MinorBody end
 const pluto = Pluto()
-Base.show(io::IO, ::Pluto) = print(io, "Pluto")
 parent(::Pluto) = pluto_barycenter
 naifid(::Pluto) = 999
 
