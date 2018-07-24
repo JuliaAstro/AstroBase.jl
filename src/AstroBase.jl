@@ -1,5 +1,11 @@
 module AstroBase
 
+using Reexport
+
+include(joinpath("bodies", "Bodies.jl"))
+
+@reexport using .Bodies
+
 using Rotations
 
 export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
