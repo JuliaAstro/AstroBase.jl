@@ -28,10 +28,10 @@ const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) *(1/3600))
-const EPS0 = sec2rad(84381.448)
-const DPBIAS = sec2rad(-0.041775)
-const DEBIAS = sec2rad(-0.0068192)
-const DRA0 = sec2rad(-0.0146)
+const EPS0 = deg2rad(84381.448 * (1/3600))
+const DPBIAS = deg2rad(-0.041775 * (1/3600))
+const DEBIAS = deg2rad(-0.0068192 *(1/3600))
+const DRA0 = deg2rad(-0.0146 *(1/3600))
 
 include("mfals.jl")
 
