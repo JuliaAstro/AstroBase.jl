@@ -592,6 +592,15 @@ julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.00079660
 function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
+function equations_of_origins(rnpb, s)
+    x = rnpb[3, 1]
+    ax = x / (1.0 + rnpb[3, 3])
+    xs = 1.0 - (ax * x)
+    ys = -ax * rnpb[3, 2]
+    zs = -x
+    p = (rnpb[1, 1] * xs) + (rnpb[1, 2] * ys) + (rnpb[1, 3] * zs)
+    q = (rnpb[2, 1] * xs) + (rnpb[2, 2] * ys) + (rnpb[2, 3] * zs)
+    ((p != 0) || (q != 0)) ? s - atan2(q, p) : s
 end
 
 """
