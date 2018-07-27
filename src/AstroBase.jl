@@ -28,6 +28,10 @@ const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) *(1/3600))
+const EPS0 = sec2rad(84381.448)
+const DPBIAS = sec2rad(-0.041775)
+const DEBIAS = sec2rad(-0.0068192)
+const DRA0 = sec2rad(-0.0146)
 
 include("mfals.jl")
 
@@ -498,14 +502,6 @@ function precession_rate_part_of_nutation(jd1, jd2)
     PRECESSION * t, OBLIQUITY * t
 end
 
-function bias_component_00()
-    DPBIAS = sec2rad(-0.041775)
-    DEBIAS = sec2rad(-0.0068192)
-    DRA0 = sec2rad(-0.0146)
-
-    DPBIAS, DEBIAS, DRA0
-end
-
 """
     bias_precession_matrix_00(jd1, jd2)
 
@@ -520,10 +516,9 @@ julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function bias_precession_matrix_00(jd1, jd2)
-    EPS0 = sec2rad(84381.448)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
-    dpsibi, depsbi, dra0 = bias_component_00()
+    dpsibi, depsbi, dra0 = DPBIAS, DEBIAS, DRA0
 
     psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
     oma77  = EPS0 + sec2rad(((0.05127 + (-0.007726) * t) * t) * t)
