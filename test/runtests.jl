@@ -38,6 +38,8 @@ using Base.Test
             @test x1 ≈ x2
             @test y1 ≈ y2
         end
+        a, b = rand(3, 3), rand(3, 3)
+        @test AstroBase.celestial_to_terrestrial_matrix(a, 0.2, b) ≈ ERFA.c2tcio(a, 0.2, b)
     end
 
     include("bodies.jl")

@@ -12,7 +12,7 @@ export tio_locator, sec2rad, rad2sec, J2000, polar_motion, earth_rotation_angle,
         celestial_to_intermediate, earth_rotation_angle, xy06, mean_anomaly_of_moon, mean_anomaly_of_sun, mean_longitude_of_moon_minus_mean_longitude_of_ascending_node,
          mean_elongation_of_moon_from_sun, mean_longitude_ascending_node_moon, mean_longitude_of_mercury, mean_longitude_of_venus,
          mean_longitude_of_earth, mean_longitude_of_mars, mean_longitude_of_jupiter, mean_longitude_of_saturn,
-         mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude
+         mean_longitude_of_uranus, mean_longitude_of_neptune, general_precession_in_longitude,
          celestial_to_intermediate, celestial_to_terrestrial_matrix
 
 const J2000 = 2451545.0
@@ -419,9 +419,18 @@ function xy06(jd1, jd2)
     sec2rad((xypr[1] + (xyls[1] + xypl[1]) / 1e6)), sec2rad(xypr[2] + (xyls[2] + xypl[2]) / 1e6)
 end
 
+"""
+    celestial_to_terrestrial_matrix(rc2i, era, rpom)
+
+Returns celestial to terrestrial matrix for celestial to intermediate matrix, earth rotation angle, polar motion matrix.
+
+# Example
+
+```jldoctest
+    add later
+```
+"""
 function celestial_to_terrestrial_matrix(rc2i, era, rpom)
-    r_z = RotZ(era)
-    r = copy(rc2i) * r_z
-    rpom * r
+    copy(rc2i) * RotZ(era) * rpom
 end
 end # module
