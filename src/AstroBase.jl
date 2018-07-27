@@ -16,7 +16,8 @@ export tio_locator,
     earth_rotation_angle,
     celestial_to_intermediate,
     earth_rotation_angle,
-    xy06
+    xy06,
+    celestial_to_terrestrial_matrix
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -426,4 +427,18 @@ function xy06(jd1, jd2)
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
 end
 
+"""
+    celestial_to_terrestrial_matrix(rc2i, era, rpom)
+
+Returns celestial to terrestrial matrix for celestial to intermediate matrix, earth rotation angle, polar motion matrix.
+
+# Example
+
+```jldoctest
+    add later
+```
+"""
+function celestial_to_terrestrial_matrix(rc2i, era, rpom)
+    copy(rc2i) * RotZ(era) * rpom
+end
 end # module
