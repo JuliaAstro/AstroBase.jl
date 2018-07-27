@@ -18,7 +18,8 @@ export tio_locator,
     earth_rotation_angle,
     xy06,
     obliquity_of_ecliptic_06,
-    mean_obliquity_of_ecliptic
+    mean_obliquity_of_ecliptic,
+    precession_fukushima_williams06
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -169,6 +170,27 @@ function obliquity_of_ecliptic_06(jd1, jd2)
 end
 
 """
+    precession_fukushima_williams06(jd1, jd2)
+
+Returns fukushima angles(radians) for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
+(8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
+```
+"""
+function precession_fukushima_williams06(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    sec2rad(@evalpoly t -0.052928 10.556378 0.4932044 -0.00031238 -0.000002788 0.0000000260),
+    sec2rad(@evalpoly t 84381.412819 -46.811016 0.0511268 0.00053289 -0.000000440 -0.0000000176),
+    sec2rad(@evalpoly t -0.041775 5038.481484 1.5584175 -0.00018522 -0.000026452 -0.0000000148),
+    obliquity_of_ecliptic_06(jd1, jd2)
+end
+
+"""
     mean_anomaly(::Luna, t)
 
 Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
@@ -176,6 +198,7 @@ Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
 # Example
 
 ```jldoctest
+
 julia> mean_anomaly(moon, 23.0)
 0.5891752616281019
 ```
