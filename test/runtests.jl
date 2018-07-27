@@ -5,6 +5,7 @@ using Test
 @testset "AstroBase" begin
     @testset "IERS" begin
         @test AstroBase.obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
+        @test AstroBase.mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl80(2.4578265e6, 0.30434616919175345)
         @test AstroBase.earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
 
         # Celestial to intermediate frame of date
