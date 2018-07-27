@@ -127,13 +127,13 @@ Returns the equation of origins(radians) for given nutation-bias-precession matr
 ```
 """
 function equations_of_origins(rnpb, s)
-    x = rnpb[3, 1]
+    x = rnpb[1, 3]
     ax = x / (1.0 + rnpb[3, 3])
     xs = 1.0 - (ax * x)
-    ys = -ax * rnpb[3, 2]
+    ys = -ax * rnpb[2, 3]
     zs = -x
-    p = (rnpb[1, 1] * xs) + (rnpb[1, 2] * ys) + (rnpb[1, 3] * zs)
-    q = (rnpb[2, 1] * xs) + (rnpb[2, 2] * ys) + (rnpb[2, 3] * zs)
+    p = (rnpb[1, 1] * xs) + (rnpb[2, 1] * ys) + (rnpb[3, 1] * zs)
+    q = (rnpb[1, 2] * xs) + (rnpb[2, 2] * ys) + (rnpb[3, 2] * zs)
     ((p != 0) || (q != 0)) ? s - atan2(q, p) : s
 end
 end
