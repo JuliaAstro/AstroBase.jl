@@ -117,10 +117,20 @@ function tio_locator(jd1, jd2)
 end
 
 """
-unknown error
+    greenwich_mean_sidereal_time82(jd1, jd2)
+
+Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
+(consistent with IAU 1982 model)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time00(2.4578265e6, 0.30434616919175345)
+4.916054244834956
+```
 """
 function greenwich_mean_sidereal_time82(jd1, jd2)
-    A = 24110.54841  -  DAYS_PER_CENTURY / 2.0
+    A = 24110.54841  -  SECONDS_PER_DAY / 2.0
     B = 8640184.812866
     C = 0.093104
     D = -6.2e-6
@@ -133,10 +143,8 @@ function greenwich_mean_sidereal_time82(jd1, jd2)
         d2 = jd1
     end
     t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
-
     f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
-
-    mod2pi(sec2rad((@evalpoly t A B C D) + f))
+    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A+f B C D))
 end
 
 """
