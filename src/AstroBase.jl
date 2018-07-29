@@ -197,7 +197,7 @@ end
 
 Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
 
-#Example
+# Example
 
 ```jldoctest
 julia> mean_anomaly(moon, 23.0)
