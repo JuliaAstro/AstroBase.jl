@@ -7,7 +7,7 @@ using Test
         @test AstroBase.obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
         @test AstroBase.mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl80(2.4578265e6, 0.30434616919175345)
         @test AstroBase.earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
-      
+
         let (w1, x1, y1, z1) = AstroBase.precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
             (w2, x2, y2, z2) = ERFA.pfw06(2.4578265e6, 0.30434616919175345)
             @test w1 ≈ w2
@@ -48,6 +48,10 @@ using Test
             @test x1 ≈ x2
             @test y1 ≈ y2
         end
+        @test AstroBase.greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+        @test AstroBase.greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+        @test AstroBase.greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345) ≈ ERFA.gmst82(2.4578265e6, 0.30434616919175345)
+        @test AstroBase.greenwich_mean_sidereal_time82(0.30434616919175345, 2.4578265e6) ≈ ERFA.gmst82(0.30434616919175345, 2.4578265e6)
     end
 
     include("bodies.jl")
