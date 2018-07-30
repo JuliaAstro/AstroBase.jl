@@ -21,12 +21,16 @@ export tio_locator,
     mean_obliquity_of_ecliptic,
     precession_fukushima_williams06,
     precession_rate_part_of_nutation
+    greenwich_mean_sidereal_time82,
+    greenwich_mean_sidereal_time00,
+    greenwich_mean_sidereal_time06
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
+const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
 
 include("mfals.jl")
 
@@ -138,6 +142,7 @@ function tio_locator(jd1, jd2)
     -47e-6 * t * sec2rad(1)
 end
 
+
 """
     mean_obliquity_of_ecliptic(jd1, jd2)
 
@@ -176,9 +181,6 @@ end
 
 Returns fukushima angles(radians) for a given 2 part Julian date (TT).
 
-# Example
-
-```jldoctest
 julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
 (8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
 ```
@@ -200,7 +202,6 @@ Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
 # Example
 
 ```jldoctest
-
 julia> mean_anomaly(moon, 23.0)
 0.5891752616281019
 ```
@@ -491,15 +492,77 @@ end
     precession_rate_part_of_nutation(jd1, jd2)
 
 Returns precession corrections for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-
-```
 """
 function precession_rate_part_of_nutation(jd1, jd2)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
     PRECESSION * t, OBLIQUITY * t
 end
+
+"""
+    greenwich_mean_sidereal_time82(jd1, jd2)
+
+Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
+(consistent with IAU 1982 model)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time00(2.4578265e6, 0.30434616919175345)
+4.916054244834956
+```
+"""
+function greenwich_mean_sidereal_time82(jd1, jd2)
+    A = 24110.54841  -  SECONDS_PER_DAY / 2.0
+    B = 8640184.812866
+    C = 0.093104
+    D = -6.2e-6
+
+    if jd1 < jd2
+        d1 = jd1
+        d2 = jd2
+    else
+        d1 = jd2
+        d2 = jd1
+    end
+    t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
+    f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
+    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A+f B C D))
+end
+
+"""
+    greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+(consistent with IAU 2000 precession)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+4.9596733720586075
+```
+"""
+function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
+    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
+    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
+end
+
+"""
+    greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+(consistent with IAU 2006 precession)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+4.959673370568533
+```
+"""
+function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
+    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
+    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
+end
+  
 end # module
