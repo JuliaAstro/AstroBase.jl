@@ -20,7 +20,7 @@ export tio_locator,
     obliquity_of_ecliptic_06,
     mean_obliquity_of_ecliptic,
     precession_fukushima_williams06,
-    precession_rate_part_of_nutation
+    precession_rate_part_of_nutation,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06
