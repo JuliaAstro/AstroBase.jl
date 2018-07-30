@@ -20,6 +20,7 @@ export tio_locator,
     obliquity_of_ecliptic_06,
     mean_obliquity_of_ecliptic,
     precession_fukushima_williams06,
+    precession_rate_part_of_nutation,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06
@@ -27,6 +28,8 @@ export tio_locator,
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
+const PRECESSION = -deg2rad((0.29965) * (1/3600))
+const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
 
 include("mfals.jl")
@@ -147,7 +150,6 @@ Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT)
 
 # Example
 
-```jldoctest
 julia> mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345)
 0.40905376936136706
 ```
@@ -487,6 +489,23 @@ function xy06(jd1, jd2)
 end
 
 """
+    precession_rate_part_of_nutation(jd1, jd2)
+
+Returns precession corrections for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> precession_rate_part_of_nutation(2400000.5, 53736)
+-0.8716465172668347629e-7, -0.7342018386722813087e-8
+```
+"""
+function precession_rate_part_of_nutation(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    PRECESSION * t, OBLIQUITY * t
+end
+
+"""
     greenwich_mean_sidereal_time82(jd1, jd2)
 
 Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
@@ -552,4 +571,5 @@ function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
 end
+  
 end # module
