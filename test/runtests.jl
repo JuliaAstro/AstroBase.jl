@@ -48,7 +48,7 @@ using Test
             @test x1 ≈ x2
             @test y1 ≈ y2
         end
-
+        @test AstroBase.fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
         @test AstroBase.numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
 
         let (ap, ao) = AstroBase.precession_rate_part_of_nutation(2.4578265e6, 0.30434616919175345)

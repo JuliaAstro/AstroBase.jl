@@ -20,6 +20,7 @@ export tio_locator,
     obliquity_of_ecliptic_06,
     mean_obliquity_of_ecliptic,
     precession_fukushima_williams06,
+    fukushima_williams_matrix,
     precession_rate_part_of_nutation,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
@@ -487,6 +488,25 @@ function xy06(jd1, jd2)
     end
 
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
+end
+
+"""
+    fukushima_williams_matrix(gamb, phib, psi, eps)
+
+Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
+
+# Example
+
+```jldoctest
+julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
+3×3 RotMatrix{Float64}:
+  0.951082   0.21718   0.219716
+ -0.274534   0.920305  0.278692
+ -0.14168   -0.325378  0.93491
+```
+"""
+function fukushima_williams_matrix(gamb, phib, psi, eps)
+    RotZXZ(gamb, phib, -psi)* RotX(-eps)
 end
 
 """
