@@ -49,6 +49,8 @@ using Test
             @test y1 ≈ y2
         end
 
+        @test AstroBase.numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
+
         let (ap, ao) = AstroBase.precession_rate_part_of_nutation(2.4578265e6, 0.30434616919175345)
             (ep, eo) = ERFA.pr00(2.4578265e6, 0.30434616919175345)
             @test ap ≈ ep

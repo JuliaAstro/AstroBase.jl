@@ -23,7 +23,8 @@ export tio_locator,
     precession_rate_part_of_nutation,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
-    greenwich_mean_sidereal_time06
+    greenwich_mean_sidereal_time06,
+    numat
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -486,6 +487,25 @@ function xy06(jd1, jd2)
     end
 
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
+end
+
+"""
+    numat(epsa, dpsi, deps)
+
+Returns nutation matrix for a given epsa(mean obliquity), dpsi and deps nutation.
+
+# Example
+
+```jldoctest
+julia> numat(0.7, 1.4, 1.3)
+3×3 RotXZX{Float64}(0.7, -1.4, -2.0):
+  0.169967  -0.410092   0.896067
+ -0.753714   0.531687   0.386296
+ -0.634844  -0.741035  -0.218722
+```
+"""
+function numat(epsa, dpsi, deps)
+    RotXZX{Float64}(epsa, -dpsi, -(epsa + deps))
 end
 
 """
