@@ -48,6 +48,30 @@ using Test
             @test x1 ≈ x2
             @test y1 ≈ y2
         end
+        @test AstroBase.fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
+        @test AstroBase.numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
+
+        let (ap, ao) = AstroBase.precession_rate_part_of_nutation(2.4578265e6, 0.30434616919175345)
+            (ep, eo) = ERFA.pr00(2.4578265e6, 0.30434616919175345)
+            @test ap ≈ ep
+            @test ao ≈ eo
+        end
+
+        @test AstroBase.greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+        @test AstroBase.greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+        @test AstroBase.greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345) ≈ ERFA.gmst82(2.4578265e6, 0.30434616919175345)
+        @test AstroBase.greenwich_mean_sidereal_time82(0.30434616919175345, 2.4578265e6) ≈ ERFA.gmst82(0.30434616919175345, 2.4578265e6)
+        let (b1, p1, bp1) = AstroBase.bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+            (b2, p2, bp2) = ERFA.bp00(2.4578265e6, 0.30434616919175345)
+            @test b1 ≈ b2
+            @test p1 ≈ p2
+            @test bp1 ≈ bp2
+        end
+
+        let a = rand(3,3)
+            @test AstroBase.equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
+        end
+
         let (x1, y1) = AstroBase.nutation(2.4578265e6, 0.30434616919175345),
             (x2, y2) = ERFA.nut80(2.4578265e6, 0.30434616919175345)
             @test x1 ≈ x2
