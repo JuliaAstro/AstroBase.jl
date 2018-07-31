@@ -25,7 +25,8 @@ export tio_locator,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
-    numat
+    numat,
+    equation_of_origins
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -41,6 +42,8 @@ include("mfals.jl")
 
 Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
+
+# Example
 
 ```jldoctest
 julia> celestial_to_intermediate(0.2, 0.2, 0.1)
@@ -63,6 +66,7 @@ end
 Form the matrix of polar motion for coordinates of the pole (radians).
 
 # Example
+
 ```jldoctest
 julia> polar_motion(20, 30, 50)
 3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
@@ -82,6 +86,7 @@ end
 Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
 
 # Example
+
 ```jldoctest
 julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
 4.912208135094597
@@ -152,6 +157,7 @@ Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT)
 
 # Example
 
+```jldoctest
 julia> mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345)
 0.40905376936136706
 ```
@@ -183,6 +189,9 @@ end
 
 Returns fukushima angles(radians) for a given 2 part Julian date (TT).
 
+# Example
+
+```jldoctest
 julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
 (8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
 ```
@@ -486,7 +495,6 @@ function xy06(jd1, jd2)
         end
         ialast = ia - 1
     end
-
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
 end
 
@@ -554,7 +562,7 @@ Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1
 # Example
 
 ```jldoctest
-julia> greenwich_mean_sidereal_time00(2.4578265e6, 0.30434616919175345)
+julia> greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345)
 4.916054244834956
 ```
 """
@@ -611,5 +619,28 @@ function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
 end
-  
+
+"""
+    equation_of_origins(rnpb, s)
+
+Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
+
+ # Example
+
+ ```jldoctest
+equation_of_origins(rand(3,3), 0.2)
+1.7738370040531068
+ ```
+"""
+function equation_of_origins(rnpb, s)
+    x = rnpb[1, 3]
+    ax = x / (1.0 + rnpb[3, 3])
+    xs = 1.0 - ax * x
+    ys = -ax * rnpb[2, 3]
+    zs = -x
+    p = rnpb[1, 1] * xs + rnpb[2, 1] * ys + rnpb[3, 1] * zs
+    q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
+    p != 0 || q != 0 ? s - atan(q, p) : s
+end
+
 end # module
