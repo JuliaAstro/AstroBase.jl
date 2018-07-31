@@ -25,7 +25,8 @@ export tio_locator,
     greenwich_mean_sidereal_time82,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
-    numat
+    numat,
+    equation_of_origins
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -592,17 +593,7 @@ julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.00079660
 function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
-function equations_of_origins(rnpb, s)
-    x = rnpb[1, 3]
-    ax = x / (1.0 + rnpb[3, 3])
-    xs = 1.0 - (ax * x)
-    ys = -ax * rnpb[2, 3]
-    zs = -x
-    p = (rnpb[1, 1] * xs) + (rnpb[2, 1] * ys) + (rnpb[3, 1] * zs)
-    q = (rnpb[1, 2] * xs) + (rnpb[2, 2] * ys) + (rnpb[3, 2] * zs)
-    ((p != 0) || (q != 0)) ? s - atan2(q, p) : s
 end
-
 """
     greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
 
@@ -621,4 +612,26 @@ function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
 end
 
+"""
+    equation_of_origins(rnpb, s)
+
+Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
+
+ # Example
+
+ ```jldoctest
+equation_of_origins(rand(3,3), 0.2)
+1.7738370040531068
+ ```
+"""
+function equation_of_origins(rnpb, s)
+    x = rnpb[1, 3]
+    ax = x / (1.0 + rnpb[3, 3])
+    xs = 1.0 - ax * x
+    ys = -ax * rnpb[2, 3]
+    zs = -x
+    p = rnpb[1, 1] * xs + rnpb[2, 1] * ys + rnpb[3, 1] * zs
+    q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
+    p != 0 || q != 0 ? s - atan(q, p) : s
+end
 end # module
