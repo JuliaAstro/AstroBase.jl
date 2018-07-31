@@ -44,7 +44,7 @@ const DEBIAS = deg2rad(-0.0068192 *(1/3600))
 const DRA0 = deg2rad(-0.0146 *(1/3600))
 
 include("mfals.jl")
-include("S0.jl")
+include("S06.jl")
 
 """
     celestial_to_intermediate(x, y, s)
