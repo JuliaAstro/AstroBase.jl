@@ -43,6 +43,8 @@ include("mfals.jl")
 Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
 
+# Example
+
 ```jldoctest
 julia> celestial_to_intermediate(0.2, 0.2, 0.1)
 3×3 RotZYZ{Float64}(0.785398, 0.286757, -0.885398):
@@ -64,6 +66,7 @@ end
 Form the matrix of polar motion for coordinates of the pole (radians).
 
 # Example
+
 ```jldoctest
 julia> polar_motion(20, 30, 50)
 3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
@@ -83,6 +86,7 @@ end
 Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
 
 # Example
+
 ```jldoctest
 julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
 4.912208135094597
@@ -153,6 +157,7 @@ Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT)
 
 # Example
 
+```jldoctest
 julia> mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345)
 0.40905376936136706
 ```
@@ -184,6 +189,7 @@ end
 
 Returns fukushima angles(radians) for a given 2 part Julian date (TT).
 
+```jldoctest
 julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
 (8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
 ```
