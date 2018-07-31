@@ -67,6 +67,10 @@ using Test
             @test p1 ≈ p2
             @test bp1 ≈ bp2
         end
+
+        let a = rand(3,3)
+            @test AstroBase.equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
+        end
     end
 
     include("bodies.jl")
