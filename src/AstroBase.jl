@@ -189,6 +189,8 @@ end
 
 Returns fukushima angles(radians) for a given 2 part Julian date (TT).
 
+# Example
+
 ```jldoctest
 julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
 (8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
@@ -640,4 +642,5 @@ function equation_of_origins(rnpb, s)
     q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
     p != 0 || q != 0 ? s - atan(q, p) : s
 end
+
 end # module
