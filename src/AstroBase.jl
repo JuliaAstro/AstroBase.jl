@@ -26,6 +26,8 @@ export tio_locator,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
     numat,
+    precession_rate_part_of_nutation,
+    bias_precession_matrix_00,
     equation_of_origins
 
 const J2000 = 2451545.0
@@ -34,6 +36,11 @@ const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
+const OBLIQUITY = -deg2rad((0.02524) *(1/3600))
+const EPS0 = deg2rad(84381.448 * (1/3600))
+const DPBIAS = deg2rad(-0.041775 * (1/3600))
+const DEBIAS = deg2rad(-0.0068192 *(1/3600))
+const DRA0 = deg2rad(-0.0146 *(1/3600))
 
 include("mfals.jl")
 
@@ -225,11 +232,9 @@ end
 """
     mean_anomaly(::Sun, t)
 
-Returns mean anomaly of the Sun for Julian centuries since J2000.0 in TDB.
-
 # Example
 
-```jldoctest
+Returns mean anomaly of the Sun for Julian centuries since J2000.0 in TDB.
 julia> mean_anomaly(sun, 23.0)
 5.857396217361825
 ```
@@ -537,23 +542,6 @@ function numat(epsa, dpsi, deps)
 end
 
 """
-    precession_rate_part_of_nutation(jd1, jd2)
-
-Returns precession corrections for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-julia> precession_rate_part_of_nutation(2400000.5, 53736)
--0.8716465172668347629e-7, -0.7342018386722813087e-8
-```
-"""
-function precession_rate_part_of_nutation(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    PRECESSION * t, OBLIQUITY * t
-end
-
-"""
     greenwich_mean_sidereal_time82(jd1, jd2)
 
 Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
@@ -618,6 +606,54 @@ julia> greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.00079660
 function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
     mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
+end
+
+"""
+    precession_rate_part_of_nutation(jd1, jd2)
+
+Returns precession corrections for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> precession_rate_part_of_nutation(2400000.5, 53736)
+-0.8716465172668347629e-7, -0.7342018386722813087e-8
+```
+"""
+function precession_rate_part_of_nutation(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    PRECESSION * t, OBLIQUITY * t
+end
+
+"""
+    bias_precession_matrix_00(jd1, jd2)
+
+Returns a tuple of array, rb (frame bias), rp (precession matrix), rbp (bias precession matrix)
+given 2 part Julian date (TT).
+
+# Example
+
+julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+(RotZYX(-7.07828e-8, -8.05622e-8, 3.30604e-8), [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.2343e-6; -0.00167106 -3.1924e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.26705e-6; -0.00167098 -3.15946e-6 0.999999])
+```
+"""
+function bias_precession_matrix_00(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    dpsibi, depsbi, dra0 = DPBIAS, DEBIAS, DRA0
+
+    psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
+    oma77  = EPS0 + sec2rad(@evalpoly 0 0 0.05127 -0.007726)
+    chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
+
+    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
+    psia = psia77 + dpsipr
+    oma  = oma77 + depspr
+
+    rbw = RotZYX(dra0, dpsibi*sin(EPS0), -depsbi)
+    rp = RotXZX(EPS0, -psia, -oma) * RotZ(chia)
+
+    rbw, rp, rp * rbw
 end
 
 """

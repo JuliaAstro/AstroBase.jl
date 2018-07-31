@@ -61,9 +61,16 @@ using Test
         @test AstroBase.greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
         @test AstroBase.greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345) ≈ ERFA.gmst82(2.4578265e6, 0.30434616919175345)
         @test AstroBase.greenwich_mean_sidereal_time82(0.30434616919175345, 2.4578265e6) ≈ ERFA.gmst82(0.30434616919175345, 2.4578265e6)
+        let (b1, p1, bp1) = AstroBase.bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+            (b2, p2, bp2) = ERFA.bp00(2.4578265e6, 0.30434616919175345)
+            @test b1 ≈ b2
+            @test p1 ≈ p2
+            @test bp1 ≈ bp2
+        end
 
-        test = rand(3,3)
-        @test AstroBase.equation_of_origins(test, 0.3) ≈ ERFA.eors(test, 0.3)
+        let a = rand(3,3)
+            @test AstroBase.equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
+        end
     end
 
     include("bodies.jl")
