@@ -631,7 +631,7 @@ function bias_precession_matrix_00(jd1, jd2)
     dpsibi, depsbi, dra0 = DPBIAS, DEBIAS, DRA0
 
     psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
-    oma77  = EPS0 + sec2rad(((0.05127 + (-0.007726) * t) * t) * t)
+    oma77  = EPS0 + sec2rad(@evalpoly 0 0 0.05127 -0.007726)
     chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
 
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
