@@ -28,7 +28,8 @@ export tio_locator,
     numat,
     precession_rate_part_of_nutation,
     bias_precession_matrix_00,
-    equation_of_origins
+    equation_of_origins,
+    s00
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
