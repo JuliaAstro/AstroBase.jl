@@ -72,6 +72,6 @@ using Test
             @test AstroBase.equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
         end
     end
-
+    @test AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50) ≈ ERFA.s00(2.4578265e6, 0.30434616919175345, 20, 50)
     include("bodies.jl")
 end

@@ -28,7 +28,8 @@ export tio_locator,
     numat,
     precession_rate_part_of_nutation,
     bias_precession_matrix_00,
-    equation_of_origins
+    equation_of_origins,
+    s00
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -43,6 +44,7 @@ const DEBIAS = deg2rad(-0.0068192 *(1/3600))
 const DRA0 = deg2rad(-0.0146 *(1/3600))
 
 include("mfals.jl")
+include("S00.jl")
 
 """
     celestial_to_intermediate(x, y, s)
@@ -677,6 +679,77 @@ function equation_of_origins(rnpb, s)
     p = rnpb[1, 1] * xs + rnpb[2, 1] * ys + rnpb[3, 1] * zs
     q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
     p != 0 || q != 0 ? s - atan(q, p) : s
+end
+
+"""
+    s00(jd1, jd2, x, y)
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+Compatible with IAU-2000 precession-nutation.
+
+# Example
+
+julia> AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50)
+-500.00000000383193
+```
+"""
+function s00(jd1, jd2, x, y)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    fa =(mean_anomaly(luna, t),
+    mean_anomaly(sun, t),
+    mean_longitude_minus_lan(luna, t),
+    mean_elongation(luna, t),
+    mean_longitude_ascending_node(luna,t),
+    mean_longitude(venus, t),
+    mean_longitude(earth, t),
+    general_precession_in_longitude(t))
+    w0 = s00p[1]
+    w1 = s00p[2]
+    w2 = s00p[3]
+    w3 = s00p[4]
+    w4 = s00p[5]
+    w5 = s00p[6]
+     for i in reverse(eachindex(s00_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s00_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w0 += s00_arg[i][1] * s + s00_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s01_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s01_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w1 += s01_arg[i][1] * s + s01_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s02_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s02_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w2 += s02_arg[i][1] * s + s02_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s03_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s03_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w3 += s03_arg[i][1] * s + s03_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s04_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s04_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w4 += s04_arg[i][1] * s + s04_arg[i][2] * c
+    end
+    sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end
 
 end # module
