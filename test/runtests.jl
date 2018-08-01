@@ -98,5 +98,10 @@ using Test
         end
     end
 
+    @testset "Dependencies" begin
+        @test nutation_matrix80(2.4578265e6, 0.30434616919175345) ≈ ERFA.nutm80(2.4578265e6, 0.30434616919175345)
+
+    end
+
     include("bodies.jl")
 end
