@@ -1009,27 +1009,25 @@ julia> nutation_00a(2.4578265e6, 0.30440190993249416)
 ```
 """
 function nutation_00a(jd1, jd2)
-    U2R = sec2rad(1/1e7)
-    NLS = length(xls_nutation)
-    NPL = length(xpl_nutation)
-
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
-    el = mean_anomaly_of_moon(t)
-    f  = mean_longitude_of_moon_minus_mean_longitude_of_ascending_node(t)
-    om = mean_longitude_ascending_node_moon(t)
+    el = mean_anomaly(luna, t)
+    f  = mean_longitude_minus_lan(luna, t)
+    om = mean_longitude_ascending_node(luna, t)
 
     apa  = general_precession_in_longitude(t)
-    alme = mean_longitude_of_mercury(t)
-    alve = mean_longitude_of_venus(t)
-    alea = mean_longitude_of_earth(t)
-    alma = mean_longitude_of_mars(t)
-    alju = mean_longitude_of_jupiter(t)
-    alsa = mean_longitude_of_saturn(t)
-    alur = mean_longitude_of_uranus(t)
+    alme = mean_longitude(mercury, t)
+    alve = mean_longitude(venus, t)
+    alea = mean_longitude(earth, t)
+    alma = mean_longitude(mars, t)
+    alju = mean_longitude(jupiter, t)
+    alsa = mean_longitude(saturn, t)
+    alur = mean_longitude(uranus, t)
 
-    elp = sec2rad(mod((@evalpoly t 1287104.79305 129596581.0481 -0.5532 0.000136 -0.00001149), TURNAS))
-    d   = sec2rad(mod((@evalpoly t 1072260.70369 1602961601.2090 -6.3706 0.006593 -0.00003169), TURNAS))
+    elp = sec2rad(mod((@evalpoly t 1287104.79305 129596581.0481 -0.5532 0.000136 -0.00001149),
+                      ARCSECONDS_IN_CIRCLE))
+    d   = sec2rad(mod((@evalpoly t 1072260.70369 1602961601.2090 -6.3706 0.006593 -0.00003169),
+                      ARCSECONDS_IN_CIRCLE))
 
     al   = mod2pi(2.35555598 + 8328.6914269554 * t)
     af   = mod2pi(1.627905234 + 8433.466158131 * t)
@@ -1037,25 +1035,25 @@ function nutation_00a(jd1, jd2)
     aom  = mod2pi(2.18243920 - 33.757045 * t)
     alne = mod2pi(5.321159000 + 3.8127774000 * t)
 
-    dp = 0.0
-    de = 0.0
+    dpls = 0.0
+    dels = 0.0
 
-    for i in NLS:-1:1
-        arg = mod(xls_nutation[i][1]  * el +
+    for i in reverse(eachindex(xls_nutation))
+        arg = mod2pi(xls_nutation[i][1]  * el +
                     xls_nutation[i][2] * elp +
                     xls_nutation[i][3]  * f +
                     xls_nutation[i][4]  * d +
-                    xls_nutation[i][5] * om, 2pi)
+                    xls_nutation[i][5] * om)
         sarg, carg = sin(arg), cos(arg)
-        dp += (xls_nutation[i][6] + xls_nutation[i][7] * t) * sarg + xls_nutation[i][8] * carg
-        de += (xls_nutation[i][9] + xls_nutation[i][10] * t) * carg + xls_nutation[i][11] * sarg
+        dpls += (xls_nutation[i][6] + xls_nutation[i][7] * t) * sarg + xls_nutation[i][8] * carg
+        dels += (xls_nutation[i][9] + xls_nutation[i][10] * t) * carg + xls_nutation[i][11] * sarg
     end
 
-    dpsils, depsls = dp * U2R, de * U2R
+    dppl = 0.0
+    depl = 0.0
 
-    dp, de = 0.0, 0.0
-    for i in NPL:-1:1
-        arg = mod(xpl_nutation[i][1] * al   +
+    for i in reverse(eachindex(xpl_nutation))
+        arg = mod2pi(xpl_nutation[i][1] * al +
              xpl_nutation[i][2] * af   +
              xpl_nutation[i][3] * ad   +
              xpl_nutation[i][4] * aom  +
@@ -1067,19 +1065,14 @@ function nutation_00a(jd1, jd2)
              xpl_nutation[i][10] * alsa +
              xpl_nutation[i][11] * alur +
              xpl_nutation[i][12] * alne +
-             xpl_nutation[i][13] * apa, 2pi)
+             xpl_nutation[i][13] * apa)
         sarg, carg = sin(arg), cos(arg)
 
-        dp += xpl_nutation[i][14] * sarg + xpl_nutation[i][15] * carg
-        de += xpl_nutation[i][16] * sarg + xpl_nutation[i][17] * carg
-
+        dppl += xpl_nutation[i][14] * sarg + xpl_nutation[i][15] * carg
+        depl += xpl_nutation[i][16] * sarg + xpl_nutation[i][17] * carg
     end
 
-    dpsipl = dp * U2R
-    depspl = de * U2R
-
-    dpsils + dpsipl, depsls + depspl
-
+    sec2rad(1e-7dpls) + sec2rad(1e-7dppl), sec2rad(1e-7dels) + sec2rad(1e-7depl)
 end
 
 end # module
