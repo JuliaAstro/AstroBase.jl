@@ -151,10 +151,10 @@ Returns TIO locator s' position for a given TT 2-part Julian date (jd1, jd2).
 
 # Example
 
-'''jldoctest
+```jldoctest
 julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 -3.9189245827947945e-11
-'''
+```
 """
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
@@ -169,6 +169,7 @@ Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT)
 
 # Example
 
+```jldoctest
 julia> mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345)
 0.40905376936136706
 ```
@@ -512,9 +513,6 @@ end
     fukushima_williams_matrix(gamb, phib, psi, eps)
 
 Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
-    nutation(jd1, jd2)
-
-Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
 
 # Example
 
