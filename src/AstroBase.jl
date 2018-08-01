@@ -515,10 +515,6 @@ end
     fukushima_williams_matrix(gamb, phib, psi, eps)
 
 Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
-    s06(jd1, jd2, x, y)
-
- Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
-with CIP coordinates (x, y)
 
 # Example
 
