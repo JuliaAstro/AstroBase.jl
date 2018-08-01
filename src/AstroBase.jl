@@ -709,11 +709,11 @@ function equation_of_equinoxes_complementary_terms(jd1, jd2)
     s1 = 0.0
 
     for i in reverse(eachindex(e0_coefficent))
-    a = 0.0
+        a = 0.0
         for j in 1:8
             a += e0_coefficent[i][j] * fa[j]
         end
-    s0 += e0_arg[i][1] * sin(a) + e0_arg[i][2] * cos(a)
+        s0 += e0_arg[i][1] * sin(a) + e0_arg[i][2] * cos(a)
     end
 
     for i in reverse(eachindex(e1_coefficent))
