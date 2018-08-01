@@ -33,7 +33,6 @@ export
     polar_motion,
     precession_fukushima_williams06,
     precession_rate_part_of_nutation,
-    precession_rate_part_of_nutation,
     s00,
     s06,
     tio_locator,
@@ -42,8 +41,6 @@ export
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
-const PRECESSION = -deg2rad((0.29965) * (1/3600))
-const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
 
 include(joinpath("constants", "mfals.jl"))
@@ -93,7 +90,7 @@ julia> polar_motion(20, 30, 50)
 ```
 """
 function polar_motion(rx, ry, sp)
-    RotZYX{Float64}(sp, -rx, -ry)
+    RotZYX(sp, -rx, -ry)
 end
 
 
@@ -136,7 +133,7 @@ julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 """
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
-    -47e-6 * t * sec2rad(1)
+    sec2rad(-47e-6 * t)
 end
 
 
@@ -507,16 +504,16 @@ function nutation_00b(jd1, jd2)
     f   = sec2rad(mod(335779.526232 + (1739527262.8478) * t, ARCSECONDS_IN_CIRCLE))
     d   = sec2rad(mod(1072260.70369 + (1602961601.2090) * t, ARCSECONDS_IN_CIRCLE))
     om  = sec2rad(mod(450160.398036 + (-6962890.5431) * t, ARCSECONDS_IN_CIRCLE))
-  
+
     dp = 0.0
     de = 0.0
 
     for i in reverse(eachindex(x_nutation))
-        arg = mod(x_nutation[i][1]  * el  +
-              x_nutation[i][2] * elp +
-              x_nutation[i][3]  * f   +
-              x_nutation[i][4]  * d   +
-              x_nutation[i][5] * om, 2pi)
+        arg = mod(x_nutation[i][1] * el
+                  + x_nutation[i][2] * elp
+                  + x_nutation[i][3] * f
+                  + x_nutation[i][4] * d
+                  + x_nutation[i][5] * om, 2pi)
         sarg, carg = sincos(arg)
 
         dp += (x_nutation[i][6] + x_nutation[i][7] * t) * sarg + x_nutation[i][8] * carg
@@ -525,7 +522,7 @@ function nutation_00b(jd1, jd2)
 
     sec2rad(-0.135e-3) + sec2rad(1e-7dp), sec2rad(0.388e-3) + sec2rad(1e-7de)
 end
-  
+
  """
     fukushima_williams_matrix(gamb, phib, psi, eps)
 
@@ -542,7 +539,7 @@ julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
 ```
 """
 function fukushima_williams_matrix(gamb, phib, psi, eps)
-    RotZXZ(gamb, phib, -psi)* RotX(-eps)
+    RotZXZ(gamb, phib, -psi) * RotX(-eps)
 end
 
 """
@@ -561,7 +558,7 @@ julia> numat(0.7, 1.4, 1.3)
 ```
 """
 function numat(epsa, dpsi, deps)
-    RotXZX{Float64}(epsa, -dpsi, -(epsa + deps))
+    RotXZX(epsa, -dpsi, -(epsa + deps))
 end
 
 """
@@ -590,9 +587,10 @@ function greenwich_mean_sidereal_time82(jd1, jd2)
         d1 = jd2
         d2 = jd1
     end
+
     t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
     f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
-    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A+f B C D))
+    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A + f B C D))
 end
 
 """
@@ -610,7 +608,8 @@ julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.00079660
 """
 function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
-    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
+    mod2pi(earth_rotation_angle(ut1, ut2) +
+           sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
 end
 
 """
@@ -628,7 +627,8 @@ julia> greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.00079660
 """
 function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
     t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
-    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
+    mod2pi(earth_rotation_angle(ut1, ut2) +
+           sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368))
 end
 
 """
@@ -645,7 +645,7 @@ julia> precession_rate_part_of_nutation(2400000.5, 53736)
 """
 function precession_rate_part_of_nutation(jd1, jd2)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    PRECESSION * t, OBLIQUITY * t
+    -sec2rad(0.29965) * t, -sec2rad(0.02524) * t
 end
 
 """
@@ -706,80 +706,6 @@ function equation_of_origins(rnpb, s)
 end
 
 """
-    s06(jd1, jd2, x, y)
-
-Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
-with CIP coordinates (x, y)
-
- # Example
-
-julia> AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50)
--500.00000000383193
-```
-"""
-function s06(jd1, jd2, x, y)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    fa = (
-        mean_anomaly(luna, t),
-        mean_anomaly(sun, t),
-        mean_longitude_minus_lan(luna, t),
-        mean_elongation(luna, t),
-        mean_longitude_ascending_node(luna,t),
-        mean_longitude(venus, t),
-        mean_longitude(earth, t),
-        general_precession_in_longitude(t),
-    )
-  
-    w0 = sp[1]
-    w1 = sp[2]
-    w2 = sp[3]
-    w3 = sp[4]
-    w4 = sp[5]
-    w5 = sp[6]
-    for i in reverse(eachindex(s0_order))
-        a = 0.0
-        for j in 8:-1:1
-            a += s0_order[i][j] * fa[j]
-        end
-        s, c = sincos(a)
-        w0 += s0_arg[i][1] * s + s0_arg[i][2] * c
-    end
-    for i in reverse(eachindex(s1_order))
-        a = 0.0
-        for j in 8:-1:1
-            a += s1_order[i][j] * fa[j]
-        end
-        s, c = sincos(a)
-        w1 += s1_arg[i][1] * s + s1_arg[i][2] * c
-    end
-    for i in reverse(eachindex(s2_order))
-        a = 0.0
-        for j in 8:-1:1
-            a += s2_order[i][j] * fa[j]
-        end
-        s, c = sincos(a)
-        w2 += s2_arg[i][1] * s + s2_arg[i][2] * c
-    end
-    for i in reverse(eachindex(s3_order))
-        a = 0.0
-        for j in 8:-1:1
-            a += s3_order[i][j] * fa[j]
-        end
-        s, c = sincos(a)
-        w3 += s3_arg[i][1] * s + s3_arg[i][2] * c
-    end
-    for i in reverse(eachindex(s4_order))
-        a = 0.0
-        for j in 8:-1:1
-            a += s4_order[i][j] * fa[j]
-        end
-        s, c = sincos(a)
-        w4 += s4_arg[i][1] * s + s4_arg[i][2] * c
-    end
-    sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
-end
-
-"""
     nutation(jd1, jd2)
 
 Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
@@ -827,8 +753,8 @@ function nutation(jd1, jd2)
         s = multiples_of_arguments[i][1] + multiples_of_arguments[i][2] * t
         c = multiples_of_arguments[i][3] + multiples_of_arguments[i][4] * t
         sinarg, cosarg = sincos(arg)
-        iszero(s) || (dp += s * sinarg)
-        iszero(c) || (de += c * cosarg)
+        dp += s * sinarg
+        de += c * cosarg
     end
 
     sec2rad(1e-4dp), sec2rad(1e-4de)
@@ -875,6 +801,7 @@ function equation_of_equinoxes_complementary_terms(jd1, jd2)
         end
         s1 += e1_arg[i][1] * sin(a) + e1_arg[i][2] * cos(a)
     end
+
     sec2rad(s0 + s1 * t)
 end
 
@@ -896,12 +823,13 @@ end
 
 """
     s00(jd1, jd2, x, y)
+
 Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
-with CIP coordinates (x, y)
-Compatible with IAU-2000 precession-nutation.
+with CIP coordinates (x, y). Compatible with IAU-2000 precession-nutation.
 
 # Example
 
+```jldoctest
 julia> AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50)
 -500.00000000383193
 ```
@@ -926,6 +854,7 @@ function s00(jd1, jd2, x, y)
     w3 = sp[4]
     w4 = sp[5]
     w5 = sp[6]
+
     for i in reverse(eachindex(s0_order))
         a = 0.0
         for j in 8:-1:1
@@ -934,6 +863,7 @@ function s00(jd1, jd2, x, y)
         s, c = sincos(a)
         w0 += s0_arg[i][1] * s + s0_arg[i][2] * c
     end
+
     for i in reverse(eachindex(s1_order))
         a = 0.0
         for j in 8:-1:1
@@ -942,6 +872,7 @@ function s00(jd1, jd2, x, y)
         s, c = sincos(a)
         w1 += s1_arg[i][1] * s + s1_arg[i][2] * c
     end
+
     for i in reverse(eachindex(s2_order))
         a = 0.0
         for j in 8:-1:1
@@ -950,6 +881,7 @@ function s00(jd1, jd2, x, y)
         s, c = sincos(a)
         w2 += s2_arg[i][1] * s + s2_arg[i][2] * c
     end
+
     for i in reverse(eachindex(s3_order))
         a = 0.0
         for j in 8:-1:1
@@ -958,6 +890,7 @@ function s00(jd1, jd2, x, y)
         s, c = sincos(a)
         w3 += s3_arg[i][1] * s + s3_arg[i][2] * c
     end
+
     for i in reverse(eachindex(s4_order))
         a = 0.0
         for j in 8:-1:1
@@ -968,6 +901,22 @@ function s00(jd1, jd2, x, y)
     end
     sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end
+
+const s06 = s00
+
+"""
+    s06(jd1, jd2, x, y)
+
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+
+ # Example
+
+julia> AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50)
+-500.00000000383193
+```
+"""
+s06
 
 """
     nutation_00a(jd1, jd2)
