@@ -31,7 +31,8 @@ export tio_locator,
     equation_of_origins,
     s06,
     nutation,
-    s00
+    s00,
+    nutation_00b
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -46,6 +47,7 @@ const DRA0 = deg2rad(-0.0146 *(1/3600))
 const U2R = deg2rad(1/1e4 * (1/3600))
 
 include("mfals.jl")
+include("nut_const.jl")
 include("S06.jl")
 include("EE00.jl")
 include("S00.jl")
@@ -512,6 +514,45 @@ function xy06(jd1, jd2)
 end
 
 """
+    nutation_00b(jd1, jd2)
+
+Returns luni-solar and planetary nutation for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> nutation_00b(2.4578265e6, 0.30440190993249416)
+(-3.7589177912131684e-5, -3.6657431214029895e-5)
+```
+"""
+function nutation_00b(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    el  = sec2rad(mod(485868.249036 + (1717915923.2178) * t, ARCSECONDS_IN_CIRCLE))
+    elp = sec2rad(mod(1287104.79305 + (129596581.0481) * t, ARCSECONDS_IN_CIRCLE))
+    f   = sec2rad(mod(335779.526232 + (1739527262.8478) * t, ARCSECONDS_IN_CIRCLE))
+    d   = sec2rad(mod(1072260.70369 + (1602961601.2090) * t, ARCSECONDS_IN_CIRCLE))
+    om  = sec2rad(mod(450160.398036 + (-6962890.5431) * t, ARCSECONDS_IN_CIRCLE))
+  
+    dp = 0.0
+    de = 0.0
+
+    for i in reverse(eachindex(x_nutation))
+        arg = mod(x_nutation[i][1]  * el  +
+              x_nutation[i][2] * elp +
+              x_nutation[i][3]  * f   +
+              x_nutation[i][4]  * d   +
+              x_nutation[i][5] * om, 2pi)
+        sarg, carg = sincos(arg)
+
+        dp += (x_nutation[i][6] + x_nutation[i][7] * t) * sarg + x_nutation[i][8] * carg
+        de += (x_nutation[i][9] + x_nutation[i][10] * t) * carg + x_nutation[i][11] * sarg
+    end
+
+    sec2rad(-0.135e-3) + sec2rad(1e-7dp), sec2rad(0.388e-3) + sec2rad(1e-7de)
+end
+  
+ """
     fukushima_williams_matrix(gamb, phib, psi, eps)
 
 Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).

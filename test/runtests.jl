@@ -48,6 +48,13 @@ using Test
             @test x1 ≈ x2
             @test y1 ≈ y2
         end
+
+        let (x1, y1) = AstroBase.nutation_00b(2.4578265e6, 0.30440190993249416)
+            (x2, y2) = ERFA.nut00b(2.4578265e6, 0.30440190993249416)
+            @test x1 ≈ x2
+            @test y1 ≈ y2
+        end
+
         @test AstroBase.fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
         @test AstroBase.numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
 
