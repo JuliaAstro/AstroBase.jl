@@ -89,6 +89,11 @@ using Test
         @test AstroBase.equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345) ≈ ERFA.eect00(2.4578265e6, 0.30434616919175345)
         @test AstroBase.equation_of_equinoxes_00(2.4578265e6, 0.30440190993249416, 1.5, 1.7) ≈ ERFA.ee00(2.4578265e6, 0.30440190993249416, 1.5, 1.7)
         @test AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50) ≈ ERFA.s00(2.4578265e6, 0.30434616919175345, 20, 50)
+        let (x1, y1) = AstroBase.nutation_00a(2.4578265e6, 0.30440190993249416)
+            (x2, y2) = ERFA.nut00a(2.4578265e6, 0.30440190993249416)
+            @test x1 ≈ x2
+            @test y1 ≈ y2
+        end
     end
 
     include("bodies.jl")
