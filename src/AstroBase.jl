@@ -19,20 +19,39 @@ export tio_locator,
     xy06,
     obliquity_of_ecliptic_06,
     mean_obliquity_of_ecliptic,
-    precession_fukushima_williams06
+    precession_fukushima_williams06,
+    fukushima_williams_matrix,
+    precession_rate_part_of_nutation,
+    greenwich_mean_sidereal_time82,
+    greenwich_mean_sidereal_time00,
+    greenwich_mean_sidereal_time06,
+    numat,
+    precession_rate_part_of_nutation,
+    bias_precession_matrix_00,
+    equation_of_origins
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
+const PRECESSION = -deg2rad((0.29965) * (1/3600))
+const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
+const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
+const OBLIQUITY = -deg2rad((0.02524) *(1/3600))
+const EPS0 = deg2rad(84381.448 * (1/3600))
+const DPBIAS = deg2rad(-0.041775 * (1/3600))
+const DEBIAS = deg2rad(-0.0068192 *(1/3600))
+const DRA0 = deg2rad(-0.0146 *(1/3600))
 
 include("mfals.jl")
-include("terms_s00.jl")
+include("S00.jl")
 
 """
     celestial_to_intermediate(x, y, s)
 
 Returns celestial to intermediate-frame-of-date transformation matrix given
 the Celestial Intermediate Pole location (`x`, `y` and the CIO locator `s`).
+
+# Example
 
 ```jldoctest
 julia> celestial_to_intermediate(0.2, 0.2, 0.1)
@@ -55,6 +74,7 @@ end
 Form the matrix of polar motion for coordinates of the pole (radians).
 
 # Example
+
 ```jldoctest
 julia> polar_motion(20, 30, 50)
 3×3 RotZYX{Float64}(50.0, -20.0, -30.0):
@@ -74,6 +94,7 @@ end
 Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
 
 # Example
+
 ```jldoctest
 julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
 4.912208135094597
@@ -135,6 +156,7 @@ function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
     -47e-6 * t * sec2rad(1)
 end
+
 
 """
     mean_obliquity_of_ecliptic(jd1, jd2)
@@ -199,7 +221,6 @@ Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
 # Example
 
 ```jldoctest
-
 julia> mean_anomaly(moon, 23.0)
 0.5891752616281019
 ```
@@ -212,11 +233,9 @@ end
 """
     mean_anomaly(::Sun, t)
 
-Returns mean anomaly of the Sun for Julian centuries since J2000.0 in TDB.
-
 # Example
 
-```jldoctest
+Returns mean anomaly of the Sun for Julian centuries since J2000.0 in TDB.
 julia> mean_anomaly(sun, 23.0)
 5.857396217361825
 ```
@@ -482,11 +501,13 @@ function xy06(jd1, jd2)
         end
         ialast = ia - 1
     end
-
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
 end
 
 """
+    fukushima_williams_matrix(gamb, phib, psi, eps)
+
+Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
     s00(jd1, jd2, x, y)
 
 Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
@@ -496,6 +517,182 @@ Compatible with IAU-2000 precession-nutation.
 # Example
 
 ```jldoctest
+julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
+3×3 RotMatrix{Float64}:
+  0.951082   0.21718   0.219716
+ -0.274534   0.920305  0.278692
+ -0.14168   -0.325378  0.93491
+```
+"""
+function fukushima_williams_matrix(gamb, phib, psi, eps)
+    RotZXZ(gamb, phib, -psi)* RotX(-eps)
+end
+
+"""
+    numat(epsa, dpsi, deps)
+
+Returns nutation matrix for a given epsa(mean obliquity), dpsi and deps nutation.
+
+# Example
+
+```jldoctest
+julia> numat(0.7, 1.4, 1.3)
+3×3 RotXZX{Float64}(0.7, -1.4, -2.0):
+  0.169967  -0.410092   0.896067
+ -0.753714   0.531687   0.386296
+ -0.634844  -0.741035  -0.218722
+```
+"""
+function numat(epsa, dpsi, deps)
+    RotXZX{Float64}(epsa, -dpsi, -(epsa + deps))
+end
+
+"""
+    greenwich_mean_sidereal_time82(jd1, jd2)
+
+Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
+(consistent with IAU 1982 model)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345)
+4.916054244834956
+```
+"""
+function greenwich_mean_sidereal_time82(jd1, jd2)
+    A = 24110.54841  -  SECONDS_PER_DAY / 2.0
+    B = 8640184.812866
+    C = 0.093104
+    D = -6.2e-6
+
+    if jd1 < jd2
+        d1 = jd1
+        d2 = jd2
+    else
+        d1 = jd2
+        d2 = jd1
+    end
+    t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
+    f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
+    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A+f B C D))
+end
+
+"""
+    greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+(consistent with IAU 2000 precession)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+4.9596733720586075
+```
+"""
+function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
+    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
+    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
+end
+
+"""
+    greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+(consistent with IAU 2006 precession)
+
+# Example
+
+```jldoctest
+julia> greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
+4.959673370568533
+```
+"""
+function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
+    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
+    mod2pi(earth_rotation_angle(ut1, ut2) + sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368 ))
+end
+
+"""
+    precession_rate_part_of_nutation(jd1, jd2)
+
+Returns precession corrections for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> precession_rate_part_of_nutation(2400000.5, 53736)
+-0.8716465172668347629e-7, -0.7342018386722813087e-8
+```
+"""
+function precession_rate_part_of_nutation(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    PRECESSION * t, OBLIQUITY * t
+end
+
+"""
+    bias_precession_matrix_00(jd1, jd2)
+
+Returns a tuple of array, rb (frame bias), rp (precession matrix), rbp (bias precession matrix)
+given 2 part Julian date (TT).
+
+# Example
+
+julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
+(RotZYX(-7.07828e-8, -8.05622e-8, 3.30604e-8), [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.2343e-6; -0.00167106 -3.1924e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.26705e-6; -0.00167098 -3.15946e-6 0.999999])
+```
+"""
+function bias_precession_matrix_00(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    dpsibi, depsbi, dra0 = DPBIAS, DEBIAS, DRA0
+
+    psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
+    oma77  = EPS0 + sec2rad(@evalpoly 0 0 0.05127 -0.007726)
+    chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
+
+    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
+    psia = psia77 + dpsipr
+    oma  = oma77 + depspr
+
+    rbw = RotZYX(dra0, dpsibi*sin(EPS0), -depsbi)
+    rp = RotXZX(EPS0, -psia, -oma) * RotZ(chia)
+
+    rbw, rp, rp * rbw
+end
+
+"""
+    equation_of_origins(rnpb, s)
+
+Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
+
+ # Example
+
+ ```jldoctest
+equation_of_origins(rand(3,3), 0.2)
+1.7738370040531068
+ ```
+"""
+function equation_of_origins(rnpb, s)
+    x = rnpb[1, 3]
+    ax = x / (1.0 + rnpb[3, 3])
+    xs = 1.0 - ax * x
+    ys = -ax * rnpb[2, 3]
+    zs = -x
+    p = rnpb[1, 1] * xs + rnpb[2, 1] * ys + rnpb[3, 1] * zs
+    q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
+    p != 0 || q != 0 ? s - atan(q, p) : s
+end
+
+"""
+    s00(jd1, jd2, x, y)
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+Compatible with IAU-2000 precession-nutation.
+
+# Example
+
 julia> AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50)
 -500.00000000383193
 ```
@@ -516,45 +713,45 @@ function s00(jd1, jd2, x, y)
     w3 = s00p[4]
     w4 = s00p[5]
     w5 = s00p[6]
-     for i in reverse(eachindex(s000))
+     for i in reverse(eachindex(s00_coefficient))
         a = 0.0
         for j in 8:-1:1
-            a += s000[i][1][j] * fa[j]
+            a += s00_coefficient[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w0 += s000[i][2] * s + s000[i][3] * c
+        w0 += s00_arg[i][1] * s + s00_arg[i][2] * c
     end
-     for i in reverse(eachindex(s001))
+     for i in reverse(eachindex(s01_coefficient))
         a = 0.0
         for j in 8:-1:1
-            a += s001[i][1][j] * fa[j]
+            a += s01_coefficient[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w1 += s001[i][2] * s + s001[i][3] * c
+        w1 += s01_arg[i][1] * s + s01_arg[i][2] * c
     end
-     for i in reverse(eachindex(s002))
+     for i in reverse(eachindex(s02_coefficient))
         a = 0.0
         for j in 8:-1:1
-            a += s002[i][1][j] * fa[j]
+            a += s02_coefficient[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w2 += s002[i][2] * s + s002[i][3] * c
+        w2 += s02_arg[i][1] * s + s02_arg[i][2] * c
     end
-     for i in reverse(eachindex(s003))
+     for i in reverse(eachindex(s03_coefficient))
         a = 0.0
         for j in 8:-1:1
-            a += s003[i][1][j] * fa[j]
+            a += s03_coefficient[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w3 += s003[i][2] * s + s003[i][3] * c
+        w3 += s03_arg[i][1] * s + s03_arg[i][2] * c
     end
-     for i in reverse(eachindex(s004))
+     for i in reverse(eachindex(s04_coefficient))
         a = 0.0
         for j in 8:-1:1
-            a += s004[i][1][j] * fa[j]
+            a += s04_coefficient[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w4 += s004[i][2] * s + s004[i][3] * c
+        w4 += s04_arg[i][1] * s + s04_arg[i][2] * c
     end
     sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end
