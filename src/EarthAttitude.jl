@@ -45,11 +45,6 @@ const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
-const EPS0 = deg2rad(84381.448 * (1/3600))
-const DPBIAS = deg2rad(-0.041775 * (1/3600))
-const DEBIAS = deg2rad(-0.0068192 *(1/3600))
-const DRA0 = deg2rad(-0.0146 *(1/3600))
-const U2R = deg2rad(1/1e4 * (1/3600))
 
 include(joinpath("constants", "mfals.jl"))
 include(joinpath("constants", "nut_const.jl"))
@@ -668,18 +663,21 @@ julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
 function bias_precession_matrix_00(jd1, jd2)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
-    dpsibi, depsbi, dra0 = DPBIAS, DEBIAS, DRA0
+    dpbias = sec2rad(-0.041775)
+    debias = sec2rad(-0.0068192)
+    dra0 = sec2rad(-0.0146)
+    eps0 = sec2rad(84381.448)
 
     psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
-    oma77  = EPS0 + sec2rad(@evalpoly 0 0 0.05127 -0.007726)
+    oma77  = eps0 + sec2rad(@evalpoly 0 0 0.05127 -0.007726)
     chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
 
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
     psia = psia77 + dpsipr
     oma  = oma77 + depspr
 
-    rbw = RotZYX(dra0, dpsibi*sin(EPS0), -depsbi)
-    rp = RotXZX(EPS0, -psia, -oma) * RotZ(chia)
+    rbw = RotZYX(dra0, dpbias * sin(eps0), -debias)
+    rp = RotXZX(eps0, -psia, -oma) * RotZ(chia)
 
     rbw, rp, rp * rbw
 end
@@ -833,7 +831,7 @@ function nutation(jd1, jd2)
         iszero(c) || (de += c * cosarg)
     end
 
-    dp * U2R, de * U2R
+    sec2rad(1e-4dp), sec2rad(1e-4de)
 end
 
 """
@@ -848,8 +846,6 @@ julia> equation_of_equinoxes_complementary_terms(2.4578265e6, 0.3043461691917534
 ```
 """
 function equation_of_equinoxes_complementary_terms(jd1, jd2)
-    fa = Vector{Float64}(undef, 14)
-
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
     fa = (mean_anomaly(luna, t),
