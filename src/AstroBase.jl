@@ -29,7 +29,8 @@ export tio_locator,
     precession_rate_part_of_nutation,
     bias_precession_matrix_00,
     equation_of_origins,
-    nutation
+    nutation,
+    s00
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -44,6 +45,8 @@ const DRA0 = deg2rad(-0.0146 *(1/3600))
 const U2R = deg2rad(1/1e4 * (1/3600))
 
 include("mfals.jl")
+include("EE00.jl")
+include("S00.jl")
 
 include("NUTATION80.jl")
 """
@@ -249,7 +252,7 @@ end
 """
     mean_longitude_minus_lan(::Luna, t)
 
-Returnsmean longitude of the Moon minus mean longitude of the ascending node for Julian
+Returns mean longitude of the Moon minus mean longitude of the ascending node for Julian
 centuries since J2000.0 in TDB.
 
 # Example
@@ -737,6 +740,139 @@ function nutation(jd1, jd2)
     end
 
     dp * U2R, de * U2R
+end
+  
+"""
+    equation_of_equinoxes_complementary_terms(jd1, jd2)
+
+Returns complementary terms for a given 2 part Julian date (TT).
+
+# Example
+
+julia> equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345)
+5.706799075288604e-9
+```
+"""
+function equation_of_equinoxes_complementary_terms(jd1, jd2)
+    fa = Vector{Float64}(14)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    fa = (mean_anomaly(luna, t),
+          mean_anomaly(sun, t),
+          mean_longitude_minus_lan(luna, t),
+          mean_elongation(luna, t),
+          mean_longitude_ascending_node(luna, t),
+          mean_longitude(venus, t),
+          mean_longitude(earth, t),
+          general_precession_in_longitude(t))
+
+    s0 = 0.0
+    s1 = 0.0
+
+    for i in reverse(eachindex(e0_coefficent))
+        a = 0.0
+        for j in 1:8
+            a += e0_coefficent[i][j] * fa[j]
+        end
+        s0 += e0_arg[i][1] * sin(a) + e0_arg[i][2] * cos(a)
+    end
+
+    for i in reverse(eachindex(e1_coefficent))
+        a = 0.0;
+        for j in 1:8
+            a += e1_coefficent[i][j] * fa[j]
+        end
+        s1 += e1_arg[i][1] * sin(a) + e1_arg[i][2] * cos(a)
+    end
+    sec2rad(s0 + s1 * t)
+end
+
+"""
+    equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
+
+Return equation of equinoxes for given 2 part Julian date (TT), mean obliquity and nutation in longitude.
+
+# Example
+
+```jldoctest
+julia> equation_of_equinoxes_00(2.4578265e6, 0.30440190993249416, 1.5, 1.7)
+0.12025324854189404
+```
+"""
+function equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
+    dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
+end
+
+"""
+    s00(jd1, jd2, x, y)
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+Compatible with IAU-2000 precession-nutation.
+
+# Example
+
+julia> AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50)
+-500.00000000383193
+```
+"""
+function s00(jd1, jd2, x, y)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    fa =(mean_anomaly(luna, t),
+    mean_anomaly(sun, t),
+    mean_longitude_minus_lan(luna, t),
+    mean_elongation(luna, t),
+    mean_longitude_ascending_node(luna,t),
+    mean_longitude(venus, t),
+    mean_longitude(earth, t),
+    general_precession_in_longitude(t))
+    w0 = s00p[1]
+    w1 = s00p[2]
+    w2 = s00p[3]
+    w3 = s00p[4]
+    w4 = s00p[5]
+    w5 = s00p[6]
+     for i in reverse(eachindex(s00_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s00_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w0 += s00_arg[i][1] * s + s00_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s01_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s01_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w1 += s01_arg[i][1] * s + s01_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s02_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s02_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w2 += s02_arg[i][1] * s + s02_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s03_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s03_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w3 += s03_arg[i][1] * s + s03_arg[i][2] * c
+    end
+     for i in reverse(eachindex(s04_coefficient))
+        a = 0.0
+        for j in 8:-1:1
+            a += s04_coefficient[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w4 += s04_arg[i][1] * s + s04_arg[i][2] * c
+    end
+    sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end
 
 end # module
