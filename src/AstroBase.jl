@@ -29,6 +29,7 @@ export tio_locator,
     precession_rate_part_of_nutation,
     bias_precession_matrix_00,
     equation_of_origins,
+    s06,
     nutation,
     s00
 
@@ -45,10 +46,11 @@ const DRA0 = deg2rad(-0.0146 *(1/3600))
 const U2R = deg2rad(1/1e4 * (1/3600))
 
 include("mfals.jl")
+include("S06.jl")
 include("EE00.jl")
 include("S00.jl")
-
 include("NUTATION80.jl")
+
 """
     celestial_to_intermediate(x, y, s)
 
@@ -686,6 +688,80 @@ function equation_of_origins(rnpb, s)
 end
 
 """
+    s06(jd1, jd2, x, y)
+
+Returns Celestial Intermediate Origin(CIO) for a given 2-part Julian date (jd1, jd2)
+with CIP coordinates (x, y)
+
+ # Example
+
+julia> AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50)
+-500.00000000383193
+```
+"""
+function s06(jd1, jd2, x, y)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    fa = (
+        mean_anomaly(luna, t),
+        mean_anomaly(sun, t),
+        mean_longitude_minus_lan(luna, t),
+        mean_elongation(luna, t),
+        mean_longitude_ascending_node(luna,t),
+        mean_longitude(venus, t),
+        mean_longitude(earth, t),
+        general_precession_in_longitude(t),
+    )
+  
+    w0 = sp[1]
+    w1 = sp[2]
+    w2 = sp[3]
+    w3 = sp[4]
+    w4 = sp[5]
+    w5 = sp[6]
+    for i in reverse(eachindex(s0_order))
+        a = 0.0
+        for j in 8:-1:1
+            a += s0_order[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w0 += s0_arg[i][1] * s + s0_arg[i][2] * c
+    end
+    for i in reverse(eachindex(s1_order))
+        a = 0.0
+        for j in 8:-1:1
+            a += s1_order[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w1 += s1_arg[i][1] * s + s1_arg[i][2] * c
+    end
+    for i in reverse(eachindex(s2_order))
+        a = 0.0
+        for j in 8:-1:1
+            a += s2_order[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w2 += s2_arg[i][1] * s + s2_arg[i][2] * c
+    end
+    for i in reverse(eachindex(s3_order))
+        a = 0.0
+        for j in 8:-1:1
+            a += s3_order[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w3 += s3_arg[i][1] * s + s3_arg[i][2] * c
+    end
+    for i in reverse(eachindex(s4_order))
+        a = 0.0
+        for j in 8:-1:1
+            a += s4_order[i][j] * fa[j]
+        end
+        s, c = sincos(a)
+        w4 += s4_arg[i][1] * s + s4_arg[i][2] * c
+    end
+    sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
+end
+
+"""
     nutation(jd1, jd2)
 
 Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
@@ -816,59 +892,63 @@ julia> AstroBase.s00(2.4578265e6, 0.30434616919175345, 20, 50)
 """
 function s00(jd1, jd2, x, y)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    fa =(mean_anomaly(luna, t),
-    mean_anomaly(sun, t),
-    mean_longitude_minus_lan(luna, t),
-    mean_elongation(luna, t),
-    mean_longitude_ascending_node(luna,t),
-    mean_longitude(venus, t),
-    mean_longitude(earth, t),
-    general_precession_in_longitude(t))
-    w0 = s00p[1]
-    w1 = s00p[2]
-    w2 = s00p[3]
-    w3 = s00p[4]
-    w4 = s00p[5]
-    w5 = s00p[6]
-     for i in reverse(eachindex(s00_coefficient))
+
+    fa = (
+        mean_anomaly(luna, t),
+        mean_anomaly(sun, t),
+        mean_longitude_minus_lan(luna, t),
+        mean_elongation(luna, t),
+        mean_longitude_ascending_node(luna,t),
+        mean_longitude(venus, t),
+        mean_longitude(earth, t),
+        general_precession_in_longitude(t),
+    )
+
+    w0 = sp[1]
+    w1 = sp[2]
+    w2 = sp[3]
+    w3 = sp[4]
+    w4 = sp[5]
+    w5 = sp[6]
+    for i in reverse(eachindex(s0_order))
         a = 0.0
         for j in 8:-1:1
-            a += s00_coefficient[i][j] * fa[j]
+            a += s0_order[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w0 += s00_arg[i][1] * s + s00_arg[i][2] * c
+        w0 += s0_arg[i][1] * s + s0_arg[i][2] * c
     end
-     for i in reverse(eachindex(s01_coefficient))
+    for i in reverse(eachindex(s1_order))
         a = 0.0
         for j in 8:-1:1
-            a += s01_coefficient[i][j] * fa[j]
+            a += s1_order[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w1 += s01_arg[i][1] * s + s01_arg[i][2] * c
+        w1 += s1_arg[i][1] * s + s1_arg[i][2] * c
     end
-     for i in reverse(eachindex(s02_coefficient))
+    for i in reverse(eachindex(s2_order))
         a = 0.0
         for j in 8:-1:1
-            a += s02_coefficient[i][j] * fa[j]
+            a += s2_order[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w2 += s02_arg[i][1] * s + s02_arg[i][2] * c
+        w2 += s2_arg[i][1] * s + s2_arg[i][2] * c
     end
-     for i in reverse(eachindex(s03_coefficient))
+    for i in reverse(eachindex(s3_order))
         a = 0.0
         for j in 8:-1:1
-            a += s03_coefficient[i][j] * fa[j]
+            a += s3_order[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w3 += s03_arg[i][1] * s + s03_arg[i][2] * c
+        w3 += s3_arg[i][1] * s + s3_arg[i][2] * c
     end
-     for i in reverse(eachindex(s04_coefficient))
+    for i in reverse(eachindex(s4_order))
         a = 0.0
         for j in 8:-1:1
-            a += s04_coefficient[i][j] * fa[j]
+            a += s4_order[i][j] * fa[j]
         end
         s, c = sincos(a)
-        w4 += s04_arg[i][1] * s + s04_arg[i][2] * c
+        w4 += s4_arg[i][1] * s + s4_arg[i][2] * c
     end
     sec2rad((@evalpoly t w0 w1 w2 w3 w4 w5)) - x * y / 2.0
 end

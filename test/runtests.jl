@@ -71,6 +71,7 @@ using Test
         let a = rand(3,3)
             @test AstroBase.equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
         end
+        @test AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50) ≈ ERFA.s06(2.4578265e6, 0.30434616919175345, 20, 50)
 
         let (x1, y1) = AstroBase.nutation(2.4578265e6, 0.30434616919175345),
             (x2, y2) = ERFA.nut80(2.4578265e6, 0.30434616919175345)
