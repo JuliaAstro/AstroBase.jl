@@ -25,9 +25,6 @@ export tio_locator,
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
-const U2R = deg2rad(1/1e7 * (1/3600))
-const DPPLAN = -0.135 * deg2rad(1/1e3 * (1/3600))
-const DEPLAN =  0.388 * deg2rad(1/1e3 * (1/3600))
 
 include("mfals.jl")
 include("nut_const.jl")
@@ -525,14 +522,8 @@ function nutation_00b(jd1, jd2)
         dp += (x_nutation[i][6] + x_nutation[i][7] * t) * sarg + x_nutation[i][8] * carg
         de += (x_nutation[i][9] + x_nutation[i][10] * t) * carg + x_nutation[i][11] * sarg
     end
-    dpsils = dp * U2R
-    depsls = de * U2R
 
-    dpsipl = DPPLAN
-    depspl = DEPLAN
-
-    dpsils + dpsipl, depsls + depspl
-
+    sec2rad(-0.135e-3) + sec2rad(1e-7dp), sec2rad(0.388e-3) + sec2rad(1e-7de)
 end
 
 end # module
