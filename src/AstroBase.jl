@@ -508,9 +508,6 @@ end
     fukushima_williams_matrix(gamb, phib, psi, eps)
 
 Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
-    equation_of_equinoxes_complementary_terms(jd1, jd2)
-
-Returns complementary terms for a given 2 part Julian date (TT).
 
 # Example
 
@@ -619,6 +616,7 @@ Returns precession corrections for a given 2 part Julian date (TT).
 
 # Example
 
+```jldoctest
 julia> precession_rate_part_of_nutation(2400000.5, 53736)
 -0.8716465172668347629e-7, -0.7342018386722813087e-8
 ```
