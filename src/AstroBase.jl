@@ -29,6 +29,7 @@ export tio_locator,
     precession_rate_part_of_nutation,
     bias_precession_matrix_00,
     equation_of_origins,
+    nutation,
     s00
 
 const J2000 = 2451545.0
@@ -37,16 +38,17 @@ const ARCSECONDS_IN_CIRCLE = 1296000.0
 const PRECESSION = -deg2rad((0.29965) * (1/3600))
 const OBLIQUITY = -deg2rad((0.02524) * (1/3600))
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
-const OBLIQUITY = -deg2rad((0.02524) *(1/3600))
 const EPS0 = deg2rad(84381.448 * (1/3600))
 const DPBIAS = deg2rad(-0.041775 * (1/3600))
 const DEBIAS = deg2rad(-0.0068192 *(1/3600))
 const DRA0 = deg2rad(-0.0146 *(1/3600))
+const U2R = deg2rad(1/1e4 * (1/3600))
 
 include("mfals.jl")
 include("EE00.jl")
 include("S00.jl")
 
+include("NUTATION80.jl")
 """
     celestial_to_intermediate(x, y, s)
 
@@ -149,10 +151,10 @@ Returns TIO locator s' position for a given TT 2-part Julian date (jd1, jd2).
 
 # Example
 
-'''jldoctest
+```jldoctest
 julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 -3.9189245827947945e-11
-'''
+```
 """
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
@@ -193,6 +195,7 @@ function obliquity_of_ecliptic_06(jd1, jd2)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
     sec2rad(@evalpoly t 84381.406 -46.836769 -0.0001831 0.00200340 -0.000000576 -0.0000000434)
 end
+
 
 """
     precession_fukushima_williams06(jd1, jd2)
@@ -682,6 +685,61 @@ function equation_of_origins(rnpb, s)
     p != 0 || q != 0 ? s - atan(q, p) : s
 end
 
+"""
+    nutation(jd1, jd2)
+
+Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
+
+# Example
+
+julia> nutation(2.4578265e6, 0.30434616919175345)
+(-3.7565297299394694e-5, -3.665617105048724e-5
+```
+"""
+function nutation(jd1, jd2)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    mean_longitude_moon_minus_mean_longitude_moon_perigee = rem2pi(
+        sec2rad(@evalpoly t 485866.733 715922.633 31.310 0.064 )
+      + mod(1325.0 * t, 1.0) * 2pi, RoundNearest)
+
+    mean_longitude_sun_minus_mean_longitude_sun_perigee = rem2pi(
+        sec2rad(@evalpoly t 1287099.804 1292581.224 -0.577 - 0.012)
+      + mod(99.0 * t, 1.0) * 2pi, RoundNearest)
+
+    mean_longitude_moon_minus_mean_longitude_moon_node = rem2pi(
+        sec2rad(@evalpoly t 335778.877 295263.137 -13.257 0.011)
+      + mod(1342.0 * t, 1.0) * 2pi, RoundNearest)
+
+    mean_elongation_moon_from_sun = rem2pi(
+        sec2rad(@evalpoly t 1072261.307 1105601.328 -6.891 0.019)
+      + mod(1236.0 * t, 1.0) * 2pi, RoundNearest)
+
+    mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date = rem2pi(
+        sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
+      + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
+
+    dp = 0.0
+    de = 0.0
+
+    for i in reverse(eachindex(multiples_of_coefficients))
+        arg = (multiples_of_coefficients[i][1]  * mean_longitude_moon_minus_mean_longitude_moon_perigee
+        + multiples_of_coefficients[i][2] * mean_longitude_sun_minus_mean_longitude_sun_perigee
+        + multiples_of_coefficients[i][3]  * mean_longitude_moon_minus_mean_longitude_moon_node
+        + multiples_of_coefficients[i][4]  * mean_elongation_moon_from_sun
+        + multiples_of_coefficients[i][5] * mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date)
+
+        s = multiples_of_arguments[i][1] + multiples_of_arguments[i][2] * t
+        c = multiples_of_arguments[i][3] + multiples_of_arguments[i][4] * t
+        sinarg, cosarg = sincos(arg)
+        iszero(s) || (dp += s * sinarg)
+        iszero(c) || (de += c * cosarg)
+    end
+
+    dp * U2R, de * U2R
+end
+  
 """
     equation_of_equinoxes_complementary_terms(jd1, jd2)
 
