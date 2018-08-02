@@ -36,7 +36,10 @@ export
     s00,
     s06,
     tio_locator,
-    xy06
+    xy06,
+    nutation_a06,
+    greenwich_apparent_sidereal_time06,
+    equation_of_equinoxes_94
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -1005,6 +1008,69 @@ function nutation_00a(jd1, jd2)
     end
 
     sec2rad(1e-7dpls) + sec2rad(1e-7dppl), sec2rad(1e-7dels) + sec2rad(1e-7depl)
+end
+
+"""
+    nutation_a06(jd1, jd2)
+
+Returns nutation, luni-solar and planetary for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> nutation_a06(2.4578265e6, 0.30434616919175345)
+(-3.758986477837638e-5, -3.665903094375903e-5)
+```
+"""
+function nutation_a06(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+    dp, de = nutation_00a(jd1, jd2)
+
+    dp + dp * (0.4697e-6 - 2.7774e-6 * t), de + de * (-2.7774e-6 * t)
+end
+
+"""
+    greenwich_mean_sidereal_time06(uta, utb, tta, ttb, rnpb)
+
+Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
+
+# Example
+
+```jldoctest
+julia> gst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, rand(3,3))
+3.738379033673736
+```
+"""
+function greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
+    x, y = rnpb[1, 3], rnpb[2, 3]
+    s = s06(tta, ttb, x, y)
+    era = earth_rotation_angle(uta, utb)
+    eors = equation_of_origins(rnpb,s)
+    mod2pi(era - eors)
+end
+
+"""
+    equation_of_equinoxes_94(jd1, jd2)
+
+Returns equation of equinoxes for a given 2 part Julian date (TT). (IAU 1994 model)
+
+# Example
+
+```jldoctest
+julia> equation_of_equinoxes_94(2.4578265e6, 0.30434616919175345)
+-3.446039061100115e-5
+```
+"""
+function equation_of_equinoxes_94(jd1, jd2)
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
+
+    om = rem2pi(sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
+      + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
+
+    dpsi, deps = nutation(jd1, jd2)
+    eps0 = mean_obliquity_of_ecliptic(jd1, jd2)
+
+    dpsi*cos(eps0) + sec2rad((0.00264 * sin(om) + 0.000063 * sin(om + om)))
 end
 
 end
