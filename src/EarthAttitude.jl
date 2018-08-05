@@ -712,7 +712,7 @@ function bias_precession_matrix_00(jd1, jd2)
     rbw = RotZYX(dra0, dpbias * sin(eps0), -debias)
     rp = RotXZX(eps0, -psia, -oma) * RotZ(chia)
 
-    rbw, rp, rp * rbw
+    rbw, rp, rbw * rp
 end
 
 """
@@ -1149,7 +1149,7 @@ function precession_nutation00(jd1, jd2, dpsi, deps)
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
     epsa = mean_obliquity_of_ecliptic(jd1, jd2) + depspr
     rb, rp, rbpw = bias_precession_matrix_00(jd1, jd2)
-    rnw = numat(epsa,dpsi, deps)
+    rnw = numat(epsa, dpsi, deps)
     epsa, rb, rp, rbpw, rnw, rbpw * rnw
 end
 
@@ -1205,7 +1205,7 @@ end
 
 
 """
-    precession_nutation_matrix_a00
+    precession_nutation_matrix_a00(jd1, jd2)
 
 Returns classical NBP matrix for a given 2 part Julian date(TT)
 
@@ -1224,7 +1224,7 @@ function precession_nutation_matrix_a00(jd1, jd2)
 end
 
 """
-    precession_nutation_matrix_a00
+    precession_nutation_matrix_b00(jd1, jd2)
 
 Returns classical NBP matrix for a given 2 part Julian date(TT)
 
@@ -1263,7 +1263,16 @@ function precession_nutation_matrix_a06(jd1, jd2)
     fukushima_williams_matrix(gamb, phib, psib + dp, epsa + de)
 end
 """
-approx error
+    s00a(jd1, jd2)
+
+Returns the CIO locator (radians) for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> s00a(2.4578265e6, 0.30434616919175345)
+2.9183401976144617e-8
+```
 """
 function s00a(jd1, jd2)
     rbpn = precession_nutation_matrix_a00(jd1, jd2)
@@ -1271,7 +1280,16 @@ function s00a(jd1, jd2)
 end
 
 """
-approx error
+    s00b(jd1, jd2)
+
+Returns the CIO locator (radians) for a given 2 part Julian date (TT).
+
+# Example
+
+```jldoctest
+julia> s00b(2.4578265e6, 0.30434616919175345)
+2.9182068810695328e-8
+```
 """
 function s00b(jd1, jd2)
     rbpn = precession_nutation_matrix_b00(jd1, jd2)
@@ -1339,7 +1357,16 @@ function nutation_matrix_day(jd1, jd2)
 end
 
 """
-approx error
+    xys00a(jd1, jd2)
+
+Returns Celestial intermediate pole (x, y) and the CIO locator for a given 2 part Julian date. (TT)
+
+# Example
+
+```jldoctest
+julia> xys00a(2.4578265e6, 0.30434616919175345)
+(0.001655885227051451, -3.987617878202287e-5, 2.9183401976144617e-8)
+```
 """
 function xys00a(jd1, jd2)
     rbpn = precession_nutation_matrix_a00(jd1, jd2)
@@ -1347,7 +1374,16 @@ function xys00a(jd1, jd2)
 end
 
 """
-approx error
+xys00a(jd1, jd2)
+
+Returns Celestial intermediate pole (x, y) and the CIO locator for a given 2 part Julian date. (TT)
+
+# Example
+
+```jldoctest
+julia> xys00b(2.4578265e6, 0.30434616919175345)
+(0.001655885521808701, -3.987456146931851e-5, 2.9182068810695328e-8)
+```
 """
 function xys00b(jd1, jd2)
     rbpn = precession_nutation_matrix_b00(jd1, jd2)
