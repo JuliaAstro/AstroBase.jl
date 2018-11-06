@@ -2,9 +2,9 @@ module AstroDynBase
 
 using Reexport
 
-@reexport using AstronomicalTime
+@reexport using AstroTime
 
-update() = AstronomicalTime.update()
+update() = AstroTime.update()
 
 include("basetypes.jl")
 include("errors.jl")

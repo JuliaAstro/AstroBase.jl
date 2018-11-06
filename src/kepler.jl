@@ -1,5 +1,6 @@
+using LinearAlgebra
 using Roots
-import AstronomicalTime: seconds
+import AstroTime: seconds
 
 export kepler, period, meantoecc, ecctomean, ecctotrue, truetoecc
 
@@ -14,11 +15,11 @@ function ecctomean(E, ecc)
 end
 
 function ecctotrue(E, ecc)
-    return 2*atan2(sqrt(1 + ecc)*sin(E/2), sqrt(1 - ecc)*cos(E/2))
+    return 2*atan(sqrt(1 + ecc)*sin(E/2), sqrt(1 - ecc)*cos(E/2))
 end
 
 function truetoecc(T, ecc)
-    return 2*atan2(sqrt(1 - ecc)*sin(T/2), sqrt(1 + ecc)*cos(T/2))
+    return 2*atan(sqrt(1 - ecc)*sin(T/2), sqrt(1 + ecc)*cos(T/2))
 end
 
 function period(a, μ)

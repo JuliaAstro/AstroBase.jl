@@ -1,3 +1,4 @@
+using LinearAlgebra: norm, cross
 import Base: angle
 
 export angle

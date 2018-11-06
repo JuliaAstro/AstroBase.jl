@@ -1,3 +1,5 @@
+using DelimitedFiles
+
 @testset "Elements" begin
     # Reference values from Orekit
     μ = 3.986004418e5
@@ -24,8 +26,8 @@
     @test isretrograde(inc)
     @test !ispolar(inc)
 
-    ref_rv = readcsv(joinpath("data", "rv.csv"))
-    ref_el = readcsv(joinpath("data", "elements.csv"))
+    ref_rv = readdlm(joinpath("data", "rv.csv"), ',')
+    ref_el = readdlm(joinpath("data", "elements.csv"), ',')
 
     n, _ = size(ref_rv)
     for i = 1:n

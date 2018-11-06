@@ -24,7 +24,7 @@
                 [5.972450880751731e-11, -1.6820380693583266e-9, 2.6616471668504273e-6]),
         )
 
-        ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 04, 23, 789))
+        ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 04, 23.789))
         ref_angles = ref[body][1]
         ref_derivatives = ref[body][2]
         angles = mod2pi.(collect(euler_angles(body, ep)))

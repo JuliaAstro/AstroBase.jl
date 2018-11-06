@@ -1,4 +1,3 @@
-import Convertible: haspath, findpath
 import Base: ∘, inv
 
 export ComposedRotation, Rotation, ∘, origin, target
@@ -36,7 +35,7 @@ target(rot::ComposedRotation) = target(rot.rot2)
 
 inv(rot::ComposedRotation) = ComposedRotation(inv(rot.rot2), inv(rot.rot1))
 
-function ∘{F<:Frame,F1<:Frame,F2<:Frame}(rot1::Rotation{F1,F}, rot2::Rotation{F,F2})
+function ∘(rot1::Rotation{F1,F}, rot2::Rotation{F,F2}) where {F<:Frame,F1<:Frame,F2<:Frame}
     ComposedRotation(rot1, rot2)
 end
 
@@ -63,6 +62,66 @@ function getgraph()
     graph
 end
 
+function haspath(graph, origin, target)
+    haspath = false
+    queue = [origin]
+    links = Dict{DataType, DataType}()
+    while !isempty(queue)
+        node = shift!(queue)
+        if node == target
+            break
+        end
+        for neighbour in graph[node]
+            if !haskey(links, neighbour)
+                push!(queue, neighbour)
+                merge!(links, Dict{DataType, DataType}(neighbour=>node))
+            end
+        end
+    end
+    if haskey(links, target)
+        haspath = true
+    end
+    return haspath
+end
+
+function findpath(graph, origin, target)
+    if isempty(graph[origin])
+        error("There are no convert methods with source type '$origin' defined.")
+    end
+    if !haspath(graph, origin, target)
+        error("No conversion path '$origin' -> '$target' found.")
+    end
+    queue = PriorityQueue(DataType, Int)
+    prev = Dict{DataType,Nullable{DataType}}()
+    distance = Dict{DataType, Int}()
+    for node in keys(graph)
+        merge!(prev, Dict(node=>Nullable{DataType}()))
+        merge!(distance, Dict(node=>typemax(Int)))
+        enqueue!(queue, node, distance[node])
+    end
+    distance[origin] = 0
+    queue[origin] = 0
+    while !isempty(queue)
+        node = dequeue!(queue)
+        node == target && break
+        for neighbour in graph[node]
+            alt = distance[node] + 1
+            if alt < distance[neighbour]
+                distance[neighbour] = alt
+                prev[neighbour] = Nullable(node)
+                queue[neighbour] = alt
+            end
+        end
+    end
+    path = DataType[]
+    current = target
+    while !isnull(prev[current])
+        unshift!(path, current)
+        current = get(prev[current])
+    end
+    return path
+end
+
 function gen_rotation(F1, F2, ep)
     graph = getgraph()
     FF1 = supertype(F1) == Frame ? F1 : supertype(F1)
@@ -81,6 +140,6 @@ function gen_rotation(F1, F2, ep)
     return ex
 end
 
-@generated function Rotation{F1<:Frame,F2<:Frame}(::Type{F1}, ::Type{F2}, ep)
+@generated function Rotation(::Type{F1}, ::Type{F2}, ep) where {F1<:Frame,F2<:Frame}
     gen_rotation(F1, F2, ep)
 end

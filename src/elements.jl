@@ -1,3 +1,5 @@
+using LinearAlgebra: norm, cross
+
 export keplerian, cartesian, perifocal, isprograde, isretrograde, ispolar
 
 keplerian(rv, μ) = keplerian(rv[1:3], rv[4:6], μ)
@@ -28,26 +30,26 @@ function keplerian(r, v, µ)
     if equatorial && !circular
         node = 0.0
         # Longitude of pericenter
-        peri = mod2pi(atan2(ec[2], ec[1]))
-        ano = mod2pi(atan2(h⋅cross(ec, r) / hm, r⋅ec))
+        peri = mod2pi(atan(ec[2], ec[1]))
+        ano = mod2pi(atan(h⋅cross(ec, r) / hm, r⋅ec))
     elseif !equatorial && circular
-        node = mod2pi(atan2(n[2], n[1]))
+        node = mod2pi(atan(n[2], n[1]))
         peri = 0.0
         # Argument of latitude
-        ano = mod2pi(atan2(r⋅cross(h, n) / hm, r⋅n))
+        ano = mod2pi(atan(r⋅cross(h, n) / hm, r⋅n))
     elseif equatorial && circular
         node = 0.0
         peri = 0.0
         # True longitude
-        ano = mod2pi(atan2(r[2], r[1]))
+        ano = mod2pi(atan(r[2], r[1]))
     else
-        node = mod2pi(atan2(n[2], n[1]))
-        # peri = mod2pi(atan2(ec⋅cross(h, n) / hm, ec⋅n))
-        # ano = mod2pi(atan2(r⋅cross(h, ec) / hm, r⋅ec))
+        node = mod2pi(atan(n[2], n[1]))
+        # peri = mod2pi(atan(ec⋅cross(h, n) / hm, ec⋅n))
+        # ano = mod2pi(atan(r⋅cross(h, ec) / hm, r⋅ec))
         if sma > 0.0
             ese = (r ⋅ v) / sqrt(μ * sma)
             ece = rm * vm^2 / μ - 1.0
-            ano = ecctotrue(atan2(ese, ece), ecc)
+            ano = ecctotrue(atan(ese, ece), ecc)
         else
             # TODO: Implement this.
             error("Hyperbolic elements not implemented.")
@@ -55,7 +57,7 @@ function keplerian(r, v, µ)
         rnode = [cos(node), sin(node), 0.0]
         px = r ⋅ rnode
         py = r ⋅ (h × rnode) / hm
-        peri = atan2(py, px) - ano
+        peri = atan(py, px) - ano
     end
 
     sma, ecc, inc, node, peri, ano

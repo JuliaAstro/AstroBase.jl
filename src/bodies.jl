@@ -1,5 +1,5 @@
 import Base: parent, show, datatype_name
-import AstronomicalTime: SECONDS_PER_CENTURY, SECONDS_PER_DAY, J2000, seconds
+import AstroTime: SECONDS_PER_CENTURY, SECONDS_PER_DAY, seconds
 
 export CelestialBody, Planet, NaturalSatellite, MinorBody, Barycenter,
     Sun, SSB, SolarSystemBarycenter
@@ -55,40 +55,40 @@ w₁(::Type{Sun}) = deg2rad(84.176)
 θ(t, b::Type{<:CelestialBody}) = θ₀(b) .+ θ₁(b) .* t ./ SECONDS_PER_CENTURY
 
 function right_ascension(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     α₀(b) + α₁(b) * t / SECONDS_PER_CENTURY +
         α₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(α(b) .* sin.(θ(t, b)))
 end
 
 function declination(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     δ₀(b) + δ₁(b) * t / SECONDS_PER_CENTURY +
         δ₂(b) * t^2 / SECONDS_PER_CENTURY^2 +
         sum(δ(b) .* cos.(θ(t, b)))
 end
 
 function rotation_angle(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     w₀(b) + w₁(b) * t / SECONDS_PER_DAY +
         w₂(b) * t^2 / SECONDS_PER_DAY^2 +
         sum(w(b) .* sin.(θ(t, b)))
 end
 
 function right_ascension_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     α₁(b) / SECONDS_PER_CENTURY + 2 * α₂(b) * t / SECONDS_PER_CENTURY^2 +
         sum(α(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end
 
 function declination_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     δ₁(b) / SECONDS_PER_CENTURY + 2 * δ₂(b) * t / SECONDS_PER_CENTURY^2 -
         sum(δ(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* sin.(θ(t, b)))
 end
 
 function rotation_rate(b::Type{C}, ep) where C<:CelestialBody
-    t = get(seconds(ep, J2000))
+    t = get(seconds(j2000(ep)))
     w₁(b) / SECONDS_PER_DAY + 2 * w₂(b) * t / SECONDS_PER_DAY^2 +
         sum(w(b) .* θ₁(b) ./ SECONDS_PER_CENTURY .* cos.(θ(t, b)))
 end

@@ -1,8 +1,7 @@
 using AstroDynBase
-using Base.Test
+using Test
 
 AstroDynBase.update()
-
 
 @testset "AstroDynBase" begin
     include("elements.jl")

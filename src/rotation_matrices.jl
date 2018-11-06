@@ -1,9 +1,9 @@
 export rotation_matrix, rate_matrix
 
-axes_numbers(axes) = replace(replace(replace(lowercase(axes), "x", "1"), "y", "2"), "z", "3")
+axes_numbers(axes) = replace(replace(replace(lowercase(axes), "x"=>"1"), "y"=>"2"), "z"=>"3")
 
 function rotation_axes(ord::AbstractString)
-    if !ismatch(r"^[xzy]{3}$|^[123]{3}$", lowercase(ord))
+    if !occursin(r"^[xzy]{3}$|^[123]{3}$", lowercase(ord))
         throw(ArgumentError("Rotation axes must be indicated as a triple of either X, Y, Z or 1, 2, 3."))
     end
 
@@ -33,7 +33,7 @@ function rotation_axes(ord::Int)
 end
 
 function rotation_axis(axis::AbstractString)
-    if !ismatch(r"^[xzy123]$", lowercase(axis))
+    if !occursin(r"^[xzy123]$", lowercase(axis))
         throw(ArgumentError("Rotation axis must be indicated as either X, Y, Z or 1, 2, 3."))
     end
     parse(Int, axes_numbers(axis))
