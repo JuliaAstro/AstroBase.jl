@@ -10,8 +10,9 @@
         push!(bodies, "Pluto")
         append!(bodies, AstroBase.Bodies.PLUTO_SATELLITE_NAMES)
         for body in bodies
-            typ = @eval Symbol($body)
+            typ = @eval $(Symbol(body))
             @test string(typ) == body
+            @test from_naifid(naifid(typ())) == typ()
         end
     end
 end

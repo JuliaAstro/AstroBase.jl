@@ -23,12 +23,16 @@ for (i, body) in enumerate(PLANET_NAMES)
         Base.show(io::IO, ::$typ_bc) = print(io, $(string(typ_bc)))
         parent(::$typ_bc) = ssb
         naifid(::$typ_bc) = $i
+        from_naifid(::Val{$i}) = $sym_bc
+        add_edge!(bodies, 0, $i)
         export $sym_bc, $typ_bc
 
         struct $typ <: Planet end
         const $sym = $typ()
         parent(::$typ) = $sym_bc
         naifid(::$typ) = $id
+        from_naifid(::Val{$id}) = $sym
+        add_edge!(bodies, 0, $id)
         export $sym, $typ
     end
 end
