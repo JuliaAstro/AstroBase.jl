@@ -2,23 +2,27 @@ module Bodies
 
 import Base: parent
 
-using LightGraphs: Graph
-using ItemGraphs: ItemGraph, add_edge!, add_vertex!, items
+using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
 export CelestialBody,
+    NAIFId,
     SolarSystemBarycenter,
     Sun,
     from_naifid,
     naifid,
+    name,
     parent,
     ssb,
     sun
 
 const NAIFId = Int
-const bodies = ItemGraph{NAIFId, NAIFId}(Graph())
+const bodies = ItemGraph{NAIFId, NAIFId}(SimpleGraph())
 
 abstract type CelestialBody end
-Base.show(io::IO, x::CelestialBody) = print(io, string(typeof(x)))
+
+name(body::CelestialBody) = string(nameof(typeof(body)))
+
+Base.show(io::IO, body::CelestialBody) = print(io, name(body))
 
 from_naifid(id::NAIFId) = from_naifid(Val(id))
 
