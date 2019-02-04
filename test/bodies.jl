@@ -15,4 +15,6 @@
             @test from_naifid(naifid(typ())) == typ()
         end
     end
+    @test AstroBase.Bodies.path_ids(luna, earth) == [301, 3, 399]
+    @test AstroBase.Bodies.path_ids(luna, io) == [301, 3, 0, 5, 501]
 end

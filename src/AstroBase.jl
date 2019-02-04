@@ -7,6 +7,7 @@ using Rotations
 
 include("util.jl")
 include(joinpath("bodies", "Bodies.jl"))
+include("interfaces.jl")
 include("EarthAttitude.jl")
 include("ephemerides.jl")
 

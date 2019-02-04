@@ -32,7 +32,7 @@ for (i, body) in enumerate(PLANET_NAMES)
         parent(::$typ) = $sym_bc
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 0, $id)
+        add_edge!(bodies, $i, $id)
         export $sym, $typ
     end
 end
