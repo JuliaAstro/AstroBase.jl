@@ -20,12 +20,8 @@
 
     @test tio_locator(2.4578265e6, 0.30434616919175345) ≈ ERFA.sp00(2.4578265e6, 0.30434616919175345)
 
-    # Radians <-> arcseconds
-    @test sec2rad(3600) == deg2rad(1)
-    @test rad2sec(1) == rad2deg(1) * 3600
-
-    @test mean_anomaly(luna, 1)  ≈ ERFA.fal03(1)
-    @test mean_anomaly(sun, 1) ≈ ERFA.falp03(1)
+    @test AstroBase.EarthAttitude.mean_anomaly(luna, 1)  ≈ ERFA.fal03(1)
+    @test AstroBase.EarthAttitude.mean_anomaly(sun, 1) ≈ ERFA.falp03(1)
     @test mean_longitude_minus_lan(luna, 1) ≈ ERFA.faf03(1)
     @test mean_elongation(luna, 1) ≈ ERFA.fad03(1)
     @test mean_longitude_ascending_node(luna, 1) ≈ ERFA.faom03(1)

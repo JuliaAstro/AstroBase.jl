@@ -1,4 +1,6 @@
-export sec2rad, rad2sec
+using LinearAlgebra: norm, ⋅, ×
+
+export sec2rad, rad2sec, normalize_angle, angle
 
 """
     sec2rad(sec)
@@ -26,3 +28,32 @@ julia> rad2sec(0.5235987755982988)
 ```
 """
 rad2sec(rad) = rad2deg(rad) * 3600
+
+function normalize_angle(angle, center)
+    angle - 2π * floor((angle + π - center) / 2π)
+end
+
+function angle(v1, v2)
+    normprod = norm(v1) * norm(v2)
+    if normprod == 0.0
+        throw(DomainError())
+    else
+        v1v2 = v1 ⋅ v2
+        threshold = normprod * 0.9999
+        if v1v2 >= -threshold && v1v2 <= threshold
+            return acos(v1v2 / normprod)
+        else
+            v3n = norm(v1 × v2)
+            return v1v2 >= 0.0 ? (v3n / normprod) : π - asin(v3n / normprod)
+        end
+    end
+end
+
+function azimuth(v)
+    atan(v[2], v[1])
+end
+
+function elevation(v)
+    asin(v[3] / norm(v))
+end
+

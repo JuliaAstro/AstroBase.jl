@@ -19,7 +19,6 @@ export
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
     greenwich_mean_sidereal_time82,
-    mean_anomaly,
     mean_elongation,
     mean_longitude,
     mean_longitude_ascending_node,
