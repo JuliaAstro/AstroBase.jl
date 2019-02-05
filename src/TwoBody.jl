@@ -180,12 +180,6 @@ end
 transform(::Parabolic, ::EccentricAnomaly, ::TrueAnomaly, a, _) = 2.0 * atan(a)
 transform(::Parabolic, ::TrueAnomaly, ::EccentricAnomaly, a, _) = tan(a / 2.0)
 
-function elliptic_eccentric_to_true(E, e)
-end
-
-function true_to_elliptic_eccentric(v, e)
-end
-
 function transform(::Elliptic, ::TrueAnomaly, ::EccentricAnomaly, ν, ecc)
     β = ecc / (1 + sqrt(1 - ecc^2))
     ν - 2 * atan(β * sin(ν) / (1 + β * cos(ν)))
