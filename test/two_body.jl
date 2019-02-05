@@ -1,38 +1,61 @@
-@testset "Two Body" begin
-    @testset "Keplerian <-> Cartesian" begin
-        #= μ = 3.9860047e14 =#
-        #=  =#
-        #= a = 24464560.0 =#
-        #= e = 0.7311 =#
-        #= i = 0.122138 =#
-        #= Ω = 1.00681 =#
-        #= ω = 3.10686 =#
-        #= v = 0.048363 =#
-        #=  =#
-        #= pos = [-0.107622532467967e+07, =#
-        #=      -0.676589636432773e+07, =#
-        #=      -0.332308783350379e+06, =#
-        #=     ] =#
-        #=  =#
-        #= vel = [0.935685775154103e+04, =#
-        #=      -0.331234775037644e+04, =#
-        #=      -0.118801577532701e+04, =#
-        #=     ] =#
-        #=  =#
-        #= pos₁, vel₁ = cartesian(a, e, i, Ω, ω, v, μ) =#
-        #= a₁, e₁, i₁, Ω₁, ω₁, v₁ = keplerian(pos, vel, μ) =#
+macro test_elements(name, μ, ele, pos, vel)
+    quote
+        @testset $name begin
+            μ = $μ
+            a, e, i, Ω, ω, ν = $ele
+            pos = $pos
+            vel = $vel
 
-        #= @testset for i = 1:3 =#
-        #=     @test pos₁[i] .≈ pos[i] =#
-        #=     @test vel₁[i] .≈ vel[i] =#
-        #= end =#
-        #=  =#
-        #= @test a ≈ a₁ =#
-        #= @test e ≈ e₁ =#
-        #= @test i ≈ i₁ =#
-        #= @test Ω ≈ Ω₁ =#
-        #= @test ω ≈ ω₁ =#
-        #= @test v ≈ v₁ =#
+            pos₁, vel₁ = cartesian(a, e, i, Ω, ω, ν, μ)
+            a₁, e₁, i₁, Ω₁, ω₁, ν₁ = keplerian(pos, vel, μ)
+
+            @testset "Cartesian" begin
+                @testset for i = 1:3
+                    @test pos₁[i] ≈ pos[i]
+                    @test vel₁[i] ≈ vel[i]
+                end
+            end
+
+            @testset "Keplerian" begin
+                @test a ≈ a₁
+                @test e ≈ e₁
+                @test i ≈ i₁
+                @test Ω ≈ Ω₁
+                @test ω ≈ ω₁
+                @test ν ≈ ν₁
+            end
+        end
+    end
+end
+
+@testset "Two Body" begin
+    @testset "Orbital Elements" begin
+        @testset "Perifocal" begin
+            p = 1.13880762905224e7
+            ecc = 0.7311
+            ν = 0.44369564302687126
+            μ = 3.9860047e14
+
+            pos = [6194863.12535486, 2944437.90016286, 0.0]
+            vel = [-2539.71254827, 9668.69568539, 0.0]
+            pos₁, vel₁ = perifocal(p, ecc, ν, μ)
+            @testset for i = 1:3
+                @test pos₁[i] ≈ pos[i]
+                @test vel₁[i] ≈ vel[i]
+            end
+        end
+        # Reference values from Orekit
+        @test_elements("Elliptical Orbit",
+                       3.9860047e14,
+                       [24464560.0, 0.7311, 0.122138, 1.00681, 3.10686, 0.44369564302687126],
+                       [-0.107622532467967e+07, -0.676589636432773e+07, -0.332308783350379e+06],
+                       [0.935685775154103e+04, -0.331234775037644e+04, -0.118801577532701e+04])
+        # Reference values from poliastro
+        #= @test_elements("Circular Orbit", =#
+        #=                3.986004418e14, =#
+        #=                [6778136.6, 0.0, deg2rad(15), 0.0, deg2rad(20), deg2rad(30)], =#
+        #=                [4396398.60746266, 5083838.45333733,  877155.42119322], =#
+        #=                [-5797.06004014,  4716.60916063,  1718.86034246]) =#
     end
     @testset "Anomalies" begin
         anomalies = -π : 0.1π : π

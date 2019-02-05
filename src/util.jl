@@ -1,4 +1,5 @@
 using LinearAlgebra: norm, ⋅, ×
+using StaticArrays: SVector
 
 export sec2rad, rad2sec, normalize_angle, angle
 
@@ -55,5 +56,11 @@ end
 
 function elevation(v)
     asin(v[3] / norm(v))
+end
+
+function vector_azel(az, el)
+    saz, caz = sincos(az)
+    sel, cel = sincos(el)
+    SVector(caz * cel, saz * cel, sel)
 end
 

@@ -2,6 +2,7 @@ julia 0.7
 AstroTime
 ItemGraphs
 Reexport 0.1.0
+ReferenceFrameRotations
 Roots
 Rotations
 StaticArrays
