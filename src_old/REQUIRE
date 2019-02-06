@@ -1,0 +1,9 @@
+julia 0.6
+AstroBase
+AstroTime
+OptionalData
+Reexport
+Roots
+DataStructures
+Nullables
+SpecialFunctions
