@@ -24,7 +24,19 @@ else
     end
 end
 
-@everywhere function keplerian_roundtrip(ele₀, μ; abort=false)
+@everywhere acceptor(ele, μ) = false
+
+# Reject element sets with an out of range anomaly.
+@everywhere function hyperbolic_rejector(ele, μ)
+    abs(ele[end]) >= acos(-1/ele[2]) && return true
+
+    false
+end
+
+@everywhere function keplerian_roundtrip(ele₀, μ, rejector; abort=false)
+    rejected = rejector(ele₀, μ)
+    rejected && return false, true, ele₀, ele₀
+
     ele₁ = keplerian(cartesian(ele₀..., μ)..., μ)
     failed = !(isapprox(ele₁[1], ele₀[1], rtol=1.0) &&
                isapprox(ele₁[2], ele₀[2], atol=sqrt(eps())) &&
@@ -41,20 +53,24 @@ end
               "ω₁: ", rpad(ele₁[5], 24), "ω₀:", ele₀[5], "\n",
               "ν₁: ", rpad(ele₁[6], 24), "ν₀:", ele₀[6])
     end
-    failed, ele₁, ele₀
+    failed, false, ele₁, ele₀
 end
 
-function run_tests(rngs...)
+function run_tests(rejector, rngs...)
     iter = product(rngs...)
     total = length(iter)
     println("Testing $total combinations with $procs processes.")
 
-    results = pmap(x -> keplerian_roundtrip(x, μ; abort=abort), iter)
+    results = pmap(x -> keplerian_roundtrip(x, μ, rejector; abort=abort), iter)
     failed = reduce(+, map(first, results))
-    passed = total - failed
+    rejected = reduce(+, map(x->x[2], results))
+    passed = total - failed - rejected
     percent_failed = round(Int, failed / total * 100.0)
+    percent_rejected = round(Int, rejected / total * 100.0)
     percent_passed = round(Int, passed / total * 100.0)
-    println("Passed $passed ($percent_passed%), failed $failed ($percent_failed%).")
+    println("Passed $passed ($percent_passed%), ",
+            "failed $failed ($percent_failed%), ",
+            "rejected $rejected ($percent_rejected%).")
 end
 
 println("Elliptic Orbits")
@@ -67,7 +83,7 @@ i_rng = range(0.001, 0.999π, length=n)
 ω_rng = range(0.001, 1.999π, length=n)
 ν_rng = range(-π, π, length=n)
 
-t = @elapsed run_tests(a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
+t = @elapsed run_tests(acceptor, a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
 println("In $t seconds.\n")
 
 println("Hyperbolic Orbits")
@@ -80,6 +96,6 @@ i_rng = range(0.001, 0.999π, length=n)
 ω_rng = range(0.001, 1.999π, length=n)
 ν_rng = range(-0.999π, 0.999π, length=n)
 
-t = @elapsed run_tests(a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
+t = @elapsed run_tests(hyperbolic_rejector, a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
 println("In $t seconds.\n")
 
