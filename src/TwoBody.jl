@@ -11,6 +11,9 @@ import ..angle,
     ..normalize_angle,
     ..vector_azel
 
+# TODO: Delete me
+using LinearAlgebra: cross, dot
+
 export
     cartesian,
     keplerian,
@@ -166,6 +169,53 @@ function keplerian(pos, vel, µ, tol=1e-8)
     a, ecc, inc, Ω, ω, ν
 end
 
+#= function keplerian(r, v, µ) =#
+#=     rm = norm(r) =#
+#=     vm = norm(v) =#
+#=     h = cross(r, v) =#
+#=     hm = norm(h) =#
+#=     k = [0.0, 0.0, 1.0] =#
+#=     n = cross(k, h) =#
+#=     nm = norm(n) =#
+#=     xi = vm^2/2 - µ/rm =#
+#=     ec = ((vm^2 - µ/rm)*r - v*dot(r, v))/µ =#
+#=     ecc = norm(ec) =#
+#=     inc = angle(h, k) =#
+#=  =#
+#=     equatorial = abs(inc) ≈ 0 =#
+#=     circular = ecc ≈ 0 =#
+#=  =#
+#=     if circular =#
+#=         # Semi-latus rectum =#
+#=         sma = hm^2/µ =#
+#=     else =#
+#=         sma = -µ/(2*xi) =#
+#=     end =#
+#=  =#
+#=     if equatorial && !circular =#
+#=         node = 0.0 =#
+#=         # Longitude of pericenter =#
+#=         peri = mod2pi(atan(ec[2], ec[1])) =#
+#=         ano = mod2pi(atan(h⋅cross(ec, r) / hm, r⋅ec)) =#
+#=     elseif !equatorial && circular =#
+#=         node = mod2pi(atan(n[2], n[1])) =#
+#=         peri = 0.0 =#
+#=         # Argument of latitude =#
+#=         ano = mod2pi(atan(r⋅cross(h, n) / hm, r⋅n)) =#
+#=     elseif equatorial && circular =#
+#=         node = 0.0 =#
+#=         peri = 0.0 =#
+#=         # True longitude =#
+#=         ano = mod2pi(atan(r[2], r[1])) =#
+#=     else =#
+#=         node = mod2pi(atan(n[2], n[1])) =#
+#=         peri = mod2pi(atan(ec⋅cross(h, n) / hm, ec⋅n)) =#
+#=         ano = mod2pi(atan(r⋅cross(h, ec) / hm, r⋅ec)) =#
+#=     end =#
+#=  =#
+#=     sma, ecc, inc, node, peri, ano =#
+#= end =#
+
 #= function keplerian(pos, vel, μ) =#
 #=     h = pos × vel =#
 #=     h2 = norm(h)^2 =#
@@ -193,7 +243,7 @@ end
 #=         e_sh = pos ⋅ vel / sqrt(-μa) =#
 #=         e_ch = rv2_over_μ - 1 =#
 #=         ecc = sqrt(1 - h2 / μa) =#
-#=         ν = transform(hyperbolic, eccentric, true_anomaly, =#
+#=         ν = transform(hyperbolic, eccentric_anomaly, true_anomaly, =#
 #=                       log((e_ch + e_sh) / (e_ch - e_sh)) / 2, ecc) =#
 #=     end =#
 #=  =#
