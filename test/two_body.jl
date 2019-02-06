@@ -1,3 +1,4 @@
+import Base.Threads: nthreads, @threads
 macro test_elements(name, μ, ele, pos, vel)
     quote
         @testset $name begin
@@ -18,12 +19,31 @@ macro test_elements(name, μ, ele, pos, vel)
 
             @testset "Keplerian" begin
                 @test a ≈ a₁
-                @test e ≈ e₁
+                @test e ≈ e₁ atol=sqrt(eps())
                 @test i ≈ i₁
                 @test Ω ≈ Ω₁
                 @test ω ≈ ω₁
                 @test ν ≈ ν₁
             end
+        end
+    end
+end
+
+macro test_elements(name, μ, ele)
+    quote
+        @testset $name begin
+            μ = $μ
+            a, e, i, Ω, ω, ν = $ele
+
+            pos₁, vel₁ = cartesian(a, e, i, Ω, ω, ν, μ)
+            a₁, e₁, i₁, Ω₁, ω₁, ν₁ = keplerian(pos₁, vel₁, μ)
+
+            @test a ≈ a₁
+            @test e ≈ e₁ atol=sqrt(eps())
+            @test i ≈ i₁
+            @test Ω ≈ Ω₁
+            @test ω ≈ ω₁
+            @test ν ≈ ν₁
         end
     end
 end
@@ -51,11 +71,20 @@ end
                        [-0.107622532467967e+07, -0.676589636432773e+07, -0.332308783350379e+06],
                        [0.935685775154103e+04, -0.331234775037644e+04, -0.118801577532701e+04])
         # Reference values from poliastro
-        #= @test_elements("Circular Orbit", =#
-        #=                3.986004418e14, =#
-        #=                [6778136.6, 0.0, deg2rad(15), 0.0, deg2rad(20), deg2rad(30)], =#
-        #=                [4396398.60746266, 5083838.45333733,  877155.42119322], =#
-        #=                [-5797.06004014,  4716.60916063,  1718.86034246]) =#
+        @test_elements("Circular Orbit",
+                       3.986004418e14,
+                       [6778136.6, 0.0, deg2rad(15), deg2rad(20), 0.0, deg2rad(30)],
+                       [4396398.60746266, 5083838.45333733,  877155.42119322],
+                       [-5797.06004014,  4716.60916063,  1718.86034246])
+        @test_elements("Circular Orekit",
+                       3.9860047e14,
+                       # Orekit uses an argument of pericenter of 3.10686 here
+                       [24464560.0, 0.0, 0.122138, 1.00681, 0.0, 0.048363])
+        @test_elements("Hyperbolic Orekit",
+                       3.9860047e14,
+                       [-24464560.0, 1.7311, 0.122138, 1.00681,  3.10686, 0.12741601769795755])
+
+
     end
     @testset "Anomalies" begin
         anomalies = -π : 0.1π : π
