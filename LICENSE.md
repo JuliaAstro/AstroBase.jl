@@ -1,6 +1,6 @@
 The AstroBase.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2018: Helge Eichhorn.
+> Copyright (c) 2018-2019: Helge Eichhorn and the AstroBase.jl contributors.
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
