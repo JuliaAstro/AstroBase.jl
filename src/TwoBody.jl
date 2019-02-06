@@ -54,15 +54,17 @@ iscircular(ecc, tol=1e-8) = isapprox(ecc, 0.0, atol=tol)
 isequatorial(inc, tol=1e-8) = isapprox(abs(inc), 0.0, atol=tol)
 
 function keplerian(pos, vel, µ, tol=1e-8)
-    rm = norm(pos)
-    vm = norm(vel)
+    r = norm(pos)
+    v = norm(vel)
+    # Angular momentum
     h = pos × vel
     hm = norm(h)
     k = SVector(0.0, 0.0, 1.0)
-    n = k × h
-    nm = norm(n)
-    ec = ((vm^2 - µ/rm) * pos - vel * (pos ⋅ vel)) / µ
-    ecc = norm(ec)
+    # Node vector
+    node = k × h
+    # Eccentricity vector
+    e = ((v^2 - µ / r) * pos - (pos ⋅ vel) * vel) / µ
+    ecc = norm(e)
     inc = angle(h, k)
 
     equatorial = isequatorial(inc, tol)
@@ -70,53 +72,48 @@ function keplerian(pos, vel, µ, tol=1e-8)
 
     if circular
         # Semi-latus rectum
-        a = hm^2/µ
+        a = hm^2 / µ
     else
-        ξ = vm^2/2 - µ/rm
-        a = -µ/(2ξ)
+        ξ = v^2 / 2 - µ / r
+        a = -µ / (2ξ)
     end
 
     if equatorial && !circular
         Ω = 0.0
         # Longitude of pericenter
-        ω = mod2pi(atan(ec[2], ec[1]))
-        ν = atan(h ⋅ (ec × pos) / hm, pos ⋅ ec)
+        ω = azimuth(e)
+        ν = atan(h ⋅ (e × pos) / hm, pos ⋅ e)
     elseif !equatorial && circular
-        Ω = mod2pi(atan(n[2], n[1]))
+        Ω = azimuth(node)
         ω = 0.0
         # Argument of latitude
-        ν = atan((pos ⋅ (h × n)) / hm, pos ⋅ n)
+        ν = atan((pos ⋅ (h × node)) / hm, pos ⋅ node)
     elseif equatorial && circular
         Ω = 0.0
         ω = 0.0
         # True longitude
-        ν = atan(pos[2], pos[1])
+        ν = azimuth(pos)
     else
         if a > 0
             # Elliptic
-            e_se = pos ⋅ vel / sqrt(μ * a)
-            e_ce = rm * vm^2 / μ - 1
-            E = sqrt(e_se^2 + e_ce^2)
+            E_se = pos ⋅ vel / sqrt(μ * a)
+            E_ce = r * v^2 / μ - 1
             ν = transform(elliptic, eccentric_anomaly, true_anomaly,
-                          atan(e_se, e_ce), E)
+                          atan(E_se, E_ce), ecc)
         else
             # Hyperbolic
-            e_sh = pos ⋅ vel / sqrt(-μ * a)
-            e_ch = rm * vm^2 / μ - 1
-            E = sqrt(1 - hm^2 / (μ * a))
+            E_sh = pos ⋅ vel / sqrt(-μ * a)
+            E_ch = r * v^2 / μ - 1
             ν = transform(hyperbolic, eccentric_anomaly, true_anomaly,
-                          log((e_ch + e_sh) / (e_ch - e_sh)) / 2, E)
+                          log((E_ch + E_sh) / (E_ch - E_sh)) / 2, ecc)
         end
-
-        Ω = azimuth(n)
-        node = vector_azel(Ω, 0.0)
+        Ω = azimuth(node)
         px = pos ⋅ node
-        py = pos ⋅ (h × node) / sqrt(hm^2)
+        py = pos ⋅ (h × node) / hm
         ω = atan(py, px) - ν
-
-        Ω = mod2pi(Ω)
-        ω = mod2pi(ω)
     end
+    Ω = mod2pi(Ω)
+    ω = mod2pi(ω)
     v = normalize_angle(ν, 0.0)
 
     a, ecc, inc, Ω, ω, ν
