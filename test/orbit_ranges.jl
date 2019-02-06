@@ -1,5 +1,10 @@
 using Base.Iterators: product
 using Distributed
+try
+    using ProgressMeter
+catch
+    # pass
+end
 
 @everywhere using AstroBase
 
@@ -61,7 +66,11 @@ function run_tests(func, rngs...)
     total = length(iter)
     println("Testing $total combinations with $procs processes.")
 
-    results = pmap(func, iter)
+    if isdefined(Main, :progress_map) && total > 1e6
+        results = progress_map(func, iter, mapfun=pmap, progress=Progress(total, dt=2.0))
+    else
+        results = pmap(func, iter)
+    end
     failed = reduce(+, map(first, results))
     rejected = reduce(+, map(x->x[2], results))
     passed = total - failed - rejected
