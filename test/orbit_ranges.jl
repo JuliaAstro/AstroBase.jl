@@ -56,12 +56,12 @@ end
     failed, false, ele₁, ele₀
 end
 
-function run_tests(rejector, rngs...)
+function run_tests(func, rngs...)
     iter = product(rngs...)
     total = length(iter)
     println("Testing $total combinations with $procs processes.")
 
-    results = pmap(x -> keplerian_roundtrip(x, μ, rejector; abort=abort), iter)
+    results = pmap(func, iter)
     failed = reduce(+, map(first, results))
     rejected = reduce(+, map(x->x[2], results))
     passed = total - failed - rejected
@@ -83,7 +83,8 @@ i_rng = range(0.001, 0.999π, length=n)
 ω_rng = range(0.001, 1.999π, length=n)
 ν_rng = range(-π, π, length=n)
 
-t = @elapsed run_tests(acceptor, a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
+t = @elapsed run_tests(x -> keplerian_roundtrip(x, μ, acceptor; abort=abort),
+                       a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
 println("In $t seconds.\n")
 
 println("Hyperbolic Orbits")
@@ -96,6 +97,42 @@ i_rng = range(0.001, 0.999π, length=n)
 ω_rng = range(0.001, 1.999π, length=n)
 ν_rng = range(-0.999π, 0.999π, length=n)
 
-t = @elapsed run_tests(hyperbolic_rejector, a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
+
+t = @elapsed run_tests(x -> keplerian_roundtrip(x, μ, hyperbolic_rejector; abort=abort),
+                       a_rng, e_rng, i_rng, Ω_rng, ω_rng, ν_rng)
+println("In $t seconds.\n")
+
+println("Circular Orbits")
+println("===============")
+
+a_rng = range(7e6, 9e8, length=n)
+i_rng = range(0.001, 0.999π, length=n)
+Ω_rng = range(0.001, 1.999π, length=n)
+ν_rng = range(-π, π, length=n)
+
+t = @elapsed run_tests(x -> keplerian_roundtrip((x[1], 0.0, x[2], x[3], 0.0, x[4]), μ, acceptor; abort=abort),
+                       a_rng, i_rng, Ω_rng, ν_rng)
+println("In $t seconds.\n")
+
+println("Equatorial Orbits")
+println("=================")
+
+a_rng = range(7e6, 9e8, length=n)
+e_rng = range(0.001, 0.999, length=n)
+ω_rng = range(0.001, 1.999π, length=n)
+ν_rng = range(-π, π, length=n)
+
+t = @elapsed run_tests(x -> keplerian_roundtrip((x[1], x[2], 0.0, 0.0, x[3], x[4]), μ, acceptor; abort=abort),
+                       a_rng, e_rng, ω_rng, ν_rng)
+println("In $t seconds.\n")
+
+println("Circular-Equatorial Orbits")
+println("==========================")
+
+a_rng = range(7e6, 9e8, length=n)
+ν_rng = range(-π, π, length=n)
+
+t = @elapsed run_tests(x -> keplerian_roundtrip((x[1], 0.0, 0.0, 0.0, 0.0, x[2]), μ, acceptor; abort=abort),
+                       a_rng, ν_rng)
 println("In $t seconds.\n")
 
