@@ -61,7 +61,6 @@ function keplerian(pos, vel, µ, tol=1e-8)
     k = SVector(0.0, 0.0, 1.0)
     n = k × h
     nm = norm(n)
-    xi = vm^2/2 - µ/rm
     ec = ((vm^2 - µ/rm) * pos - vel * (pos ⋅ vel)) / µ
     ecc = norm(ec)
     inc = angle(h, k)
@@ -73,7 +72,8 @@ function keplerian(pos, vel, µ, tol=1e-8)
         # Semi-latus rectum
         a = hm^2/µ
     else
-        a = -µ/(2*xi)
+        ξ = vm^2/2 - µ/rm
+        a = -µ/(2ξ)
     end
 
     if equatorial && !circular
