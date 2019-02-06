@@ -11,9 +11,6 @@ import ..angle,
     ..normalize_angle,
     ..vector_azel
 
-# TODO: Delete me
-using LinearAlgebra: cross, dot
-
 export
     cartesian,
     keplerian,
@@ -52,50 +49,6 @@ function perifocal(p, ecc, ν, μ)
 
     r_pqw, v_pqw
 end
-
-#= function cartesian(a, e, i, Ω, ω, v, μ) =#
-#=     sinΩ, cosΩ = sincos(Ω) =#
-#=     sinω, cosω = sincos(ω) =#
-#=     sini, cosi = sincos(i) =#
-#=  =#
-#=     crcp = cosΩ * cosω =#
-#=     crsp = cosΩ * sinω =#
-#=     srcp = sinΩ * cosω =#
-#=     srsp = sinΩ * sinω =#
-#=  =#
-#=     p = SVector(crcp - cosi * srsp, srcp + cosi * crsp, sini * sinω) =#
-#=     q = SVector(-crsp - cosi * srcp, -srsp + cosi * crcp, sini * cosω) =#
-#=  =#
-#=     if a > 0 =#
-#=         uME2 = (1 - e) * (1 + e) =#
-#=         s1Me2 = sqrt(uME2) =#
-#=         E = transform(elliptic, true_anomaly, eccentric_anomaly, v, e) =#
-#=         cose = cos(E) =#
-#=         sine = sin(E) =#
-#=  =#
-#=         x = a * (cose - e) =#
-#=         y = a * sine * s1Me2 =#
-#=         factor = sqrt(μ / a) / (1 - e * cose) =#
-#=         ẋ = -sine * factor =#
-#=         ẏ = cose * s1Me2 * factor =#
-#=     else =#
-#=         sinv = sin(v) =#
-#=         cosv = cos(v) =#
-#=         f = a * (1 - e^2) =#
-#=         pos_factor = f / (1 + e * cosv) =#
-#=         vel_factor = sqrt(μ / f) =#
-#=  =#
-#=         x = pos_factor * cosv =#
-#=         y = pos_factor * sinv =#
-#=         ẋ = -vel_factor * sinv =#
-#=         ẏ = vel_factor * (e + cosv) =#
-#=     end =#
-#=  =#
-#=     pos = x .* p .+ y .* q =#
-#=     vel = ẋ .* p .+ ẏ .* q =#
-#=  =#
-#=     pos, vel =#
-#= end =#
 
 iscircular(ecc, tol=1e-8) = isapprox(ecc, 0.0, atol=tol)
 isequatorial(inc, tol=1e-8) = isapprox(abs(inc), 0.0, atol=tol)
@@ -168,96 +121,6 @@ function keplerian(pos, vel, µ, tol=1e-8)
 
     a, ecc, inc, Ω, ω, ν
 end
-
-#= function keplerian(r, v, µ) =#
-#=     rm = norm(r) =#
-#=     vm = norm(v) =#
-#=     h = cross(r, v) =#
-#=     hm = norm(h) =#
-#=     k = [0.0, 0.0, 1.0] =#
-#=     n = cross(k, h) =#
-#=     nm = norm(n) =#
-#=     xi = vm^2/2 - µ/rm =#
-#=     ec = ((vm^2 - µ/rm)*r - v*dot(r, v))/µ =#
-#=     ecc = norm(ec) =#
-#=     inc = angle(h, k) =#
-#=  =#
-#=     equatorial = abs(inc) ≈ 0 =#
-#=     circular = ecc ≈ 0 =#
-#=  =#
-#=     if circular =#
-#=         # Semi-latus rectum =#
-#=         sma = hm^2/µ =#
-#=     else =#
-#=         sma = -µ/(2*xi) =#
-#=     end =#
-#=  =#
-#=     if equatorial && !circular =#
-#=         node = 0.0 =#
-#=         # Longitude of pericenter =#
-#=         peri = mod2pi(atan(ec[2], ec[1])) =#
-#=         ano = mod2pi(atan(h⋅cross(ec, r) / hm, r⋅ec)) =#
-#=     elseif !equatorial && circular =#
-#=         node = mod2pi(atan(n[2], n[1])) =#
-#=         peri = 0.0 =#
-#=         # Argument of latitude =#
-#=         ano = mod2pi(atan(r⋅cross(h, n) / hm, r⋅n)) =#
-#=     elseif equatorial && circular =#
-#=         node = 0.0 =#
-#=         peri = 0.0 =#
-#=         # True longitude =#
-#=         ano = mod2pi(atan(r[2], r[1])) =#
-#=     else =#
-#=         node = mod2pi(atan(n[2], n[1])) =#
-#=         peri = mod2pi(atan(ec⋅cross(h, n) / hm, ec⋅n)) =#
-#=         ano = mod2pi(atan(r⋅cross(h, ec) / hm, r⋅ec)) =#
-#=     end =#
-#=  =#
-#=     sma, ecc, inc, node, peri, ano =#
-#= end =#
-
-#= function keplerian(pos, vel, μ) =#
-#=     h = pos × vel =#
-#=     h2 = norm(h)^2 =#
-#=     k = SVector(0, 0, 1) =#
-#=     i = angle(h, k) =#
-#=     Ω = azimuth(k × h) =#
-#=  =#
-#=     r = norm(pos) =#
-#=     r2 = r^2 =#
-#=     v2 = norm(vel)^2 =#
-#=     rv2_over_μ = r * v2 / μ =#
-#=  =#
-#=     a = r / (2 - rv2_over_μ) =#
-#=     μa = μ * a =#
-#=  =#
-#=     if a > 0 =#
-#=         # Elliptic or circular =#
-#=         e_se = pos ⋅ vel / sqrt(μa) =#
-#=         e_ce = rv2_over_μ - 1 =#
-#=         ecc = sqrt(e_se^2 + e_ce^2) =#
-#=         ν = transform(elliptic, eccentric_anomaly, true_anomaly, =#
-#=                       atan(e_se, e_ce), ecc) =#
-#=     else =#
-#=         # Hyperbolic =#
-#=         e_sh = pos ⋅ vel / sqrt(-μa) =#
-#=         e_ch = rv2_over_μ - 1 =#
-#=         ecc = sqrt(1 - h2 / μa) =#
-#=         ν = transform(hyperbolic, eccentric_anomaly, true_anomaly, =#
-#=                       log((e_ch + e_sh) / (e_ch - e_sh)) / 2, ecc) =#
-#=     end =#
-#=  =#
-#=     node = vector_azel(Ω, 0.0) =#
-#=     px = pos ⋅ node =#
-#=     py = pos ⋅ (h × node) / sqrt(h2) =#
-#=     ω = atan(py, px) - ν =#
-#=  =#
-#=     Ω = mod2pi(Ω) =#
-#=     ω = mod2pi(ω) =#
-#=     ν = normalize_angle(ν, 0.0) =#
-#=  =#
-#=     a, ecc, i, Ω, ω, ν =#
-#= end =#
 
 abstract type OrbitType end
 
