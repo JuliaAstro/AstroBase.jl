@@ -1,3 +1,4 @@
+using SpecialFunctions: gamma
 export c2, c3
 
 function c2(psi)

@@ -1,3 +1,6 @@
+using DataStructures
+using Nullables
+
 import Base: ∘, inv
 
 export ComposedRotation, Rotation, ∘, origin, target
@@ -48,8 +51,8 @@ function getgraph()
 
         t1 = params[2].parameters[1]
         t2 = params[3].parameters[1]
-        t1 = isleaftype(t1) ? t1 : t1.ub
-        t2 = isleaftype(t2) ? t2 : t2.ub
+        t1 = isconcretetype(t1) ? t1 : t1.ub
+        t2 = isconcretetype(t2) ? t2 : t2.ub
 
         if !haskey(graph, t1)
             merge!(graph, Dict(t1=>Set{DataType}()))
@@ -67,7 +70,7 @@ function haspath(graph, origin, target)
     queue = [origin]
     links = Dict{DataType, DataType}()
     while !isempty(queue)
-        node = shift!(queue)
+        node = popfirst!(queue)
         if node == target
             break
         end
@@ -91,7 +94,7 @@ function findpath(graph, origin, target)
     if !haspath(graph, origin, target)
         error("No conversion path '$origin' -> '$target' found.")
     end
-    queue = PriorityQueue(DataType, Int)
+    queue = PriorityQueue{DataType, Int}()
     prev = Dict{DataType,Nullable{DataType}}()
     distance = Dict{DataType, Int}()
     for node in keys(graph)
@@ -116,7 +119,7 @@ function findpath(graph, origin, target)
     path = DataType[]
     current = target
     while !isnull(prev[current])
-        unshift!(path, current)
+        pushfirst!(path, current)
         current = get(prev[current])
     end
     return path

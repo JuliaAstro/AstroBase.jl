@@ -9,5 +9,5 @@ AstroDynBase.update()
     include("rotation_matrices.jl")
     include("bodies.jl")
     include("kepler.jl")
-    include("ephemerides.jl")
+    #= include("ephemerides.jl") =#
 end
