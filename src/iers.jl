@@ -20,7 +20,7 @@ end
 
 function Rotation(::Type{CIRF}, ::Type{TIRF}, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = eraEra00(julian1(ut1), julian2(ut1))
+    era = ERFA.era00(get.(julian_split(ut1))...)
     rate = rotation_rate(Earth, TDBEpoch(ep))
     m = rotation_matrix(3, era)
     δm = rate_matrix(3, era, rate)
@@ -29,7 +29,7 @@ end
 
 function Rotation(::Type{TIRF}, ::Type{CIRF}, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = eraEra00(julian1(ut1), julian2(ut1))
+    era = ERFA.era00(get.(julian_split(ut1))...)
     rate = rotation_rate(Earth, TDBEpoch(ep))
     m = rotation_matrix(3, -era)
     δm = rate_matrix(3, -era, -rate)
@@ -37,19 +37,20 @@ function Rotation(::Type{TIRF}, ::Type{CIRF}, ep::Epoch)
 end
 
 function polarmotion(ep::TTEpoch)
-    xp, yp = polarmotion(julian(ep))
+    xp, yp = polarmotion(get(julian(ep)))
     xp = dms2rad(0, 0, xp)
     yp = dms2rad(0, 0, yp)
-    reshape(eraPom00(xp, yp, eraSp00(julian1(ep), julian2(ep))), (3,3))
+    reshape(ERFA.pom00(xp, yp, ERFA.sp00(get.(julian_split(ep))...)), (3,3))
 end
 
 function precession_nutation(ep::TTEpoch)
-    dx, dy = precession_nutation00(julian(ep))
-    x, y = eraXy06(julian1(ep), julian2(ep))
-    s = eraS06(julian1(ep), julian2(ep), x, y)
+    dx, dy = precession_nutation00(get(julian(ep)))
+    jd1, jd2 = get.(julian_split(ep))
+    x, y = ERFA.xy06(jd1, jd2)
+    s = ERFA.s06(jd1, jd2, x, y)
     x += dms2rad(0, 0, dx/1000.0)
     y += dms2rad(0, 0, dy/1000.0)
-    reshape(eraC2ixys(x, y, s), (3,3))
+    reshape(ERFA.c2ixys(x, y, s), (3,3))
 end
 
 function Rotation(::Type{TIRF}, ::Type{ITRF}, ep::Epoch)

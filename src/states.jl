@@ -1,10 +1,10 @@
-using AstronomicalTime
+using AstroTime
 using StaticArrays
 
-import AstroDynBase: AbstractState, keplerian, velocity, position,
+import AstroBase: velocity, position, state
+import AstroDynBase: AbstractState, keplerian,
     Rotation, period, epoch
-import Base: show, isapprox
-import Base.Operators: ==
+import Base: show, isapprox, ==
 
 export State, ThreeBodyState, period
 export timescale, frame, body, primary, secondary, keplerian, position, velocity,
@@ -13,40 +13,37 @@ export timescale, frame, body, primary, secondary, keplerian, position, velocity
 
 struct State{
         F<:Frame,
-        T<:TimeScale,
+        S, T,
         C<:CelestialBody,
         R, V,
     } <: AbstractState
-    epoch::Epoch{T}
+    epoch::Epoch{S, T}
     r::SVector{3,R}
     v::SVector{3,V}
 
-    function State(ep::Epoch{T}, r, v,
+    function State(ep::Epoch{S,T}, r, v,
         frame::Type{F}=GCRF, body::Type{C}=Earth) where {
-        F<:Frame, T<:TimeScale, C<:CelestialBody}
+        F<:Frame, T, S, C<:CelestialBody}
         R = eltype(r)
         V = eltype(v)
-        new{F,T,C,R,V}(ep, r, v)
+        new{F,S,T,C,R,V}(ep, r, v)
     end
 end
 
-function State(ep::Epoch{T},
+function State(ep::Epoch,
     sma, ecc, inc, node, peri, ano,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {
-    T<:TimeScale,F<:Frame,C<:CelestialBody}
+    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
     r, v = cartesian(sma, ecc, inc, node, peri, ano, μ(body))
     State(ep, r, v, frame, body)
 end
 
-function State(ep::Epoch{T}, rv,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {
-    T<:TimeScale,F<:Frame,C<:CelestialBody}
+function State(ep::Epoch, rv,
+    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
     State(ep, rv[1], rv[2], frame, body)
 end
 
-function State(ep::Epoch{T}, rv::AbstractArray,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {
-    T<:TimeScale,F<:Frame,C<:CelestialBody}
+function State(ep::Epoch, rv::AbstractArray,
+    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
     State(ep, rv[1:3], rv[4:6], frame, body)
 end
 
@@ -69,33 +66,33 @@ argofpericenter(s::State) = keplerian(s)[5]
 trueanomaly(s::State) = keplerian(s)[6]
 frame(::State{F}) where F<:Frame = F
 const _frame = frame
-timescale(::State{<:Frame, T}) where T<:TimeScale = T
+timescale(::State{<:Any, T}) where {T} = T
 const _timescale = timescale
-body(::State{<:Frame, <:TimeScale, C}) where C<:CelestialBody = C
+body(::State{<:Any, <:Any, <:Any, C}) where C<:CelestialBody = C
 const _body = body
 (rot::Rotation)(s::State) = rot(position(s), velocity(s))
 splitrv(arr) = arr[1:3], arr[4:6]
 
-function State(s::State{F1, T1, C1};
-    frame::Type{F2}=_frame(s), timescale::Type{T2}=_timescale(s),
+function State(s::State{F1, T1, S, C1};
+    frame::Type{F2}=_frame(s), timescale::T2=_timescale(s),
     body::Type{C2}=_body(s)) where {F1<:Frame, F2<:Frame,
-    T1<:TimeScale, T2<:TimeScale, C1<:CelestialBody, C2<:CelestialBody}
-    convert(State{F2, T2, C2}, s)
+    T1, T2, S, C1<:CelestialBody, C2<:CelestialBody}
+    convert(State{F2, T2, S, C2}, s)
 end
 
-function (==)(s1::State{F, T, C}, s2::State{F, T, C}) where {
-    F<:Frame, T<:TimeScale, C<:CelestialBody}
+function (==)(s1::State{F, S, T, C}, s2::State{F, S, T, C}) where {
+    F<:Frame, S, T, C<:CelestialBody}
     s1.epoch == s2.epoch && s1.r == s2.r && s1.v == s2.v
 end
-(==)(s1::State{<:Frame, <:TimeScale, <:CelestialBody},
-    s2::State{<:Frame, <:TimeScale, <:CelestialBody}) = false
+#= (==)(s1::State{<:Frame, , <:CelestialBody}, =#
+#=     s2::State{<:Frame, , <:CelestialBody}) = false =#
 
-function isapprox(s1::State{F, T, C}, s2::State{F, T, C}) where {
-    F<:Frame, T<:TimeScale, C<:CelestialBody}
+function isapprox(s1::State{F, S, T, C}, s2::State{F, S, T, C}) where {
+    F<:Frame, S, T, C<:CelestialBody}
     s1.epoch ≈ s2.epoch && s1.r ≈ s2.r && s1.v ≈ s2.v
 end
-isapprox(s1::State{<:Frame, <:TimeScale, <:CelestialBody},
-    s2::State{<:Frame, <:TimeScale, <:CelestialBody}) = false
+#= isapprox(s1::State{<:Frame, , <:CelestialBody}, =#
+#=     s2::State{<:Frame, , <:CelestialBody}) = false =#
 
 function show(io::IO, s::State)
     sma, ecc, inc, node, peri, ano = keplerian(s)
@@ -119,27 +116,27 @@ function show(io::IO, s::State)
     " Ω: ", rad2deg(peri), "\n",
     " ν: ", rad2deg(ano))
 end
-
-struct ThreeBodyState{
-        F<:Frame,
-        T<:TimeScale,
-        C1<:CelestialBody,
-        C2<:CelestialBody,
-    } <: AbstractState
-    ep::Epoch{T}
-    r::SVector{3,Float64}
-    v::SVector{3,Float64}
-
-    function ThreeBodyState(
-        ep::Epoch{T}, r, v, frame::Type{F}=GCRF,
-        primary::Type{C1}=Sun, secondary::Type{C2}=Earth
-    ) where {T<:TimeScale,F<:Frame,C1<:CelestialBody,C2<:CelestialBody}
-        new{F, T, C1, C2}(ep, r, v)
-    end
-end
-
-frame(::ThreeBodyState{F}) where F<:Frame = F
-timescale(::ThreeBodyState{<:Frame, T}) where T<:TimeScale = T
-primary(::ThreeBodyState{<:Frame,<:TimeScale,C}) where C<:CelestialBody = C
-secondary(::ThreeBodyState{<:Frame,<:TimeScale,<:CelestialBody,C}) where {
-    C<:CelestialBody} = C
+#=  =#
+#= struct ThreeBodyState{ =#
+#=         F<:Frame, =#
+#=         T, =#
+#=         C1<:CelestialBody, =#
+#=         C2<:CelestialBody, =#
+#=     } <: AbstractState =#
+#=     ep::Epoch{T} =#
+#=     r::SVector{3,Float64} =#
+#=     v::SVector{3,Float64} =#
+#=  =#
+#=     function ThreeBodyState( =#
+#=         ep::Epoch{T}, r, v, frame::Type{F}=GCRF, =#
+#=         primary::Type{C1}=Sun, secondary::Type{C2}=Earth =#
+#=     ) where {T,F<:Frame,C1<:CelestialBody,C2<:CelestialBody} =#
+#=         new{F, T, C1, C2}(ep, r, v) =#
+#=     end =#
+#= end =#
+#=  =#
+#= frame(::ThreeBodyState{F}) where F<:Frame = F =#
+#= timescale(::ThreeBodyState{<:Frame, T}) where T = T =#
+#= primary(::ThreeBodyState{<:Frame,,C}) where C<:CelestialBody = C =#
+#= secondary(::ThreeBodyState{<:Frame,,<:CelestialBody,C}) where { =#
+#=     C<:CelestialBody} = C =#

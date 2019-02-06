@@ -1,5 +1,6 @@
 using RemoteFiles
 using SPICE
+import AstroTime
 
 const PCK_FILE = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc"
 
@@ -8,8 +9,8 @@ furnsh(path(PCK_FILE))
 
 @testset "IAU" begin
     # Reference data from SPICE
-    ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 4, 23, 789))
-    jd = get(seconds(ep, J2000))
+    ep = TDBEpoch(UTCEpoch(2017, 3, 25, 17, 4, 23.789))
+    jd = get(seconds(AstroTime.j2000(ep)))
     @testset for body in (PLANET_NAMES..., SATELLITE_NAMES...)
         @eval b = $body
         @eval f = $(Symbol("IAU", body))

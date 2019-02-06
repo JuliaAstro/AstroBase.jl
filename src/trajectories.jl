@@ -1,9 +1,11 @@
 using AstroDynBase
 using AstroDynCoordinates
 using SmoothingSplines
+using LinearAlgebra
 
-import Base: getindex, endof, show
-import AstroDynBase: AbstractTrajectory, state, epoch
+import Base: getindex, lastindex, show
+import AstroDynBase: AbstractTrajectory, epoch
+import AstroBase: state
 
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector
@@ -20,9 +22,9 @@ detector(l::LogEntry) = l.detector
 epoch(l::LogEntry) = l.epoch
 count_id(idx, log) = count(x->id(x) == idx, log)
 
-struct Trajectory{S<:AbstractState} <: AbstractTrajectory
-    initial::S
-    final::S
+struct Trajectory
+    initial
+    final
     times::Vector
     splines::Vector{SmoothingSpline}
     array::Matrix
@@ -35,13 +37,13 @@ events(tra::Trajectory) = tra.events
 times(tra::Trajectory) = tra.times
 
 function Trajectory(initial, final, events=LogEntry[])
-    Trajectory(initial, final, Vector(0), SmoothingSpline[], Matrix(0, 0), events)
+    Trajectory(initial, final, Vector(undef, 0), SmoothingSpline[], Matrix(undef, 0, 0), events)
 end
 
 function Trajectory(initial, final, t, vectors, events=LogEntry[])
     n = length(vectors[1])
-    splines = Array{SmoothingSpline}(n)
-    arr = hcat(vectors...)'
+    splines = Array{SmoothingSpline}(undef, n)
+    arr = permutedims(hcat(vectors...))
     m = size(arr)[2]
     for i = 1:m
         splines[i] = fit(SmoothingSpline, t, arr[:,i], 0.0)
@@ -83,4 +85,4 @@ state(tra::Trajectory, time::Period) = state(tra, get(seconds(time)))
 (tra::Trajectory)(time) = state(tra, time)
 
 getindex(tra::Trajectory, idx) = state(tra, tra.times[idx])
-endof(tra::Trajectory) = length(tra.times)
+lastindex(tra::Trajectory) = length(tra.times)

@@ -1,3 +1,10 @@
 julia 0.6
+AstroTime
+AstroBase
+AstroDynBase
 ERFA
 StaticArrays
+EarthOrientation
+SmoothingSplines
+SPICE
+JPLEphemeris
