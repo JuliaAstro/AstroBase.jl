@@ -65,13 +65,13 @@ end
             end
         end
         # Reference values from Orekit
-        @test_elements("Elliptical Orbit",
+        @test_elements("Elliptic",
                        3.9860047e14,
                        [24464560.0, 0.7311, 0.122138, 1.00681, 3.10686, 0.44369564302687126],
                        [-0.107622532467967e+07, -0.676589636432773e+07, -0.332308783350379e+06],
                        [0.935685775154103e+04, -0.331234775037644e+04, -0.118801577532701e+04])
         # Reference values from poliastro
-        @test_elements("Circular Orbit",
+        @test_elements("Circular",
                        3.986004418e14,
                        [6778136.6, 0.0, deg2rad(15), deg2rad(20), 0.0, deg2rad(30)],
                        [4396398.60746266, 5083838.45333733,  877155.42119322],
@@ -83,8 +83,12 @@ end
         @test_elements("Hyperbolic Orekit",
                        3.9860047e14,
                        [-24464560.0, 1.7311, 0.122138, 1.00681,  3.10686, 0.12741601769795755])
-
-
+        @test_elements("Equatorial",
+                       3.9860047e14,
+                       [24464560.0, 0.7311, 0.0, 0.0, 3.10686, 0.44369564302687126])
+        @test_elements("Circular-Equatorial",
+                       3.9860047e14,
+                       [24464560.0, 0.0, 0.0, 0.0, 0.0, 0.44369564302687126])
     end
     @testset "Anomalies" begin
         anomalies = -π : 0.1π : π
