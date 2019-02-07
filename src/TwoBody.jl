@@ -8,8 +8,7 @@ using Roots: find_zero, Order5, Order2
 
 import ..angle,
     ..azimuth,
-    ..normalize_angle,
-    ..vector_azel
+    ..normalize_angle
 
 export
     cartesian,
@@ -114,7 +113,7 @@ function keplerian(pos, vel, µ, tol=1e-8)
     end
     Ω = mod2pi(Ω)
     ω = mod2pi(ω)
-    v = normalize_angle(ν, 0.0)
+    ν = normalize_angle(ν, 0.0)
 
     a, ecc, inc, Ω, ω, ν
 end
