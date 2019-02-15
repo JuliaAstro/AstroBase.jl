@@ -9,6 +9,7 @@ export CelestialBody,
     SolarSystemBarycenter,
     Sun,
     from_naifid,
+    grav_param,
     naifid,
     name,
     parent,
@@ -19,6 +20,8 @@ const NAIFId = Int
 const bodies = ItemGraph{NAIFId, NAIFId}(SimpleGraph())
 
 abstract type CelestialBody end
+
+function grav_param end
 
 name(body::CelestialBody) = string(nameof(typeof(body)))
 
@@ -47,5 +50,7 @@ add_edge!(bodies, 0, 10)
 include("planets.jl")
 include("minor.jl")
 include("satellites.jl")
+
+include(joinpath(@__DIR__, "..", "..", "gen", "gm.jl"))
 
 end

@@ -6,6 +6,7 @@ const MINOR_BODY_NAMES = (
     "Ceres",
     "Pallas",
     "Vesta",
+    "Psyche",
     "Lutetia",
     "Ida",
     "Eros",
@@ -51,9 +52,13 @@ naifid(::Pallas) = 2000002
 from_naifid(::Val{2000002}) = pallas
 add_edge!(bodies, 0, 2000002)
 
-naifid(::Vesta) = 2000003
-from_naifid(::Val{2000003}) = vesta
-add_edge!(bodies, 0, 2000003)
+naifid(::Vesta) = 2000004
+from_naifid(::Val{2000004}) = vesta
+add_edge!(bodies, 0, 2000004)
+
+naifid(::Psyche) = 2000016
+from_naifid(::Val{2000016}) = psyche
+add_edge!(bodies, 0, 2000016)
 
 naifid(::Lutetia) = 2000021
 from_naifid(::Val{2000021}) = lutetia
