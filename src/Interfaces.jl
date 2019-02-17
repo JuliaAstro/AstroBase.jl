@@ -10,9 +10,7 @@ using ..Bodies:
     ssb
 
 #####################
-#                   #
 # AbstractEphemeris #
-#                   #
 #####################
 
 import Base: position
