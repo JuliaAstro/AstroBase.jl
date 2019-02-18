@@ -1,7 +1,6 @@
 module AstroBase
 
 using Reexport
-using Rotations
 
 @reexport using AstroTime
 
@@ -14,13 +13,13 @@ Base.showerror(io::IO, err::AstroException) = print(io, err.msg)
 include("util.jl")
 include(joinpath("bodies", "Bodies.jl"))
 include("Interfaces.jl")
-include("EarthAttitude.jl")
+#= include("EarthAttitude.jl") =#
 include("TwoBody.jl")
 include("ephemerides.jl")
 include(joinpath("coords", "Coords.jl"))
 
 @reexport using .Bodies
-@reexport using .EarthAttitude
+#= @reexport using .EarthAttitude =#
 @reexport using .TwoBody
 @reexport using .Coords
 

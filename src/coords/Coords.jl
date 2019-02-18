@@ -18,7 +18,7 @@ import ..TwoBody:
 
 using StaticArrays: SVector
 
-using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
+using ItemGraphs: ItemGraph, add_edge!, items
 
 export InertialFrame, RotatingFrame, @frame, State, KeplerianState, icrf, epoch, frame, body
 
@@ -51,6 +51,7 @@ from_sym(sym::Symbol) = from_sym(Val(sym))
 struct ICRF <: InertialFrame end
 const icrf = ICRF()
 from_sym(::Val{:ICRF}) = icrf
+path_frames(::F1, ::F2) where {F1, F2} = items(FRAMES, nameof(F1), nameof(F2))
 
 macro frame(name::Symbol, parent::Symbol, typ::Symbol)
     cname = Symbol(lowercase(string(name)))
@@ -63,6 +64,8 @@ macro frame(name::Symbol, parent::Symbol, typ::Symbol)
         Coords.from_sym(::Val{$(Meta.quot(name))}) = $(esc(cname))
     end
 end
+
+include("rotations.jl")
 
 struct State{Scale, Frame, Body, T, TP, TV} <: AbstractState{Scale, Frame, Body}
     epoch::Epoch{Scale, T}
@@ -104,5 +107,8 @@ keplerian(s::KeplerianState) = (s.a, s.i, s.e, s.Ω, s.ω, s.ν)
 
 KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=frame(s), body=body(s))
 State(s::KeplerianState) = State(epoch(s), position_velocity(s)...; frame=frame(s), body=body(s))
+
+struct Trajectory{Scale, Frame, Body}
+end
 
 end
