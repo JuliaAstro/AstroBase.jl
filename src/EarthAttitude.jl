@@ -2,8 +2,7 @@ module EarthAttitude
 
 using ..AstroBase: sec2rad
 using ..Bodies
-
-using Rotations
+using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
 export
     J2000,
@@ -103,7 +102,7 @@ function celestial_to_intermediate(x, y, s)
     r2 = x^2 + y^2
     e = r2 > 0.0 ? atan(y, x) : 0.0
     d = atan(sqrt(r2 / (1.0 - r2)))
-    RotZYZ(e, d, -(e + s))
+    angle_to_dcm(e + s, -d, -e, :ZYZ)
 end
 
 """
@@ -122,7 +121,7 @@ julia> polar_motion(20, 30, 50)
 ```
 """
 function polar_motion(rx, ry, sp)
-    RotZYX(sp, -rx, -ry)
+    angle_to_dcm(ry, rx, -sp, :XYZ)
 end
 
 
@@ -571,7 +570,7 @@ julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
 ```
 """
 function fukushima_williams_matrix(gamb, phib, psi, eps)
-    RotZXZ(gamb, phib, -psi) * RotX(-eps)
+    compose_rotation(angleaxis_to_dcm(eps, [1.0, 0.0, 0.0]), angle_to_dcm(psi, -phib, -gamb, :ZXZ))
 end
 
 """
@@ -590,7 +589,7 @@ julia> numat(0.7, 1.4, 1.3)
 ```
 """
 function numat(epsa, dpsi, deps)
-    RotXZX(epsa, -dpsi, -(epsa + deps))
+    angle_to_dcm(epsa + deps, dpsi, -epsa, :XZX)
 end
 
 """
@@ -708,10 +707,11 @@ function bias_precession_matrix_00(jd1, jd2)
     psia = psia77 + dpsipr
     oma  = oma77 + depspr
 
-    rbw = RotZYX(dra0, dpbias * sin(eps0), -debias)
-    rp = RotXZX(eps0, -psia, -oma) * RotZ(chia)
+    rbw = angle_to_dcm(debias, -(dpbias * sin(eps0)), -dra0, :XYZ)
+    rp = compose_rotation(angleaxis_to_dcm(-chia, [0.0, 0.0, 1.0]),
+                          angle_to_dcm(oma, psia, -eps0, :XZX))
 
-    rbw, rp, rbw * rp
+    rbw, rp, compose_rotation(rp, rbw)
 end
 
 """
@@ -1652,7 +1652,7 @@ function celestial_to_terrestrial_matrix(tta, ttb, uta, utb, x, y, xp, yp)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    rc2i * RotZ(era) * rpom
+    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
 end
 
 """
@@ -1676,7 +1676,7 @@ function celestial_to_terrestrial_a00(tta, ttb, uta, utb, xp, yp)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    rc2i * RotZ(era) * rpom
+    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
 end
 
 """
@@ -1699,7 +1699,7 @@ function celestial_to_terrestrial_b00(tta, ttb, uta, utb, xp, yp)
     era = earth_rotation_angle(uta, utb)
 
     rpom = polar_motion(xp, yp, 0.0)
-    rc2i * RotZ(era) * rpom
+    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
 end
 
 """
@@ -1724,7 +1724,7 @@ function c2tpe(tta, ttb, uta, utb, dpsi, deps, xp, yp)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    rbpn * RotZ(gmst + ee) * rpom
+    compose_rotation(rpom, angleaxis_to_dcm(-(gmst + ee), [0.0, 0.0, 1.0]), rbpn)
 end
 
 end
