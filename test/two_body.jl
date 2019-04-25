@@ -1,4 +1,3 @@
-import Base.Threads: nthreads, @threads
 macro test_elements(name, μ, ele, pos, vel)
     quote
         @testset $name begin

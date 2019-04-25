@@ -1,0 +1,28 @@
+name = "AstroBase"
+uuid = "e1773a3a-3ab2-51da-b25a-65b4161c689f"
+license = "MIT"
+desc = "Base types and functions for Astro* packages"
+version = "0.1.0"
+
+[deps]
+AstroTime = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
+ItemGraphs = "d5eda45b-7e79-5788-9687-2c6ab7b96158"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+ReferenceFrameRotations = "74f56ac7-18b3-5285-802d-d4bd4f104033"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+ERFA = "≥ 0.2.2"
+ItemGraphs = "≥ 0.3.0"
+Reexport = "≥ 0.1.0"
+julia = "≥ 0.7.0"
+
+[extras]
+ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
+SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "ERFA", "SPICE"]
