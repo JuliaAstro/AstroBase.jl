@@ -2,22 +2,6 @@ abstract type NaturalSatellite <: CelestialBody end
 
 export deimos, Deimos, phobos, Phobos, luna, Luna, moon, charon, Charon
 
-# Mars
-
-struct Phobos <: NaturalSatellite end
-const phobos = Phobos()
-parent(::Phobos) = mars_barycenter
-naifid(::Phobos) = 401
-from_naifid(::Val{401}) = phobos
-add_edge!(bodies, 4, 401)
-
-struct Deimos <: NaturalSatellite end
-const deimos = Deimos()
-parent(::Deimos) = mars_barycenter
-naifid(::Deimos) = 402
-from_naifid(::Val{402}) = deimos
-add_edge!(bodies, 4, 402)
-
 # Earth
 
 struct Luna <: NaturalSatellite end
@@ -26,7 +10,20 @@ const moon = luna
 parent(::Luna) = earth_barycenter
 naifid(::Luna) = 301
 from_naifid(::Val{301}) = luna
-add_edge!(bodies, 3, 301)
+
+# Mars
+
+struct Phobos <: NaturalSatellite end
+const phobos = Phobos()
+parent(::Phobos) = mars_barycenter
+naifid(::Phobos) = 401
+from_naifid(::Val{401}) = phobos
+
+struct Deimos <: NaturalSatellite end
+const deimos = Deimos()
+parent(::Deimos) = mars_barycenter
+naifid(::Deimos) = 402
+from_naifid(::Val{402}) = deimos
 
 # Jupiter
 
@@ -52,7 +49,7 @@ const JUPITER_SATELLITE_NAMES = (
     "Magaclite",
     "Taygete",
     "Chaldene",
-    "Harpalke",
+    "Harpalyke",
     "Kalyke",
     "Iocaste",
     "Erinome",
@@ -84,7 +81,7 @@ const JUPITER_SATELLITE_NAMES = (
     "Dia",
 )
 
-for (i, body) in enumerate(JUPITER_SATELLITE_NAMES)
+for (i, body) in enumerate(JUPITER_SATELLITE_NAMES[1:end-1])
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 500 + i
@@ -94,10 +91,16 @@ for (i, body) in enumerate(JUPITER_SATELLITE_NAMES)
         parent(::$typ) = jupiter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 5, $id)
         export $sym, $typ
     end
 end
+
+struct Dia <: NaturalSatellite end
+const dia = Dia()
+parent(::Dia) = jupiter
+naifid(::Dia) = 553
+from_naifid(::Val{553}) = dia
+export dia, Dia
 
 # Saturn
 
@@ -167,7 +170,6 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
         parent(::$typ) = saturn
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 6, $id)
         export $sym, $typ
     end
 end
@@ -212,7 +214,6 @@ for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
         parent(::$typ) = uranus
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 7, $id)
         export $sym, $typ
     end
 end
@@ -245,7 +246,6 @@ for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
         parent(::$typ) = neptune
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 8, $id)
         export $sym, $typ
     end
 end
@@ -270,7 +270,6 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
         parent(::$typ) = pluto_barycenter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, 9, $id)
         export $sym, $typ
     end
 end

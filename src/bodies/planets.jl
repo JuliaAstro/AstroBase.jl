@@ -25,7 +25,6 @@ for (i, body) in enumerate(PLANET_NAMES)
         parent(::$typ_bc) = ssb
         naifid(::$typ_bc) = $i
         from_naifid(::Val{$i}) = $sym_bc
-        add_edge!(bodies, 0, $i)
         export $sym_bc, $typ_bc
 
         struct $typ <: Planet end
@@ -33,7 +32,6 @@ for (i, body) in enumerate(PLANET_NAMES)
         parent(::$typ) = $sym_bc
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
-        add_edge!(bodies, $i, $id)
         export $sym, $typ
     end
 end
