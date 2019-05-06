@@ -2,9 +2,9 @@ using SPICE
 
 file = "gm_de431.tpc"
 
-ids = []
-gms = []
-re = r"BODY(?<id>[0-9]+)_GM\s+= \( (?<gm>[0-9\.\+\-E]+) \)"
+ids = Int[]
+gms = Float64[]
+re = r"BODY(?<id>[0-9]+)_GM\s+= \(\s+(?<gm>[0-9\.\+\-E]+)\s+\)"
 lines = open(readlines, file)
 for line in lines
     s = string(line)
@@ -24,7 +24,7 @@ open("gm.jl", "w") do f
         try
             body = replace(titlecase(bodc2n(id)), r"\s"=>"")
             body = body == "Moon" ? "Luna" : body
-            write(f, "grav_param(::Float64, ::$body) = $gm\n")
+            write(f, "grav_param(::Type{Float64}, ::$body) = $gm\n")
             write(f, "grav_param(::$body) = grav_param(Float64, $body())\n")
         catch
             @show id

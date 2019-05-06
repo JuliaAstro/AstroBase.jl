@@ -2,16 +2,25 @@ module Bodies
 
 import Base: parent
 
+using AstroTime: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
 export CelestialBody,
     NAIFId,
     SolarSystemBarycenter,
     Sun,
+    declination,
+    declination_rate,
+    euler_angles,
+    euler_rates,
     from_naifid,
     grav_param,
     naifid,
     parent,
+    right_ascension,
+    right_ascension_rate,
+    rotation_angle,
+    rotation_rate,
     ssb,
     sun
 
@@ -45,6 +54,94 @@ parent(::Sun) = ssb
 naifid(::Sun) = 10
 from_naifid(::Val{10}) = sun
 
+alpha0(::CelestialBody) = 0.0
+alpha1(::CelestialBody) = 0.0
+alpha2(::CelestialBody) = 0.0
+delta0(::CelestialBody) = 0.0
+delta1(::CelestialBody) = 0.0
+delta2(::CelestialBody) = 0.0
+omega0(::CelestialBody) = 0.0
+omega1(::CelestialBody) = 0.0
+omega2(::CelestialBody) = 0.0
+alpha(::CelestialBody) = zeros(1)
+delta(::CelestialBody) = zeros(1)
+omega(::CelestialBody) = zeros(1)
+theta0(::CelestialBody) = zeros(1)
+theta1(::CelestialBody) = zeros(1)
+
+const Δtc = SECONDS_PER_CENTURY
+const Δtd = SECONDS_PER_DAY
+
+theta(b::CelestialBody, t) = theta0(b) .+ theta1(b) .* t / Δtc
+
+function right_ascension(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    α = alpha(b)
+    α₀ = alpha0(b)
+    α₁ = alpha1(b)
+    α₂ = alpha2(b)
+    θ = theta(b, t)
+    α₀ + α₁ * t / Δtc + α₂ * t^2 / Δtc^2 + sum(α .* sin.(θ))
+end
+
+function declination(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    δ = delta(b)
+    δ₀ = delta0(b)
+    δ₁ = delta1(b)
+    δ₂ = delta2(b)
+    θ = theta(b, t)
+    δ₀ + δ₁ * t / Δtc + δ₂ * t^2 / Δtc^2 + sum(δ .* cos.(θ))
+end
+
+function rotation_angle(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    ω = omega(b)
+    ω₀ = omega0(b)
+    ω₁ = omega1(b)
+    ω₂ = omega2(b)
+    θ = theta(b, t)
+    ω₀ + ω₁ * t / Δtd + ω₂ * t^2 / Δtd^2 + sum(ω .* sin.(θ))
+end
+
+function right_ascension_rate(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    α = alpha(b)
+    α₁ = alpha1(b)
+    α₂ = alpha2(b)
+    θ = theta(b, t)
+    θ₁ = theta1(b)
+    α₁ / Δtc + 2 * α₂ * t / Δtc^2 + sum(α .* θ₁ ./ Δtc .* cos.(θ))
+end
+
+function declination_rate(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    δ = delta(b)
+    δ₁ = delta1(b)
+    δ₂ = delta2(b)
+    θ = theta(b, t)
+    θ₁ = theta1(b)
+    δ₁ / Δtc + 2 * δ₂ * t / Δtc^2 - sum(δ .* θ₁ ./ Δtc .* sin.(θ))
+end
+
+function rotation_rate(b::CelestialBody, ep)
+    t = value(seconds(j2000(ep)))
+    ω = omega(b)
+    ω₁ = omega1(b)
+    ω₂ = omega2(b)
+    θ = theta(b, t)
+    θ₁ = theta1(b)
+    ω₁ / Δtd + 2 * ω₂ * t / Δtd^2 + sum(ω .* θ₁ ./ Δtc .* cos.(θ))
+end
+
+function euler_angles(b::CelestialBody, ep)
+    right_ascension(b, ep) + π/2, π/2 - declination(b, ep), mod2pi(rotation_angle(b, ep))
+end
+
+function euler_rates(b::CelestialBody, ep)
+    right_ascension_rate(b, ep), -declination_rate(b, ep), rotation_rate(b, ep)
+end
+
 include("planets.jl")
 include("minor.jl")
 include("satellites.jl")
@@ -61,7 +158,13 @@ const ALL_NAMES = Tuple([["Sun", "SolarSystemBarycenter"]
                          ["Pluto", "PlutoBarycenter"];
                          collect(PLUTO_SATELLITE_NAMES)])
 
-include(joinpath(@__DIR__, "..", "..", "gen", "gm.jl"))
+gm = joinpath(@__DIR__, "..", "..", "gen", "gm.jl")
+isfile(gm) || error("`gm.jl` has not been generated, yet. Run `gen/gen_gm.jl`")
+include(gm)
+
+pck = joinpath(@__DIR__, "..", "..", "gen", "pck.jl")
+isfile(pck) || error("`pck.jl` has not been generated, yet. Run `gen/gen_pck.jl`")
+include(pck)
 
 function __init__()
     # Sun and SSB
