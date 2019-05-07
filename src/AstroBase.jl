@@ -16,11 +16,13 @@ include("Interfaces.jl")
 include("EarthAttitude.jl")
 include("TwoBody.jl")
 include("ephemerides.jl")
+include(joinpath("frames", "Frames.jl"))
 include(joinpath("coords", "Coords.jl"))
 
 @reexport using .Bodies
 @reexport using .EarthAttitude
 @reexport using .TwoBody
+@reexport using .Frames
 @reexport using .Coords
 
 end # module

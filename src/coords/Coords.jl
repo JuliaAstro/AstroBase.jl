@@ -12,25 +12,17 @@ using ..Bodies:
     earth,
     grav_param
 
+using ..Frames:
+    AbstractFrame,
+    icrf
+
 import ..TwoBody:
     cartesian,
     keplerian
 
 using StaticArrays: SVector
 
-using ItemGraphs: ItemGraph, add_edge!, items
-
-export InertialFrame, RotatingFrame, @frame, State, KeplerianState, icrf, epoch, frame, body
-
-#########
-# Frame #
-#########
-
-export AbstractFrame, InertialFrame, RotatingFrame
-
-abstract type AbstractFrame end
-abstract type InertialFrame <: AbstractFrame end
-abstract type RotatingFrame <: AbstractFrame end
+export State, KeplerianState, icrf, epoch, frame, body
 
 #################
 # AbstractState #
@@ -44,28 +36,6 @@ function epoch end
 
 frame(s::AbstractState{_S, Frame}) where {_S, Frame} = Frame
 body(s::AbstractState{_S, _F, Body}) where {_S, _F, Body} = Body
-
-const FRAMES = ItemGraph{Symbol}()
-from_sym(sym::Symbol) = from_sym(Val(sym))
-
-struct ICRF <: InertialFrame end
-const icrf = ICRF()
-from_sym(::Val{:ICRF}) = icrf
-path_frames(::F1, ::F2) where {F1, F2} = items(FRAMES, nameof(F1), nameof(F2))
-
-macro frame(name::Symbol, parent::Symbol, typ::Symbol)
-    cname = Symbol(lowercase(string(name)))
-    name == cname && throw(ArgumentError("Frame names must start with an uppercase letter."))
-    quote
-        struct $(esc(name)) <: $(esc(typ)) end
-        const $(esc(cname)) = $(esc(name))()
-        add_edge!(FRAMES, $(Meta.quot(name)), $(Meta.quot(parent)))
-        add_edge!(FRAMES, $(Meta.quot(parent)), $(Meta.quot(name)))
-        Coords.from_sym(::Val{$(Meta.quot(name))}) = $(esc(cname))
-    end
-end
-
-include("rotations.jl")
 
 struct State{Scale, Frame, Body, T, TP, TV} <: AbstractState{Scale, Frame, Body}
     epoch::Epoch{Scale, T}
