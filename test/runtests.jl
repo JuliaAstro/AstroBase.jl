@@ -8,5 +8,6 @@ using Test
     include("bodies.jl")
     include("interfaces.jl")
     include("two_body.jl")
+    include("frames.jl")
 end
 
