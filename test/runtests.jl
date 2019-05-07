@@ -1,6 +1,9 @@
 using AstroBase
+using EarthOrientation
 using ERFA
 using Test
+
+EarthOrientation.update()
 
 @testset "AstroBase" begin
     include("util.jl")
