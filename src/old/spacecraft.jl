@@ -1,7 +1,7 @@
 abstract type AbstractSpacecraft end
 abstract type AbstractModule end
 
-type SimpleSpacecraft <: AbstractSpacecraft
+struct SimpleSpacecraft <: AbstractSpacecraft
     name::Symbol
     fuel::Float64
     drymass::Float64
@@ -11,7 +11,7 @@ type SimpleSpacecraft <: AbstractSpacecraft
     srparea::Float64
 end
 
-type Spacecraft <: AbstractSpacecraft
+struct Spacecraft <: AbstractSpacecraft
     name::Symbol
     modules::Array{SCModule, 1}
 end
