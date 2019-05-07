@@ -1,5 +1,5 @@
 using AstroBase
-using EarthOrientation
+import EarthOrientation
 using ERFA
 using Test
 

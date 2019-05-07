@@ -1,4 +1,4 @@
-import EarthOrientation: polarmotion, precession_nutation00
+import EarthOrientation
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
 import ..sec2rad
@@ -60,7 +60,7 @@ function Rotation(::TIRF, ::CIRF, ep::Epoch)
 end
 
 function polarmotion(ep::TTEpoch)
-    xp, yp = polarmotion(value(julian(ep)))
+    xp, yp = EarthOrientation.polarmotion(value(julian(ep)))
     xp = sec2rad(xp)
     yp = sec2rad(yp)
     sp00 = tio_locator(value.(julian_twopart(ep))...)
@@ -68,7 +68,7 @@ function polarmotion(ep::TTEpoch)
 end
 
 function precession_nutation(ep::TTEpoch)
-    dx, dy = precession_nutation00(value(julian(ep)))
+    dx, dy = EarthOrientation.precession_nutation00(value(julian(ep)))
     jd1, jd2 = value.(julian_twopart(ep))
     x, y = xy06(jd1, jd2)
     s = s06(jd1, jd2, x, y)
