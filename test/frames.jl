@@ -1,37 +1,75 @@
 using AstroBase
+using SPICE: sxform, tisbod
 
 @testset "Frames" begin
-    ep = TDBEpoch(2000, 1, 1)
-    rot = Rotation(icrf, icrf, ep)
-    @test origin(rot) == icrf
-    @test target(rot) == icrf
+    @testset "Rotations" begin
+        ep = TDBEpoch(2019, 5, 6)
+        rot = Rotation(icrf, icrf, ep)
+        @test origin(rot) == icrf
+        @test target(rot) == icrf
 
-    rot′ = inv(rot)
-    @test rot == rot′
+        rot′ = inv(rot)
+        @test rot == rot′
 
-    r = randn(3)
-    v = randn(3)
+        r = randn(3)
+        v = randn(3)
 
-    rv = (r, v)
-    r1, v1 = rot(r, v)
-    rv1 = rot(rv)
-    @test r1 == r
-    @test v1 == v
-    @test rv1 == rv
+        rv = (r, v)
+        r1, v1 = rot(r, v)
+        rv1 = rot(rv)
+        @test r1 == r
+        @test v1 == v
+        @test rv1 == rv
 
-    comp = rot ∘ rot
-    r1, v1 = comp(r, v)
-    rv1 = comp(rv)
-    @test r1 == r
-    @test v1 == v
-    @test rv1 == rv
+        comp = rot ∘ rot
+        r1, v1 = comp(r, v)
+        rv1 = comp(rv)
+        @test r1 == r
+        @test v1 == v
+        @test rv1 == rv
 
-    @test AstroBase.Frames.path_frames(iau_earth, itrf) == [:IAUEarth,
-                                                            :ICRF,
-                                                            :CIRF,
-                                                            :TIRF,
-                                                            :ITRF]
-
+        exp_path = [:IAUEarth, :ICRF, :CIRF, :TIRF, :ITRF]
+        @test AstroBase.Frames.path_frames(iau_earth, itrf) == exp_path
+    end
+    @testset "Composition" begin
+        ep = TDBEpoch(2019, 5, 6)
+        et = value(seconds(j2000(ep)))
+        rot = Rotation(iau_earth, iau_io, ep)
+        m_act = rot.m
+        m′_act = rot.m′
+        s_exp = sxform("IAU_EARTH", "IAU_IO", et)
+        m_exp = s_exp[1:3, 1:3]
+        m′_exp = s_exp[4:6, 1:3]
+        @testset for i in eachindex(m_act, m_exp)
+            @test m_act[i] ≈ m_exp[i] atol=1e-8
+        end
+        @testset for i in eachindex(m′_act, m′_exp)
+            @test m′_act[i] ≈ m′_exp[i] atol=1e-6
+        end
+    end
+    @testset "IAU" begin
+        ep = TDBEpoch(2019, 5, 6)
+        et = value(seconds(j2000(ep)))
+        @testset for body_name in AstroBase.Bodies.ALL_NAMES
+            body = @eval $(Symbol(body_name))()
+            id = naifid(body)
+            if bodfnd(id, "PM")
+                frame = @eval $(Symbol("IAU", body_name))()
+                rot = Rotation(icrf, frame, ep)
+                m_act = rot.m
+                m′_act = rot.m′
+                s_exp = tisbod("J2000", id, et)
+                m_exp = s_exp[1:3, 1:3]
+                m′_exp = s_exp[4:6, 1:3]
+                @testset for i in eachindex(m_act, m_exp)
+                    @test m_act[i] ≈ m_exp[i] atol=1e-8
+                end
+                @testset for i in eachindex(m′_act, m′_exp)
+                    @test m′_act[i] ≈ m′_exp[i] atol=1e-6
+                end
+            end
+        end
+    end
     @testset "IERS" begin
         # Reference values from Orekit (http://www.orekit.org)
         tdb = TDBEpoch(2013, 3, 18, 12, 0, 0.0)
@@ -73,5 +111,15 @@ using AstroBase
         @test all(tirf_itrf(r_tirf, v_tirf) .≈ (r_itrf, v_itrf))
         @test all(itrf_tirf(tirf_itrf(r_tirf, v_tirf)...) .≈ (r_tirf, v_tirf))
         @test all((itrf_tirf ∘ tirf_itrf)(r_tirf, v_tirf) .≈ (r_tirf, v_tirf))
+
+        icrf_itrf = icrf_cirf ∘ cirf_tirf ∘ tirf_itrf
+        r_exp, v_exp = tirf_itrf(cirf_tirf(icrf_cirf(r, v)))
+        r_act, v_act = icrf_itrf(r, v)
+        @testset for i in eachindex(r_exp, r_act)
+            @test r_exp[i] ≈ r_act[i]
+        end
+        @testset for i in eachindex(v_exp, v_act)
+            @test v_exp[i] ≈ v_act[i]
+        end
     end
 end

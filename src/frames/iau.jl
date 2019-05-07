@@ -10,7 +10,7 @@ for name in ALL_NAMES
     @eval begin
         struct $frame <: RotatingFrame end
         const $cname = $frame()
-        from_sym(::Val{$frame}) = $cname
+        from_sym(::Val{$(Meta.quot(frame))}) = $cname
         export $frame, $cname
 
         function Rotation(::ICRF, ::$frame, ep::Epoch)

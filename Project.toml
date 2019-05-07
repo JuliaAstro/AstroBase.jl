@@ -6,6 +6,7 @@ version = "0.1.0"
 
 [deps]
 AstroTime = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
+EarthOrientation = "732a3c5d-d6c0-58bc-adb1-1b51709a25e2"
 ItemGraphs = "d5eda45b-7e79-5788-9687-2c6ab7b96158"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"

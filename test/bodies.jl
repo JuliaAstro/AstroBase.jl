@@ -36,7 +36,7 @@ furnsh(joinpath(@__DIR__, "..", "gen", "gm_de431.tpc"),
                 ep = TDBEpoch(2019, 5, 6)
                 et = value(seconds(j2000(ep)))
                 eulang = [reverse(euler_angles(body, ep))...; reverse(euler_rates(body, ep))...]
-                p_act = eul2m(eulang[1], eulang[2], eulang[3], 3, 1, 3)
+                p_act = eul2m(eulang[1:3]..., 3, 1, 3)
                 p_exp = tipbod("J2000", id, et)
                 @testset for i in eachindex(p_act, p_exp)
                     @test p_act[i] ≈ p_exp[i] atol=1e-8

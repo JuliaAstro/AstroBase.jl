@@ -1,9 +1,15 @@
-import ERFA
 import EarthOrientation: polarmotion, precession_nutation00
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
-using AstroTime: value, julian, julian_twopart, TTEpoch, UT1Epoch, TDBEpoch
 import ..sec2rad
+using AstroTime: value, julian, julian_twopart, TTEpoch, UT1Epoch, TDBEpoch
+using ..EarthAttitude:
+    celestial_to_intermediate,
+    earth_rotation_angle,
+    polar_motion,
+    s06,
+    tio_locator,
+    xy06
 
 export
     CIRF,
@@ -27,60 +33,57 @@ from_sym(::Val{:ITRF}) = itrf
 
 function Rotation(::ICRF, ::CIRF, ep::Epoch)
     m = precession_nutation(TTEpoch(ep))
-    Rotation{ICRF, CIRF}(m')
+    Rotation{icrf, cirf}(m')
 end
 
 function Rotation(::CIRF, ::ICRF, ep::Epoch)
     m = precession_nutation(TTEpoch(ep))
-    Rotation{CIRF, ICRF}(m)
+    Rotation{cirf, icrf}(m)
 end
 
 function Rotation(::CIRF, ::TIRF, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = ERFA.era00(value.(julian_twopart(ut1))...)
+    era = earth_rotation_angle(value.(julian_twopart(ut1))...)
     rate = rotation_rate(earth, TDBEpoch(ep))
-    # m = rotation_matrix(3, era)
     m = angleaxis_to_dcm(era, [0, 0, 1])
-    # δm = rate_matrix(3, era, rate)
     m′ = ddcm(m, [0, 0, rate])
-    Rotation{CIRF, TIRF}(m, m′)
+    Rotation{cirf, tirf}(m, m′)
 end
 
 function Rotation(::TIRF, ::CIRF, ep::Epoch)
     ut1 = UT1Epoch(ep)
-    era = ERFA.era00(value.(julian_twopart(ut1))...)
+    era = earth_rotation_angle(value.(julian_twopart(ut1))...)
     rate = rotation_rate(earth, TDBEpoch(ep))
-    # m = rotation_matrix(3, -era)
     m = angleaxis_to_dcm(-era, [0, 0, 1])
-    # δm = rate_matrix(3, -era, -rate)
     m′ = ddcm(m, [0, 0, -rate])
-    Rotation{TIRF, CIRF}(m, m′)
+    Rotation{tirf, cirf}(m, m′)
 end
 
 function polarmotion(ep::TTEpoch)
     xp, yp = polarmotion(value(julian(ep)))
     xp = sec2rad(xp)
     yp = sec2rad(yp)
-    reshape(ERFA.pom00(xp, yp, ERFA.sp00(value.(julian_twopart(ep))...)), (3,3))
+    sp00 = tio_locator(value.(julian_twopart(ep))...)
+    reshape(polar_motion(xp, yp, sp00), (3,3))
 end
 
 function precession_nutation(ep::TTEpoch)
     dx, dy = precession_nutation00(value(julian(ep)))
     jd1, jd2 = value.(julian_twopart(ep))
-    x, y = ERFA.xy06(jd1, jd2)
-    s = ERFA.s06(jd1, jd2, x, y)
+    x, y = xy06(jd1, jd2)
+    s = s06(jd1, jd2, x, y)
     x += sec2rad(dx/1000.0)
     y += sec2rad(dy/1000.0)
-    reshape(ERFA.c2ixys(x, y, s), (3,3))
+    reshape(celestial_to_intermediate(x, y, s), (3,3))
 end
 
 function Rotation(::TIRF, ::ITRF, ep::Epoch)
     m = polarmotion(TTEpoch(ep))
-    Rotation{TIRF,ITRF}(m')
+    Rotation{tirf, itrf}(m')
 end
 
 function Rotation(::ITRF, ::TIRF, ep::Epoch)
     m = polarmotion(TTEpoch(ep))
-    Rotation{ITRF,TIRF}(m)
+    Rotation{itrf, tirf}(m)
 end
 

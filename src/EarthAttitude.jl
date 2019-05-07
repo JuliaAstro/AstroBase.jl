@@ -9,7 +9,6 @@ export
     bias_precession_matrix_00,
     celestial_to_intermediate,
     earth_rotation_angle,
-    earth_rotation_angle,
     equation_of_equinoxes_00,
     equation_of_equinoxes_complementary_terms,
     equation_of_origins,
