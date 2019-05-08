@@ -2,28 +2,10 @@ using LinearAlgebra
 using Roots
 import AstroTime: seconds
 
-export kepler, period, meantoecc, ecctomean, ecctotrue, truetoecc
-
-function meantoecc(M, ecc)
-    kepler(E) = E - ecc*sin(E) - M
-    kepler_der(E) = 1 - ecc*cos(E)
-    return newton(kepler, kepler_der, M)
-end
-
-function ecctomean(E, ecc)
-    return E - ecc*sin(E)
-end
-
-function ecctotrue(E, ecc)
-    return 2*atan(sqrt(1 + ecc)*sin(E/2), sqrt(1 - ecc)*cos(E/2))
-end
-
-function truetoecc(T, ecc)
-    return 2*atan(sqrt(1 - ecc)*sin(T/2), sqrt(1 + ecc)*cos(T/2))
-end
+export kepler, period
 
 function period(a, μ)
-    return 2π*sqrt(abs(a)^3/μ)*seconds
+    2π * sqrt(abs(a)^3/μ) * seconds
 end
 
 function kepler(μ, r₀, v₀, Δt, numiter=50, rtol=sqrt(eps()))

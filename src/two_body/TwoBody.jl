@@ -29,6 +29,9 @@ export
     eccentric_anomaly,
     transform
 
+include("stumpff.jl")
+include("kepler.jl")
+
 semilatus(a, ecc) = ecc ≈ 0.0 ? a : a * (1.0 - ecc^2)
 
 function cartesian(a, ecc, i, Ω, ω, ν, μ)
@@ -117,6 +120,10 @@ function keplerian(pos, vel, µ, tol=1e-8)
 
     a, ecc, inc, Ω, ω, ν
 end
+
+isprograde(inc) = inc < π/2 && !(inc ≈ π/2)
+isretrograde(inc) = inc > π/2 && !(inc ≈ π/2)
+ispolar(inc) = inc ≈ π/2
 
 abstract type OrbitType end
 

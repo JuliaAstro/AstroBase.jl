@@ -64,3 +64,10 @@ function vector_azel(az, el)
     SVector(caz * cel, saz * cel, sel)
 end
 
+function angular_velocity(ψ, δψ, θ, δθ, ϕ, δϕ)
+    Ω₁ = δψ * sin(θ) * sin(ϕ) - δθ * cos(ϕ)
+    Ω₂ = δψ * sin(θ) * cos(ϕ) + δθ * sin(ϕ)
+    Ω₃ = δψ * cos(θ) + δϕ
+    [Ω₁, Ω₂, Ω₃]
+end
+
