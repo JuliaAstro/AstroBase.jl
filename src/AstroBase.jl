@@ -15,6 +15,7 @@ include(joinpath("bodies", "Bodies.jl"))
 include("Interfaces.jl")
 include(joinpath("earth_attitude", "EarthAttitude.jl"))
 include(joinpath("two_body", "TwoBody.jl"))
+include(joinpath("n_body", "NBody.jl"))
 include(joinpath("frames", "Frames.jl"))
 include(joinpath("coords", "Coords.jl"))
 
