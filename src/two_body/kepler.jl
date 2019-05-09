@@ -1,5 +1,4 @@
-using LinearAlgebra
-using Roots
+using LinearAlgebra: cross, norm
 import AstroTime: seconds
 
 export kepler, period
