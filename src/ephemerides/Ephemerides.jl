@@ -2,7 +2,7 @@ module Ephemerides
 
 using MuladdMacro
 
-import AstroTime: Epoch, julian, centuries, value
+import AstroTime: Epoch, j2000, centuries, value, DAYS_PER_CENTURY
 import ..Interfaces: AbstractEphemeris, position, position!
 import ..Bodies: SolarSystemBarycenter, Sun
 
@@ -21,38 +21,45 @@ include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_neptune.jl"))
 struct VSOP87 <: AbstractEphemeris end
 const vsop87 = VSOP87()
 
-function position!(arr, ::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::Sun; max_terms::Int=0)
-    t = value(centuries(julian(ep))) / 10
+@inbounds function _vsop(coeffs, t0, n_terms, max_terms, max_order)
+    # Powers of `t0`
+    t = Array{Float64}(undef, 7)
+    t[1] = 0.0 # t[-1]
+    t[2] = 1.0 # t[0]
+    t[3] = t0 # t[1]
+    for i = 4:max_order + 2
+        t[i] = t[i-1] * t0
+    end
 
-    x = zeros(6)
-    y = zeros(6)
-    z = zeros(6)
+    r = zeros(3)
+    v = zeros(3)
 
-    for i = 1:6
-        for j in eachindex(sun_x[i][1])
-            max_terms != 0 && j > max_terms && break
+    for k = 1:3
+        for order = 0:max_order
+            i = order + 1
+            it = order + 2
+            n = min(n_terms[k][i], max_terms)
+            for j = 1:n
+                a = coeffs[k][i][1][j]
+                b = coeffs[k][i][2][j]
+                c = coeffs[k][i][3][j]
 
-            @muladd x[i] += sun_x[i][1][j] * cos(sun_x[i][2][j] + sun_x[i][3][j] * t)
-        end
-
-        for j in eachindex(sun_y[i])
-            max_terms != 0 && j > max_terms && break
-
-            @muladd y[i] += sun_y[i][1][j] * cos(sun_y[i][2][j] + sun_y[i][3][j] * t)
-        end
-
-        for j in eachindex(sun_z[i])
-            max_terms != 0 && j > max_terms && break
-
-            @muladd z[i] += sun_x[i][1][j] * cos(sun_z[i][2][j] + sun_z[i][3][j] * t)
+                u = b + c * t0
+                su, cu = sincos(u)
+                r[k] += a * cu * t[it]
+                v[k] += order * a * cu * t[it-1] - a * c * su * t[it]
+            end
         end
     end
 
-    arr[1] += @evalpoly t x[1] x[2] x[3] x[4] x[5] x[6]
-    arr[2] += @evalpoly t y[1] y[2] y[3] y[4] y[5] y[6]
-    arr[3] += @evalpoly t z[1] z[2] z[3] z[4] z[5] z[6]
+    v ./= 10DAYS_PER_CENTURY
 
-    arr
+    r, v
+end
+
+function position!(arr, ::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::Sun)
+    t0 = value(centuries(TDEpoch(ep))) / 10.0
+    _vsop(VSOP_SUN, t0, VSOP_SUN_NUM, typemax(Int), 5)[1]
 end
 
 end
