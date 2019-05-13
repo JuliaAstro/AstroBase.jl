@@ -2,10 +2,9 @@ module Coords
 
 using AstroTime: Epoch, TimeScale
 
-import ..Interfaces:
-    position,
-    position_velocity,
-    velocity
+import ..position,
+    ..position_velocity,
+    ..velocity
 
 using ..Bodies:
     CelestialBody,

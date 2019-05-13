@@ -54,29 +54,17 @@ for (name, f) in files
             end
         end
 
-        write(f, """
-const VSOP_$(name) = ((($(name)_X_0_AMP, $(name)_X_0_PHS, $(name)_X_0_FRQ),
-                       ($(name)_X_1_AMP, $(name)_X_1_PHS, $(name)_X_1_FRQ),
-                       ($(name)_X_2_AMP, $(name)_X_2_PHS, $(name)_X_2_FRQ),
-                       ($(name)_X_3_AMP, $(name)_X_3_PHS, $(name)_X_3_FRQ),
-                       ($(name)_X_4_AMP, $(name)_X_4_PHS, $(name)_X_4_FRQ),
-                       ($(name)_X_5_AMP, $(name)_X_5_PHS, $(name)_X_5_FRQ)),
-                      (($(name)_Y_0_AMP, $(name)_Y_0_PHS, $(name)_Y_0_FRQ),
-                       ($(name)_Y_1_AMP, $(name)_Y_1_PHS, $(name)_Y_1_FRQ),
-                       ($(name)_Y_2_AMP, $(name)_Y_2_PHS, $(name)_Y_2_FRQ),
-                       ($(name)_Y_3_AMP, $(name)_Y_3_PHS, $(name)_Y_3_FRQ),
-                       ($(name)_Y_4_AMP, $(name)_Y_4_PHS, $(name)_Y_4_FRQ),
-                       ($(name)_Y_5_AMP, $(name)_Y_5_PHS, $(name)_Y_5_FRQ)),
-                      (($(name)_Z_0_AMP, $(name)_Z_0_PHS, $(name)_Z_0_FRQ),
-                       ($(name)_Z_1_AMP, $(name)_Z_1_PHS, $(name)_Z_1_FRQ),
-                       ($(name)_Z_2_AMP, $(name)_Z_2_PHS, $(name)_Z_2_FRQ),
-                       ($(name)_Z_3_AMP, $(name)_Z_3_PHS, $(name)_Z_3_FRQ),
-                       ($(name)_Z_4_AMP, $(name)_Z_4_PHS, $(name)_Z_4_FRQ),
-                       ($(name)_Z_5_AMP, $(name)_Z_5_PHS, $(name)_Z_5_FRQ)))
-
-const VSOP_$(name)_NUM = ($(name)_X_NUM, $(name)_Y_NUM, $(name)_Z_NUM)
-""")
-
+        write(f, "const VSOP_$(name) = ((\n")
+        for (idx, coord) in enumerate(["X", "Y", "Z"])
+            for i in 0:length(coeffs[idx]) - 1
+                write(f, "$indent($(name)_$(coord)_$(i)_AMP, $(name)_$(coord)_$(i)_PHS, $(name)_$(coord)_$(i)_FRQ),\n")
+            end
+            if idx in (1, 2)
+                write(f, "), (\n")
+            end
+        end
+        write(f, "))\n\n")
+        write(f, "const VSOP_$(name)_NUM = ($(name)_X_NUM, $(name)_Y_NUM, $(name)_Z_NUM)\n\n")
     end
     empty!(coeffs[1])
     empty!(coeffs[2])

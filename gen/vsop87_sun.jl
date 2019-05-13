@@ -20089,23 +20089,28 @@ const SUN_Z_5_FRQ = [
     433.7117378768,
 ]
 
-const VSOP_SUN = (((SUN_X_0_AMP, SUN_X_0_PHS, SUN_X_0_FRQ),
-                       (SUN_X_1_AMP, SUN_X_1_PHS, SUN_X_1_FRQ),
-                       (SUN_X_2_AMP, SUN_X_2_PHS, SUN_X_2_FRQ),
-                       (SUN_X_3_AMP, SUN_X_3_PHS, SUN_X_3_FRQ),
-                       (SUN_X_4_AMP, SUN_X_4_PHS, SUN_X_4_FRQ),
-                       (SUN_X_5_AMP, SUN_X_5_PHS, SUN_X_5_FRQ)),
-                      ((SUN_Y_0_AMP, SUN_Y_0_PHS, SUN_Y_0_FRQ),
-                       (SUN_Y_1_AMP, SUN_Y_1_PHS, SUN_Y_1_FRQ),
-                       (SUN_Y_2_AMP, SUN_Y_2_PHS, SUN_Y_2_FRQ),
-                       (SUN_Y_3_AMP, SUN_Y_3_PHS, SUN_Y_3_FRQ),
-                       (SUN_Y_4_AMP, SUN_Y_4_PHS, SUN_Y_4_FRQ),
-                       (SUN_Y_5_AMP, SUN_Y_5_PHS, SUN_Y_5_FRQ)),
-                      ((SUN_Z_0_AMP, SUN_Z_0_PHS, SUN_Z_0_FRQ),
-                       (SUN_Z_1_AMP, SUN_Z_1_PHS, SUN_Z_1_FRQ),
-                       (SUN_Z_2_AMP, SUN_Z_2_PHS, SUN_Z_2_FRQ),
-                       (SUN_Z_3_AMP, SUN_Z_3_PHS, SUN_Z_3_FRQ),
-                       (SUN_Z_4_AMP, SUN_Z_4_PHS, SUN_Z_4_FRQ),
-                       (SUN_Z_5_AMP, SUN_Z_5_PHS, SUN_Z_5_FRQ)))
+const VSOP_SUN = ((
+    (SUN_X_0_AMP, SUN_X_0_PHS, SUN_X_0_FRQ),
+    (SUN_X_1_AMP, SUN_X_1_PHS, SUN_X_1_FRQ),
+    (SUN_X_2_AMP, SUN_X_2_PHS, SUN_X_2_FRQ),
+    (SUN_X_3_AMP, SUN_X_3_PHS, SUN_X_3_FRQ),
+    (SUN_X_4_AMP, SUN_X_4_PHS, SUN_X_4_FRQ),
+    (SUN_X_5_AMP, SUN_X_5_PHS, SUN_X_5_FRQ),
+), (
+    (SUN_Y_0_AMP, SUN_Y_0_PHS, SUN_Y_0_FRQ),
+    (SUN_Y_1_AMP, SUN_Y_1_PHS, SUN_Y_1_FRQ),
+    (SUN_Y_2_AMP, SUN_Y_2_PHS, SUN_Y_2_FRQ),
+    (SUN_Y_3_AMP, SUN_Y_3_PHS, SUN_Y_3_FRQ),
+    (SUN_Y_4_AMP, SUN_Y_4_PHS, SUN_Y_4_FRQ),
+    (SUN_Y_5_AMP, SUN_Y_5_PHS, SUN_Y_5_FRQ),
+), (
+    (SUN_Z_0_AMP, SUN_Z_0_PHS, SUN_Z_0_FRQ),
+    (SUN_Z_1_AMP, SUN_Z_1_PHS, SUN_Z_1_FRQ),
+    (SUN_Z_2_AMP, SUN_Z_2_PHS, SUN_Z_2_FRQ),
+    (SUN_Z_3_AMP, SUN_Z_3_PHS, SUN_Z_3_FRQ),
+    (SUN_Z_4_AMP, SUN_Z_4_PHS, SUN_Z_4_FRQ),
+    (SUN_Z_5_AMP, SUN_Z_5_PHS, SUN_Z_5_FRQ),
+))
 
 const VSOP_SUN_NUM = (SUN_X_NUM, SUN_Y_NUM, SUN_Z_NUM)
+

@@ -1,65 +1,124 @@
 module Ephemerides
 
-using MuladdMacro
+using AstroTime: Epoch
+using ..Bodies:
+    CelestialBody,
+    NAIFId,
+    SolarSystemBarycenter,
+    naifid,
+    path_ids,
+    ssb
 
-import AstroTime: Epoch, j2000, centuries, value, DAYS_PER_CENTURY
-import ..Interfaces: AbstractEphemeris, position, position!
-import ..Bodies: SolarSystemBarycenter, Sun
+#####################
+# AbstractEphemeris #
+#####################
 
-export VSOP87, vsop87, position!
+import ..position,
+    ..position!,
+    ..velocity,
+    ..velocity!,
+    ..position_velocity,
+    ..position_velocity!
 
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_sun.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_mercury.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_venus.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_earth.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_mars.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_jupiter.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_saturn.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_uranus.jl"))
-include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_neptune.jl"))
+export AbstractEphemeris,
+    position,
+    position!,
+    velocity,
+    velocity!,
+    position_velocity,
+    position_velocity!
 
-struct VSOP87 <: AbstractEphemeris end
-const vsop87 = VSOP87()
+abstract type AbstractEphemeris end
 
-@inbounds function _vsop(coeffs, t0, n_terms, max_terms, max_order)
-    # Powers of `t0`
-    t = Array{Float64}(undef, 7)
-    t[1] = 0.0 # t[-1]
-    t[2] = 1.0 # t[0]
-    t[3] = t0 # t[1]
-    for i = 4:max_order + 2
-        t[i] = t[i-1] * t0
-    end
+function position end
+function position! end
+function velocity end
+function velocity! end
+function position_velocity end
+function position_velocity end
 
-    r = zeros(3)
-    v = zeros(3)
+# for f in (:position, :velocity)
+#     fmut = Symbol(f, "!")
+#     @eval begin
+#         function $fmut(arr,
+#                        eph::AbstractEphemeris,
+#                        ep::Epoch,
+#                        from::T,
+#                        to::T;
+#                        kwargs...
+#                       ) where T<:CelestialBody
+#             arr .+= 0.0
+#         end
+#
+#         function $fmut(arr,
+#                        eph::AbstractEphemeris,
+#                        ep::Epoch,
+#                        from::CelestialBody,
+#                        to::CelestialBody;
+#                        kwargs...
+#                       )
+#             path = path_ids(from, to)
+#             for (origin, target) in zip(path[1:end-1], path[2:end])
+#                 $fmut(arr, eph, ep, origin, target; kwargs...)
+#             end
+#             arr
+#         end
+#
+#         function $f(eph::AbstractEphemeris,
+#                     ep::Epoch,
+#                     from::CelestialBody,
+#                     to::CelestialBody;
+#                     kwargs...
+#                    )
+#             $fmut(zeros(3), eph, ep, from, to; kwargs...)
+#         end
+#
+#         function $fmut(arr, eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#             $fmut(arr, eph, ep, ssb, to; kwargs...)
+#         end
+#
+#         function $f(eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#             $fmut(zeros(3), eph, ep, ssb, to; kwargs...)
+#         end
+#     end
+# end
+#
+# function position_velocity!(pos, vel, eph::AbstractEphemeris, ep::Epoch, from::NAIFId, to::NAIFId; kwargs...)
+#     position!(pos, eph, ep, from, to; kwargs...), velocity!(vel, eph, ep, from, to; kwargs...)
+# end
+#
+# function position_velocity!(pos,
+#                             vel,
+#                             eph::AbstractEphemeris,
+#                             ep::Epoch,
+#                             from::CelestialBody,
+#                             to::CelestialBody;
+#                             kwargs...)
+#     path = path_ids(from, to)
+#     for (origin, target) in zip(path[1:end-1], path[2:end])
+#         position_velocity!(pos, vel, eph, ep, origin, target; kwargs...)
+#     end
+#     pos, vel
+# end
+#
+# position_velocity!(pos,
+#                    vel,
+#                    ::AbstractEphemeris,
+#                    ::Epoch,
+#                    ::T, ::T; kwargs...) where {T<:CelestialBody} = pos, vel
+#
+# function position_velocity(eph::AbstractEphemeris, ep::Epoch, from::CelestialBody, to::CelestialBody; kwargs...)
+#     position_velocity!(zeros(3), zeros(3), eph, ep, from, to; kwargs...)
+# end
+#
+# function position_velocity!(pos, vel, eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#     position_velocity!(pos, vel, eph, ep, ssb, to; kwargs...)
+# end
+#
+# function position_velocity(eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#     position_velocity!(zeros(3), zeros(3), eph, ep, ssb, to; kwargs...)
+# end
 
-    for k = 1:3
-        for order = 0:max_order
-            i = order + 1
-            it = order + 2
-            n = min(n_terms[k][i], max_terms)
-            for j = 1:n
-                a = coeffs[k][i][1][j]
-                b = coeffs[k][i][2][j]
-                c = coeffs[k][i][3][j]
-
-                u = b + c * t0
-                su, cu = sincos(u)
-                r[k] += a * cu * t[it]
-                v[k] += order * a * cu * t[it-1] - a * c * su * t[it]
-            end
-        end
-    end
-
-    v ./= 10DAYS_PER_CENTURY
-
-    r, v
-end
-
-function position!(arr, ::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::Sun)
-    t0 = value(centuries(TDEpoch(ep))) / 10.0
-    _vsop(VSOP_SUN, t0, VSOP_SUN_NUM, typemax(Int), 5)[1]
-end
+include("vsop87.jl")
 
 end

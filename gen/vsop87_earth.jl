@@ -16855,23 +16855,28 @@ const EARTH_Z_5_FRQ = [
     199.0720014364,
 ]
 
-const VSOP_EARTH = (((EARTH_X_0_AMP, EARTH_X_0_PHS, EARTH_X_0_FRQ),
-                       (EARTH_X_1_AMP, EARTH_X_1_PHS, EARTH_X_1_FRQ),
-                       (EARTH_X_2_AMP, EARTH_X_2_PHS, EARTH_X_2_FRQ),
-                       (EARTH_X_3_AMP, EARTH_X_3_PHS, EARTH_X_3_FRQ),
-                       (EARTH_X_4_AMP, EARTH_X_4_PHS, EARTH_X_4_FRQ),
-                       (EARTH_X_5_AMP, EARTH_X_5_PHS, EARTH_X_5_FRQ)),
-                      ((EARTH_Y_0_AMP, EARTH_Y_0_PHS, EARTH_Y_0_FRQ),
-                       (EARTH_Y_1_AMP, EARTH_Y_1_PHS, EARTH_Y_1_FRQ),
-                       (EARTH_Y_2_AMP, EARTH_Y_2_PHS, EARTH_Y_2_FRQ),
-                       (EARTH_Y_3_AMP, EARTH_Y_3_PHS, EARTH_Y_3_FRQ),
-                       (EARTH_Y_4_AMP, EARTH_Y_4_PHS, EARTH_Y_4_FRQ),
-                       (EARTH_Y_5_AMP, EARTH_Y_5_PHS, EARTH_Y_5_FRQ)),
-                      ((EARTH_Z_0_AMP, EARTH_Z_0_PHS, EARTH_Z_0_FRQ),
-                       (EARTH_Z_1_AMP, EARTH_Z_1_PHS, EARTH_Z_1_FRQ),
-                       (EARTH_Z_2_AMP, EARTH_Z_2_PHS, EARTH_Z_2_FRQ),
-                       (EARTH_Z_3_AMP, EARTH_Z_3_PHS, EARTH_Z_3_FRQ),
-                       (EARTH_Z_4_AMP, EARTH_Z_4_PHS, EARTH_Z_4_FRQ),
-                       (EARTH_Z_5_AMP, EARTH_Z_5_PHS, EARTH_Z_5_FRQ)))
+const VSOP_EARTH = ((
+    (EARTH_X_0_AMP, EARTH_X_0_PHS, EARTH_X_0_FRQ),
+    (EARTH_X_1_AMP, EARTH_X_1_PHS, EARTH_X_1_FRQ),
+    (EARTH_X_2_AMP, EARTH_X_2_PHS, EARTH_X_2_FRQ),
+    (EARTH_X_3_AMP, EARTH_X_3_PHS, EARTH_X_3_FRQ),
+    (EARTH_X_4_AMP, EARTH_X_4_PHS, EARTH_X_4_FRQ),
+    (EARTH_X_5_AMP, EARTH_X_5_PHS, EARTH_X_5_FRQ),
+), (
+    (EARTH_Y_0_AMP, EARTH_Y_0_PHS, EARTH_Y_0_FRQ),
+    (EARTH_Y_1_AMP, EARTH_Y_1_PHS, EARTH_Y_1_FRQ),
+    (EARTH_Y_2_AMP, EARTH_Y_2_PHS, EARTH_Y_2_FRQ),
+    (EARTH_Y_3_AMP, EARTH_Y_3_PHS, EARTH_Y_3_FRQ),
+    (EARTH_Y_4_AMP, EARTH_Y_4_PHS, EARTH_Y_4_FRQ),
+    (EARTH_Y_5_AMP, EARTH_Y_5_PHS, EARTH_Y_5_FRQ),
+), (
+    (EARTH_Z_0_AMP, EARTH_Z_0_PHS, EARTH_Z_0_FRQ),
+    (EARTH_Z_1_AMP, EARTH_Z_1_PHS, EARTH_Z_1_FRQ),
+    (EARTH_Z_2_AMP, EARTH_Z_2_PHS, EARTH_Z_2_FRQ),
+    (EARTH_Z_3_AMP, EARTH_Z_3_PHS, EARTH_Z_3_FRQ),
+    (EARTH_Z_4_AMP, EARTH_Z_4_PHS, EARTH_Z_4_FRQ),
+    (EARTH_Z_5_AMP, EARTH_Z_5_PHS, EARTH_Z_5_FRQ),
+))
 
 const VSOP_EARTH_NUM = (EARTH_X_NUM, EARTH_Y_NUM, EARTH_Z_NUM)
+

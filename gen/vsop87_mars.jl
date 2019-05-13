@@ -22912,23 +22912,28 @@ const MARS_Z_5_FRQ = [
     536.8045120954,
 ]
 
-const VSOP_MARS = (((MARS_X_0_AMP, MARS_X_0_PHS, MARS_X_0_FRQ),
-                       (MARS_X_1_AMP, MARS_X_1_PHS, MARS_X_1_FRQ),
-                       (MARS_X_2_AMP, MARS_X_2_PHS, MARS_X_2_FRQ),
-                       (MARS_X_3_AMP, MARS_X_3_PHS, MARS_X_3_FRQ),
-                       (MARS_X_4_AMP, MARS_X_4_PHS, MARS_X_4_FRQ),
-                       (MARS_X_5_AMP, MARS_X_5_PHS, MARS_X_5_FRQ)),
-                      ((MARS_Y_0_AMP, MARS_Y_0_PHS, MARS_Y_0_FRQ),
-                       (MARS_Y_1_AMP, MARS_Y_1_PHS, MARS_Y_1_FRQ),
-                       (MARS_Y_2_AMP, MARS_Y_2_PHS, MARS_Y_2_FRQ),
-                       (MARS_Y_3_AMP, MARS_Y_3_PHS, MARS_Y_3_FRQ),
-                       (MARS_Y_4_AMP, MARS_Y_4_PHS, MARS_Y_4_FRQ),
-                       (MARS_Y_5_AMP, MARS_Y_5_PHS, MARS_Y_5_FRQ)),
-                      ((MARS_Z_0_AMP, MARS_Z_0_PHS, MARS_Z_0_FRQ),
-                       (MARS_Z_1_AMP, MARS_Z_1_PHS, MARS_Z_1_FRQ),
-                       (MARS_Z_2_AMP, MARS_Z_2_PHS, MARS_Z_2_FRQ),
-                       (MARS_Z_3_AMP, MARS_Z_3_PHS, MARS_Z_3_FRQ),
-                       (MARS_Z_4_AMP, MARS_Z_4_PHS, MARS_Z_4_FRQ),
-                       (MARS_Z_5_AMP, MARS_Z_5_PHS, MARS_Z_5_FRQ)))
+const VSOP_MARS = ((
+    (MARS_X_0_AMP, MARS_X_0_PHS, MARS_X_0_FRQ),
+    (MARS_X_1_AMP, MARS_X_1_PHS, MARS_X_1_FRQ),
+    (MARS_X_2_AMP, MARS_X_2_PHS, MARS_X_2_FRQ),
+    (MARS_X_3_AMP, MARS_X_3_PHS, MARS_X_3_FRQ),
+    (MARS_X_4_AMP, MARS_X_4_PHS, MARS_X_4_FRQ),
+    (MARS_X_5_AMP, MARS_X_5_PHS, MARS_X_5_FRQ),
+), (
+    (MARS_Y_0_AMP, MARS_Y_0_PHS, MARS_Y_0_FRQ),
+    (MARS_Y_1_AMP, MARS_Y_1_PHS, MARS_Y_1_FRQ),
+    (MARS_Y_2_AMP, MARS_Y_2_PHS, MARS_Y_2_FRQ),
+    (MARS_Y_3_AMP, MARS_Y_3_PHS, MARS_Y_3_FRQ),
+    (MARS_Y_4_AMP, MARS_Y_4_PHS, MARS_Y_4_FRQ),
+    (MARS_Y_5_AMP, MARS_Y_5_PHS, MARS_Y_5_FRQ),
+), (
+    (MARS_Z_0_AMP, MARS_Z_0_PHS, MARS_Z_0_FRQ),
+    (MARS_Z_1_AMP, MARS_Z_1_PHS, MARS_Z_1_FRQ),
+    (MARS_Z_2_AMP, MARS_Z_2_PHS, MARS_Z_2_FRQ),
+    (MARS_Z_3_AMP, MARS_Z_3_PHS, MARS_Z_3_FRQ),
+    (MARS_Z_4_AMP, MARS_Z_4_PHS, MARS_Z_4_FRQ),
+    (MARS_Z_5_AMP, MARS_Z_5_PHS, MARS_Z_5_FRQ),
+))
 
 const VSOP_MARS_NUM = (MARS_X_NUM, MARS_Y_NUM, MARS_Z_NUM)
+

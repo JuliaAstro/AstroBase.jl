@@ -14158,23 +14158,28 @@ const VENUS_Z_5_FRQ = [
     433.7117378768,
 ]
 
-const VSOP_VENUS = (((VENUS_X_0_AMP, VENUS_X_0_PHS, VENUS_X_0_FRQ),
-                       (VENUS_X_1_AMP, VENUS_X_1_PHS, VENUS_X_1_FRQ),
-                       (VENUS_X_2_AMP, VENUS_X_2_PHS, VENUS_X_2_FRQ),
-                       (VENUS_X_3_AMP, VENUS_X_3_PHS, VENUS_X_3_FRQ),
-                       (VENUS_X_4_AMP, VENUS_X_4_PHS, VENUS_X_4_FRQ),
-                       (VENUS_X_5_AMP, VENUS_X_5_PHS, VENUS_X_5_FRQ)),
-                      ((VENUS_Y_0_AMP, VENUS_Y_0_PHS, VENUS_Y_0_FRQ),
-                       (VENUS_Y_1_AMP, VENUS_Y_1_PHS, VENUS_Y_1_FRQ),
-                       (VENUS_Y_2_AMP, VENUS_Y_2_PHS, VENUS_Y_2_FRQ),
-                       (VENUS_Y_3_AMP, VENUS_Y_3_PHS, VENUS_Y_3_FRQ),
-                       (VENUS_Y_4_AMP, VENUS_Y_4_PHS, VENUS_Y_4_FRQ),
-                       (VENUS_Y_5_AMP, VENUS_Y_5_PHS, VENUS_Y_5_FRQ)),
-                      ((VENUS_Z_0_AMP, VENUS_Z_0_PHS, VENUS_Z_0_FRQ),
-                       (VENUS_Z_1_AMP, VENUS_Z_1_PHS, VENUS_Z_1_FRQ),
-                       (VENUS_Z_2_AMP, VENUS_Z_2_PHS, VENUS_Z_2_FRQ),
-                       (VENUS_Z_3_AMP, VENUS_Z_3_PHS, VENUS_Z_3_FRQ),
-                       (VENUS_Z_4_AMP, VENUS_Z_4_PHS, VENUS_Z_4_FRQ),
-                       (VENUS_Z_5_AMP, VENUS_Z_5_PHS, VENUS_Z_5_FRQ)))
+const VSOP_VENUS = ((
+    (VENUS_X_0_AMP, VENUS_X_0_PHS, VENUS_X_0_FRQ),
+    (VENUS_X_1_AMP, VENUS_X_1_PHS, VENUS_X_1_FRQ),
+    (VENUS_X_2_AMP, VENUS_X_2_PHS, VENUS_X_2_FRQ),
+    (VENUS_X_3_AMP, VENUS_X_3_PHS, VENUS_X_3_FRQ),
+    (VENUS_X_4_AMP, VENUS_X_4_PHS, VENUS_X_4_FRQ),
+    (VENUS_X_5_AMP, VENUS_X_5_PHS, VENUS_X_5_FRQ),
+), (
+    (VENUS_Y_0_AMP, VENUS_Y_0_PHS, VENUS_Y_0_FRQ),
+    (VENUS_Y_1_AMP, VENUS_Y_1_PHS, VENUS_Y_1_FRQ),
+    (VENUS_Y_2_AMP, VENUS_Y_2_PHS, VENUS_Y_2_FRQ),
+    (VENUS_Y_3_AMP, VENUS_Y_3_PHS, VENUS_Y_3_FRQ),
+    (VENUS_Y_4_AMP, VENUS_Y_4_PHS, VENUS_Y_4_FRQ),
+    (VENUS_Y_5_AMP, VENUS_Y_5_PHS, VENUS_Y_5_FRQ),
+), (
+    (VENUS_Z_0_AMP, VENUS_Z_0_PHS, VENUS_Z_0_FRQ),
+    (VENUS_Z_1_AMP, VENUS_Z_1_PHS, VENUS_Z_1_FRQ),
+    (VENUS_Z_2_AMP, VENUS_Z_2_PHS, VENUS_Z_2_FRQ),
+    (VENUS_Z_3_AMP, VENUS_Z_3_PHS, VENUS_Z_3_FRQ),
+    (VENUS_Z_4_AMP, VENUS_Z_4_PHS, VENUS_Z_4_FRQ),
+    (VENUS_Z_5_AMP, VENUS_Z_5_PHS, VENUS_Z_5_FRQ),
+))
 
 const VSOP_VENUS_NUM = (VENUS_X_NUM, VENUS_Y_NUM, VENUS_Z_NUM)
+
