@@ -17,16 +17,16 @@ import ..position,
     ..position!,
     ..velocity,
     ..velocity!,
-    ..position_velocity,
-    ..position_velocity!
+    ..state,
+    ..state!
 
 export AbstractEphemeris,
     position,
     position!,
     velocity,
     velocity!,
-    position_velocity,
-    position_velocity!
+    state,
+    state!
 
 abstract type AbstractEphemeris end
 
@@ -34,8 +34,8 @@ function position end
 function position! end
 function velocity end
 function velocity! end
-function position_velocity end
-function position_velocity end
+function state end
+function state end
 
 # for f in (:position, :velocity)
 #     fmut = Symbol(f, "!")
@@ -83,11 +83,11 @@ function position_velocity end
 #     end
 # end
 #
-# function position_velocity!(pos, vel, eph::AbstractEphemeris, ep::Epoch, from::NAIFId, to::NAIFId; kwargs...)
+# function state!(pos, vel, eph::AbstractEphemeris, ep::Epoch, from::NAIFId, to::NAIFId; kwargs...)
 #     position!(pos, eph, ep, from, to; kwargs...), velocity!(vel, eph, ep, from, to; kwargs...)
 # end
 #
-# function position_velocity!(pos,
+# function state!(pos,
 #                             vel,
 #                             eph::AbstractEphemeris,
 #                             ep::Epoch,
@@ -96,27 +96,27 @@ function position_velocity end
 #                             kwargs...)
 #     path = path_ids(from, to)
 #     for (origin, target) in zip(path[1:end-1], path[2:end])
-#         position_velocity!(pos, vel, eph, ep, origin, target; kwargs...)
+#         state!(pos, vel, eph, ep, origin, target; kwargs...)
 #     end
 #     pos, vel
 # end
 #
-# position_velocity!(pos,
+# state!(pos,
 #                    vel,
 #                    ::AbstractEphemeris,
 #                    ::Epoch,
 #                    ::T, ::T; kwargs...) where {T<:CelestialBody} = pos, vel
 #
-# function position_velocity(eph::AbstractEphemeris, ep::Epoch, from::CelestialBody, to::CelestialBody; kwargs...)
-#     position_velocity!(zeros(3), zeros(3), eph, ep, from, to; kwargs...)
+# function state(eph::AbstractEphemeris, ep::Epoch, from::CelestialBody, to::CelestialBody; kwargs...)
+#     state!(zeros(3), zeros(3), eph, ep, from, to; kwargs...)
 # end
 #
-# function position_velocity!(pos, vel, eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
-#     position_velocity!(pos, vel, eph, ep, ssb, to; kwargs...)
+# function state!(pos, vel, eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#     state!(pos, vel, eph, ep, ssb, to; kwargs...)
 # end
 #
-# function position_velocity(eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
-#     position_velocity!(zeros(3), zeros(3), eph, ep, ssb, to; kwargs...)
+# function state(eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
+#     state!(zeros(3), zeros(3), eph, ep, ssb, to; kwargs...)
 # end
 
 include("vsop87.jl")

@@ -84,7 +84,7 @@ for body in ("Sun", "Mercury", "Venus", "Earth", "Mars",
             _vsop($c, $n, eph.order, eph.terms, ep)[2]
         end
 
-        function position_velocity!(r0, v0, eph::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::$b)
+        function state!(r0, v0, eph::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::$b)
             r1, v1 = _vsop($c, $n, eph.order, eph.terms, ep)
             r0 .+= r1
             v0 .+= v1

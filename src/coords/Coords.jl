@@ -3,7 +3,7 @@ module Coords
 using AstroTime: Epoch, TimeScale
 
 import ..position,
-    ..position_velocity,
+    ..state,
     ..velocity
 
 using ..Bodies:
@@ -51,7 +51,7 @@ end
 epoch(s::State) = s.epoch
 position(s::State) = s.pos
 velocity(s::State) = s.vel
-position_velocity(s::State) = (s.pos, s.vel)
+state(s::State) = (s.pos, s.vel)
 keplerian(s::State) = keplerian(position(s), velocity(s), grav_param(body(s)))
 
 struct KeplerianState{Scale, Frame, Body, T} <: AbstractState{Scale, Frame, Body}
@@ -71,11 +71,11 @@ end
 epoch(s::KeplerianState) = s.epoch
 position(s::KeplerianState) = cartesian(s.a, s.i, s.e, s.Ω, s.ω, s.ν, grav_param(body(s)))[1]
 velocity(s::KeplerianState) = cartesian(s.a, s.i, s.e, s.Ω, s.ω, s.ν, grav_param(body(s)))[2]
-position_velocity(s::KeplerianState) = cartesian(s.a, s.i, s.e, s.Ω, s.ω, s.ν, grav_param(body(s)))
+state(s::KeplerianState) = cartesian(s.a, s.i, s.e, s.Ω, s.ω, s.ν, grav_param(body(s)))
 keplerian(s::KeplerianState) = (s.a, s.i, s.e, s.Ω, s.ω, s.ν)
 
 KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=frame(s), body=body(s))
-State(s::KeplerianState) = State(epoch(s), position_velocity(s)...; frame=frame(s), body=body(s))
+State(s::KeplerianState) = State(epoch(s), state(s)...; frame=frame(s), body=body(s))
 
 struct Trajectory{Scale, Frame, Body}
 end

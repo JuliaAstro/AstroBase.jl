@@ -4,7 +4,7 @@ using AstroBase.Bodies:
     NAIFId, ssb, sun, mercury, venus, earth, mars,
     jupiter, saturn, uranus, neptune
 
-import AstroBase.Ephemerides: position!, velocity!, position_velocity!
+import AstroBase.Ephemerides: position!, velocity!, state!
 
 struct DummyEphemeris <: AbstractEphemeris end
 const eph = DummyEphemeris()
@@ -17,7 +17,7 @@ function velocity!(vel, ::DummyEphemeris, ::Epoch, ::NAIFId, ::NAIFId)
     vel .+= [1.0, 2.0, 3.0]
 end
 
-function position_velocity!(pos, vel, ::DummyEphemeris, ::Epoch, ::NAIFId, ::NAIFId)
+function state!(pos, vel, ::DummyEphemeris, ::Epoch, ::NAIFId, ::NAIFId)
     (pos .+= [1.0, 2.0, 3.0], vel .+= [1.0, 2.0, 3.0])
 end
 
@@ -40,36 +40,36 @@ end
     #     @test position(eph, ep, ssb, sun) == res
     #     @test velocity!(zeros(3), eph, ep, ssb, sun) == res
     #     @test velocity(eph, ep, ssb, sun) == res
-    #     @test position_velocity!(zeros(3), zeros(3), eph, ep, ssb, sun) == (res, res)
-    #     @test position_velocity(eph, ep, ssb, sun) == (res, res)
+    #     @test state!(zeros(3), zeros(3), eph, ep, ssb, sun) == (res, res)
+    #     @test state(eph, ep, ssb, sun) == (res, res)
     #
     #     @test position!(zeros(3), eph, ep, luna, io) == 4res
     #     @test position(eph, ep, luna, io) == 4res
     #     @test velocity!(zeros(3), eph, ep, luna, io) == 4res
     #     @test velocity(eph, ep, luna, io) == 4res
-    #     @test position_velocity!(zeros(3), zeros(3), eph, ep, luna, io) == (4res, 4res)
-    #     @test position_velocity(eph, ep, luna, io) == (4res, 4res)
+    #     @test state!(zeros(3), zeros(3), eph, ep, luna, io) == (4res, 4res)
+    #     @test state(eph, ep, luna, io) == (4res, 4res)
     #
     #     @test position!(zeros(3), eph, ep, sun) == res
     #     @test position(eph, ep, sun) == res
     #     @test velocity!(zeros(3), eph, ep, sun) == res
     #     @test velocity(eph, ep, sun) == res
-    #     @test position_velocity!(zeros(3), zeros(3), eph, ep, sun) == (res, res)
-    #     @test position_velocity(eph, ep, sun) == (res, res)
+    #     @test state!(zeros(3), zeros(3), eph, ep, sun) == (res, res)
+    #     @test state(eph, ep, sun) == (res, res)
     #
     #     @test position!(zeros(3), eph, ep, ssb) == zeros(3)
     #     @test position(eph, ep, ssb) == zeros(3)
     #     @test velocity!(zeros(3), eph, ep, ssb) == zeros(3)
     #     @test velocity(eph, ep, ssb) == zeros(3)
-    #     @test position_velocity!(zeros(3), zeros(3), eph, ep, ssb) == (zeros(3), zeros(3))
-    #     @test position_velocity(eph, ep, ssb) == (zeros(3), zeros(3))
+    #     @test state!(zeros(3), zeros(3), eph, ep, ssb) == (zeros(3), zeros(3))
+    #     @test state(eph, ep, ssb) == (zeros(3), zeros(3))
     #
     #     @test position!(zeros(3), eph2, ep, luna, io) == 4res
     #     @test position(eph2, ep, luna, io) == 4res
     #     @test velocity!(zeros(3), eph2, ep, luna, io) == 4res
     #     @test velocity(eph2, ep, luna, io) == 4res
-    #     @test position_velocity!(zeros(3), zeros(3), eph2, ep, luna, io) == (4res, 4res)
-    #     @test position_velocity(eph2, ep, luna, io) == (4res, 4res)
+    #     @test state!(zeros(3), zeros(3), eph2, ep, luna, io) == (4res, 4res)
+    #     @test state(eph2, ep, luna, io) == (4res, 4res)
     # end
     @testset "VSOP87" begin
         exp = Dict(sun => [-0.0017833873905459886,
@@ -135,7 +135,7 @@ end
             rv_exp = (r_exp, v_exp)
             r_act = position!(zeros(3), vsop87, ep, ssb, body)
             v_act = velocity!(zeros(3), vsop87, ep, ssb, body)
-            rv_act = position_velocity!(zeros(3), zeros(3), vsop87, ep, ssb, body)
+            rv_act = state!(zeros(3), zeros(3), vsop87, ep, ssb, body)
             @testset for i in 1:3
                 @test r_act[i] ≈ r_exp[i]
             end
