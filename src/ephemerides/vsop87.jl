@@ -1,7 +1,9 @@
 using MuladdMacro
 using Parameters: @with_kw
 
-import AstroTime: Epoch, TDBEpoch, j2000, centuries, value, DAYS_PER_CENTURY
+import ..AU
+
+import AstroTime: Epoch, TDBEpoch, j2000, centuries, value, SECONDS_PER_CENTURY
 import ..Bodies:
     SolarSystemBarycenter,
     Sun,
@@ -65,7 +67,10 @@ end
         end
     end
 
-    v ./= 10DAYS_PER_CENTURY
+    # AU to m
+    r .*= AU
+    # AU/millenium to m/s
+    v .*= AU / 10SECONDS_PER_CENTURY
 
     r, v
 end

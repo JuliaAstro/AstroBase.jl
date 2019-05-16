@@ -1,8 +1,9 @@
-using AstroTime: TDBEpoch
+using AstroTime: TDBEpoch, SECONDS_PER_DAY
 using AstroBase.Ephemerides
 using AstroBase.Bodies:
     NAIFId, ssb, sun, mercury, venus, earth, mars,
     jupiter, saturn, uranus, neptune
+using AstroBase: AU
 
 import AstroBase.Ephemerides: position!, velocity!, state!
 
@@ -33,44 +34,44 @@ function velocity!(vel, ::DummyEphemeris2, ::Epoch, ::NAIFId, ::NAIFId)
 end
 
 @testset "Ephemerides" begin
-    # @testset "AbstractEphemeris" begin
-    #     ep = TDBEpoch(2000, 1, 1)
-    #     res = [1.0, 2.0, 3.0]
-    #     @test position!(zeros(3), eph, ep, ssb, sun) == res
-    #     @test position(eph, ep, ssb, sun) == res
-    #     @test velocity!(zeros(3), eph, ep, ssb, sun) == res
-    #     @test velocity(eph, ep, ssb, sun) == res
-    #     @test state!(zeros(3), zeros(3), eph, ep, ssb, sun) == (res, res)
-    #     @test state(eph, ep, ssb, sun) == (res, res)
-    #
-    #     @test position!(zeros(3), eph, ep, luna, io) == 4res
-    #     @test position(eph, ep, luna, io) == 4res
-    #     @test velocity!(zeros(3), eph, ep, luna, io) == 4res
-    #     @test velocity(eph, ep, luna, io) == 4res
-    #     @test state!(zeros(3), zeros(3), eph, ep, luna, io) == (4res, 4res)
-    #     @test state(eph, ep, luna, io) == (4res, 4res)
-    #
-    #     @test position!(zeros(3), eph, ep, sun) == res
-    #     @test position(eph, ep, sun) == res
-    #     @test velocity!(zeros(3), eph, ep, sun) == res
-    #     @test velocity(eph, ep, sun) == res
-    #     @test state!(zeros(3), zeros(3), eph, ep, sun) == (res, res)
-    #     @test state(eph, ep, sun) == (res, res)
-    #
-    #     @test position!(zeros(3), eph, ep, ssb) == zeros(3)
-    #     @test position(eph, ep, ssb) == zeros(3)
-    #     @test velocity!(zeros(3), eph, ep, ssb) == zeros(3)
-    #     @test velocity(eph, ep, ssb) == zeros(3)
-    #     @test state!(zeros(3), zeros(3), eph, ep, ssb) == (zeros(3), zeros(3))
-    #     @test state(eph, ep, ssb) == (zeros(3), zeros(3))
-    #
-    #     @test position!(zeros(3), eph2, ep, luna, io) == 4res
-    #     @test position(eph2, ep, luna, io) == 4res
-    #     @test velocity!(zeros(3), eph2, ep, luna, io) == 4res
-    #     @test velocity(eph2, ep, luna, io) == 4res
-    #     @test state!(zeros(3), zeros(3), eph2, ep, luna, io) == (4res, 4res)
-    #     @test state(eph2, ep, luna, io) == (4res, 4res)
-    # end
+    @testset "AbstractEphemeris" begin
+        ep = TDBEpoch(2000, 1, 1)
+        res = [1.0, 2.0, 3.0]
+        @test position!(zeros(3), eph, ep, ssb, sun) == res
+        @test position(eph, ep, ssb, sun) == res
+        @test velocity!(zeros(3), eph, ep, ssb, sun) == res
+        @test velocity(eph, ep, ssb, sun) == res
+        @test state!(zeros(3), zeros(3), eph, ep, ssb, sun) == (res, res)
+        @test state(eph, ep, ssb, sun) == (res, res)
+
+        @test position!(zeros(3), eph, ep, luna, io) == 4res
+        @test position(eph, ep, luna, io) == 4res
+        @test velocity!(zeros(3), eph, ep, luna, io) == 4res
+        @test velocity(eph, ep, luna, io) == 4res
+        @test state!(zeros(3), zeros(3), eph, ep, luna, io) == (4res, 4res)
+        @test state(eph, ep, luna, io) == (4res, 4res)
+
+        @test position!(zeros(3), eph, ep, sun) == res
+        @test position(eph, ep, sun) == res
+        @test velocity!(zeros(3), eph, ep, sun) == res
+        @test velocity(eph, ep, sun) == res
+        @test state!(zeros(3), zeros(3), eph, ep, sun) == (res, res)
+        @test state(eph, ep, sun) == (res, res)
+
+        @test position!(zeros(3), eph, ep, ssb) == zeros(3)
+        @test position(eph, ep, ssb) == zeros(3)
+        @test velocity!(zeros(3), eph, ep, ssb) == zeros(3)
+        @test velocity(eph, ep, ssb) == zeros(3)
+        @test state!(zeros(3), zeros(3), eph, ep, ssb) == (zeros(3), zeros(3))
+        @test state(eph, ep, ssb) == (zeros(3), zeros(3))
+
+        @test position!(zeros(3), eph2, ep, luna, io) == 4res
+        @test position(eph2, ep, luna, io) == 4res
+        @test velocity!(zeros(3), eph2, ep, luna, io) == 4res
+        @test velocity(eph2, ep, luna, io) == 4res
+        @test state!(zeros(3), zeros(3), eph2, ep, luna, io) == (4res, 4res)
+        @test state(eph2, ep, luna, io) == (4res, 4res)
+    end
     @testset "VSOP87" begin
         exp = Dict(sun => [-0.0017833873905459886,
                            0.007598638358181509,
@@ -130,8 +131,8 @@ end
         ep = TDBEpoch(2019, 5, 6)
         vsop87 = VSOP87()
         @testset for (body, s_exp) in exp
-            r_exp = s_exp[1:3]
-            v_exp = s_exp[4:6]
+            r_exp = s_exp[1:3] * AU
+            v_exp = s_exp[4:6] * AU / SECONDS_PER_DAY
             rv_exp = (r_exp, v_exp)
             r_act = position!(zeros(3), vsop87, ep, ssb, body)
             v_act = velocity!(zeros(3), vsop87, ep, ssb, body)
