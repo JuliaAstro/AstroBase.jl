@@ -1,5 +1,4 @@
 using Roots
-using JPLEphemeris
 
 export libration_dist, gcrf_to_libration_norm, libration_norm_to_gcrf
 
@@ -43,7 +42,7 @@ function gcrf_to_libration_norm(rv, epoch, primary, secondary, point)
     rv_lib[4:6] = M'*rv_lib[4:6] - [-Ω*rv_lib[2], Ω*rv_lib[1], 0.0]
     rv_lib[1:3] /= rm
     rv_lib[4:6] /= rm*Ω
-    return rv_lib
+    rv_lib
 end
 
 function libration_norm_to_gcrf(rv_lib, epoch, primary, secondary, point)
@@ -57,6 +56,5 @@ function libration_norm_to_gcrf(rv_lib, epoch, primary, secondary, point)
     rv_eci[4:6] = M*rv_eci[4:6]
     rv_eci[1:3] *= rm
     rv_eci[4:6] *= Ω*rm
-    rv_eci = rv_eci + rv_sec*(1 + γ)
-    return rv_eci
+    rv_eci .+ rv_sec .* (1 + γ)
 end
