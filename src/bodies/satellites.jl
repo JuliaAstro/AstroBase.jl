@@ -88,7 +88,7 @@ for (i, body) in enumerate(JUPITER_SATELLITE_NAMES[1:end-1])
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        parent(::$typ) = jupiter
+        parent(::$typ) = jupiter_barycenter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
         export $sym, $typ
@@ -97,7 +97,7 @@ end
 
 struct Dia <: NaturalSatellite end
 const dia = Dia()
-parent(::Dia) = jupiter
+parent(::Dia) = jupiter_barycenter
 naifid(::Dia) = 553
 from_naifid(::Val{553}) = dia
 export dia, Dia
@@ -167,7 +167,7 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        parent(::$typ) = saturn
+        parent(::$typ) = saturn_barycenter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
         export $sym, $typ
@@ -211,7 +211,7 @@ for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        parent(::$typ) = uranus
+        parent(::$typ) = uranus_barycenter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
         export $sym, $typ
@@ -243,7 +243,7 @@ for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
-        parent(::$typ) = neptune
+        parent(::$typ) = neptune_barycenter
         naifid(::$typ) = $id
         from_naifid(::Val{$id}) = $sym
         export $sym, $typ
@@ -273,4 +273,3 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
         export $sym, $typ
     end
 end
-
