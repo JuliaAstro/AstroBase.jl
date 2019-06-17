@@ -1,5 +1,6 @@
 using MuladdMacro
 using Parameters: @with_kw
+using StaticArrays: @SMatrix
 
 import ..AU
 
@@ -27,6 +28,10 @@ include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_jupiter.jl"))
 include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_saturn.jl"))
 include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_uranus.jl"))
 include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_neptune.jl"))
+
+const VSOP87_FK5 = @SMatrix [1.0 0.000000440360 -0.000000190919;
+							 -0.000000479966 0.917482137087 -0.397776982902;
+							 0.0 0.397776982902 0.917482137087]
 
 @with_kw struct VSOP87 <: AbstractEphemeris
     order::Int = 5; @assert order >= 0; @assert order <= 5
@@ -72,7 +77,7 @@ end
     # AU/millenium to m/s
     v .*= AU / 10SECONDS_PER_CENTURY
 
-    r, v
+    VSOP87_FK5 * r, VSOP87_FK5 * v
 end
 
 for body in ("Sun", "Mercury", "Venus", "Earth", "Mars",
@@ -97,4 +102,3 @@ for body in ("Sun", "Mercury", "Venus", "Earth", "Mars",
         end
     end
 end
-

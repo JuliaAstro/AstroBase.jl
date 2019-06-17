@@ -112,6 +112,7 @@ function state(eph::AbstractEphemeris, ep::Epoch, to::CelestialBody; kwargs...)
     state!(zeros(3), zeros(3), eph, ep, ssb, to; kwargs...)
 end
 
+include("meeus.jl")
 include("vsop87.jl")
 
 end
