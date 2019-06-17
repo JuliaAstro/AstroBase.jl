@@ -1,7 +1,9 @@
 using LinearAlgebra: norm, ⋅, ×
 using StaticArrays: SVector
 
-export sec2rad, rad2sec, normalize_angle, angle
+export
+    sec2rad, rad2sec, normalize_angle, angle,
+    dms2rad, rad2dms, sec2deg, deg2sec
 
 """
     sec2rad(sec)
@@ -30,8 +32,23 @@ julia> rad2sec(0.5235987755982988)
 """
 rad2sec(rad) = rad2deg(rad) * 3600
 
+sec2deg(sec) = sec / 3600
+deg2sec(deg) = deg * 3600
+
 function normalize_angle(angle, center)
     angle - 2π * floor((angle + π - center) / 2π)
+end
+
+function dms2rad(deg, arcmin, arcsec)
+    deg2rad(deg + arcmin/60 + arcsec/3600)
+end
+
+function rad2dms(rad)
+    d = rad2deg(rad)
+    deg = trunc(d)
+    arcmin = trunc((d-deg)*60)
+    arcsec = (d-deg-arcmin/60)*3600
+    return deg, arcmin, arcsec
 end
 
 function angle(v1, v2)
