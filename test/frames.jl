@@ -1,5 +1,13 @@
 using AstroBase
-using SPICE: sxform, tisbod
+using RemoteFiles
+using SPICE: furnsh, kclear, sxform, tisbod
+
+pck = @RemoteFile(
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc",
+    dir=joinpath(@__DIR__(), "data"),
+)
+download(pck)
+furnsh(path(pck))
 
 @testset "Frames" begin
     @testset "Rotations" begin
@@ -41,10 +49,10 @@ using SPICE: sxform, tisbod
         m_exp = s_exp[1:3, 1:3]
         m′_exp = s_exp[4:6, 1:3]
         @testset for i in eachindex(m_act, m_exp)
-            @test m_act[i] ≈ m_exp[i] atol=1e-8
+            @test m_act[i] ≈ m_exp[i] atol = 1e-8
         end
         @testset for i in eachindex(m′_act, m′_exp)
-            @test m′_act[i] ≈ m′_exp[i] atol=1e-6
+            @test m′_act[i] ≈ m′_exp[i] atol = 1e-6
         end
     end
     @testset "IAU" begin
@@ -62,10 +70,10 @@ using SPICE: sxform, tisbod
                 m_exp = s_exp[1:3, 1:3]
                 m′_exp = s_exp[4:6, 1:3]
                 @testset for i in eachindex(m_act, m_exp)
-                    @test m_act[i] ≈ m_exp[i] atol=1e-8
+                    @test m_act[i] ≈ m_exp[i] atol = 1e-8
                 end
                 @testset for i in eachindex(m′_act, m′_exp)
-                    @test m′_act[i] ≈ m′_exp[i] atol=1e-6
+                    @test m′_act[i] ≈ m′_exp[i] atol = 1e-6
                 end
             end
         end
@@ -123,3 +131,5 @@ using SPICE: sxform, tisbod
         end
     end
 end
+
+kclear()

@@ -1,7 +1,10 @@
 using JPLEphemeris
 using RemoteFiles
 
-de430 = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp"
+de430 = @RemoteFile(
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp",
+    dir=joinpath(@__DIR__(), "data"),
+)
 download(de430)
 load_ephemeris!(SPK, path(de430))
 

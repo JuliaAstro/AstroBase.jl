@@ -1,19 +1,23 @@
 using Test
 import AstroBase
 
-using AstroTime: Epoch, TDBEpoch, SECONDS_PER_DAY, j2000, seconds, value
+using AstroTime: Epoch, TDBEpoch, SECONDS_PER_DAY, j2000, seconds, value, julian_twopart
 using AstroBase.Ephemerides
 using AstroBase.Bodies
 using AstroBase: AU
+using ERFA
+using LinearAlgebra: norm
 using SPICE: spkezr, furnsh, kclear
 using RemoteFiles: @RemoteFile, @RemoteFileSet, download, path
 
-@RemoteFileSet KERNELS "SPK Kernels" begin
-    de200 = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de200.bsp"
-    de245 = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de245_1990_2010.bsp"
-end
+@RemoteFile(
+    DE200,
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de200.bsp",
+    dir=joinpath(@__DIR__(), "data"),
+)
 
-download(KERNELS)
+download(DE200)
+furnsh(path(DE200))
 
 getet(epoch) = value(seconds(j2000(epoch)))
 
@@ -85,50 +89,81 @@ end
         @test state(eph2, ep, luna, io) == (4res, 4res)
     end
     @testset "Meeus" begin
-        furnsh(path(KERNELS, :de245))
         bodies = (
             mercury,
             venus,
-            earth,
+            earth_barycenter,
             mars,
             jupiter,
             saturn,
             uranus,
             neptune,
-            pluto,
+        )
+        pos_error = (
+            0.5e6,
+            1.1e6,
+            1.3e6,
+            9e6,
+            82e6,
+            263e6,
+            661e6,
+            248e6,
+        )
+        vel_error = (
+            0.7,
+            0.9,
+            1.0,
+            2.5,
+            8.2,
+            24.6,
+            27.4,
+            21.4,
         )
         ep = TDBEpoch(2009, 5, 24)
         et = getet(ep)
-        @testset for body in bodies
-            name = string(body)
-            if body in (jupiter, saturn, uranus, neptune, pluto)
-                name *= " Barycenter"
+        jd1, jd2 = value.(julian_twopart(ep))
+        @testset for (id, body) in enumerate(bodies)
+            @testset "ERFA" begin
+                r_erfa, v_erfa = ERFA.plan94(jd1, jd2, id)
+                r_erfa .*= AU
+                v_erfa .*= AU
+                v_erfa ./= SECONDS_PER_DAY
+                rv_erfa = (r_erfa, v_erfa)
+                r_act = position!(zeros(3), meeus, ep, sun, body)
+                v_act = velocity!(zeros(3), meeus, ep, sun, body)
+                rv_act = state!(zeros(3), zeros(3), meeus, ep, sun, body)
+                @testset for i in 1:3
+                    @test r_act[i] ≈ r_erfa[i] atol=1.0
+                end
+                @testset for i in 1:3
+                    @test v_act[i] ≈ v_erfa[i] atol=5.0
+                end
+                @testset for i in 1:3
+                    @test rv_act[1][i] ≈ rv_erfa[1][i] atol=1.0
+                    @test rv_act[2][i] ≈ rv_erfa[2][i] atol=5.0
+                end
             end
-            s_exp = spkezr(name, et, "J2000", "NONE", "SUN")[1] .* 1e3
-            r_exp = s_exp[1:3]
-            v_exp = s_exp[4:6]
-            rv_exp = (r_exp, v_exp)
-            r_act = position!(zeros(3), meeus, ep, sun, body)
-            v_act = velocity!(zeros(3), meeus, ep, sun, body)
-            rv_act = state!(zeros(3), zeros(3), meeus, ep, sun, body)
-            # TODO: Check tolerances
-            @testset for i in 1:3
-                @test r_act[i] ≈ r_exp[i] rtol=1e0
-            end
-            @testset for i in 1:3
-                @test v_act[i] ≈ v_exp[i] rtol=1e-1
-            end
-            @testset for i in 1:3
-                @test rv_act[1][i] ≈ rv_exp[1][i] rtol=1e0
-                @test rv_act[2][i] ≈ rv_exp[2][i] rtol=1e-1
+            @testset "JPL" begin
+                name = string(body)
+                if body in (jupiter, saturn, uranus, neptune)
+                    name *= " Barycenter"
+                end
+                s_exp = spkezr(name, et, "J2000", "NONE", "SUN")[1] .* 1e3
+                r_exp = s_exp[1:3]
+                v_exp = s_exp[4:6]
+                rv_exp = (r_exp, v_exp)
+                r_act = position!(zeros(3), meeus, ep, sun, body)
+                v_act = velocity!(zeros(3), meeus, ep, sun, body)
+                rv_act = state!(zeros(3), zeros(3), meeus, ep, sun, body)
+                @test norm(r_act) ≈ norm(r_exp) atol=pos_error[id]
+                @test norm(v_act) ≈ norm(v_exp) atol=vel_error[id]
+                @test norm(rv_act[1]) ≈ norm(rv_exp[1]) atol=pos_error[id]
+                @test norm(rv_act[2]) ≈ norm(rv_exp[2]) atol=vel_error[id]
             end
         end
-        kclear()
     end
     @testset "VSOP87" begin
-        furnsh(path(KERNELS, :de200))
-        bodies = (
-            sun,
+        bodies = (sun,
             mercury,
             venus,
             earth,
@@ -136,8 +171,7 @@ end
             jupiter,
             saturn,
             uranus,
-            neptune,
-        )
+            neptune,)
         ep = TDBEpoch(2019, 5, 6)
         et = getet(ep)
         vsop87 = VSOP87()
@@ -155,16 +189,17 @@ end
             rv_act = state!(zeros(3), zeros(3), vsop87, ep, ssb, body)
             # TODO: Check tolerances
             @testset for i in 1:3
-                @test r_act[i] ≈ r_exp[i] rtol=1e-2
+                @test r_act[i] ≈ r_exp[i] rtol = 1e-2
             end
             @testset for i in 1:3
-                @test v_act[i] ≈ v_exp[i] rtol=1e-3
+                @test v_act[i] ≈ v_exp[i] rtol = 1e-3
             end
             @testset for i in 1:3
-                @test rv_act[1][i] ≈ rv_exp[1][i] rtol=1e-2
-                @test rv_act[2][i] ≈ rv_exp[2][i] rtol=1e-3
+                @test rv_act[1][i] ≈ rv_exp[1][i] rtol = 1e-2
+                @test rv_act[2][i] ≈ rv_exp[2][i] rtol = 1e-3
             end
         end
-        kclear()
     end
+
+    kclear()
 end
