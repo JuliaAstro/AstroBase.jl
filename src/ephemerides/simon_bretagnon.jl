@@ -18,10 +18,10 @@ using ..Bodies: CelestialBody,
 using ..EarthAttitude: obliquity_of_ecliptic_06
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
 
-export Meeus, meeus
+export SimonBretagnon, simon_bretagnon
 
-struct Meeus <: AbstractEphemeris end
-const meeus = Meeus()
+struct SimonBretagnon <: AbstractEphemeris end
+const simon_bretagnon = SimonBretagnon()
 
 const ϵ = 0.40909280422232897
 
@@ -319,7 +319,7 @@ sl(::Saturn) = SVector(138606, -13478, -4964, 1441, -1319, -1482, 427, 1236, -91
 sl(::Uranus) = SVector(71234, -41116, 5334, -4935, -1848, 66, 434, -1748, 3780, -701)
 sl(::Neptune) = SVector(-47645, 11647, 2166, 3194, 679, 0, -244, -419, -2531, 48)
 
-function state!(pos, vel, ::Meeus, ep::TDBEpoch, ::Sun, body::CelestialBody)
+function state!(pos, vel, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
     t = value(centuries(j2000(ep))) / 10.0
 
     a = semi_major(body, t)
@@ -371,12 +371,12 @@ function state!(pos, vel, ::Meeus, ep::TDBEpoch, ::Sun, body::CelestialBody)
 	return pos, vel
 end
 
-function position!(pos, ::Meeus, ep::TDBEpoch, ::Sun, body::CelestialBody)
-    state!(pos, zeros(3), meeus, ep, sun, body)
+function position!(pos, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
+    state!(pos, zeros(3), simon_bretagnon, ep, sun, body)
     pos
 end
 
-function velocity!(vel, ::Meeus, ep::TDBEpoch, ::Sun, body::CelestialBody)
-    state!(zeros(3), vel, meeus, ep, sun, body)
+function velocity!(vel, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
+    state!(zeros(3), vel, simon_bretagnon, ep, sun, body)
     vel
 end

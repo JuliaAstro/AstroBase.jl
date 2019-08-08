@@ -88,7 +88,7 @@ end
         @test state!(zeros(3), zeros(3), eph2, ep, luna, io) == (4res, 4res)
         @test state(eph2, ep, luna, io) == (4res, 4res)
     end
-    @testset "Meeus" begin
+    @testset "Simon/Bretagnon" begin
         bodies = (
             mercury,
             venus,
@@ -129,9 +129,9 @@ end
                 v_erfa .*= AU
                 v_erfa ./= SECONDS_PER_DAY
                 rv_erfa = (r_erfa, v_erfa)
-                r_act = position!(zeros(3), meeus, ep, sun, body)
-                v_act = velocity!(zeros(3), meeus, ep, sun, body)
-                rv_act = state!(zeros(3), zeros(3), meeus, ep, sun, body)
+                r_act = position!(zeros(3), simon_bretagnon, ep, sun, body)
+                v_act = velocity!(zeros(3), simon_bretagnon, ep, sun, body)
+                rv_act = state!(zeros(3), zeros(3), simon_bretagnon, ep, sun, body)
                 @testset for i in 1:3
                     @test r_act[i] ≈ r_erfa[i] atol=1.0
                 end
@@ -152,9 +152,9 @@ end
                 r_exp = s_exp[1:3]
                 v_exp = s_exp[4:6]
                 rv_exp = (r_exp, v_exp)
-                r_act = position!(zeros(3), meeus, ep, sun, body)
-                v_act = velocity!(zeros(3), meeus, ep, sun, body)
-                rv_act = state!(zeros(3), zeros(3), meeus, ep, sun, body)
+                r_act = position!(zeros(3), simon_bretagnon, ep, sun, body)
+                v_act = velocity!(zeros(3), simon_bretagnon, ep, sun, body)
+                rv_act = state!(zeros(3), zeros(3), simon_bretagnon, ep, sun, body)
                 @test norm(r_act) ≈ norm(r_exp) atol=pos_error[id]
                 @test norm(v_act) ≈ norm(v_exp) atol=vel_error[id]
                 @test norm(rv_act[1]) ≈ norm(rv_exp[1]) atol=pos_error[id]
@@ -163,7 +163,8 @@ end
         end
     end
     @testset "VSOP87" begin
-        bodies = (sun,
+        bodies = (
+            sun,
             mercury,
             venus,
             earth,
@@ -171,7 +172,8 @@ end
             jupiter,
             saturn,
             uranus,
-            neptune,)
+            neptune,
+        )
         ep = TDBEpoch(2019, 5, 6)
         et = getet(ep)
         vsop87 = VSOP87()
@@ -189,14 +191,14 @@ end
             rv_act = state!(zeros(3), zeros(3), vsop87, ep, ssb, body)
             # TODO: Check tolerances
             @testset for i in 1:3
-                @test r_act[i] ≈ r_exp[i] rtol = 1e-2
+                @test r_act[i] ≈ r_exp[i]
             end
             @testset for i in 1:3
-                @test v_act[i] ≈ v_exp[i] rtol = 1e-3
+                @test v_act[i] ≈ v_exp[i]
             end
             @testset for i in 1:3
-                @test rv_act[1][i] ≈ rv_exp[1][i] rtol = 1e-2
-                @test rv_act[2][i] ≈ rv_exp[2][i] rtol = 1e-3
+                @test rv_act[1][i] ≈ rv_exp[1][i]
+                @test rv_act[2][i] ≈ rv_exp[2][i]
             end
         end
     end
