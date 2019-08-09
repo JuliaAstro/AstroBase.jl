@@ -174,10 +174,32 @@ end
             uranus,
             neptune,
         )
+        pos_error = (
+            0.5e6,
+            0.5e6,
+            1.1e6,
+            1.3e6,
+            9e6,
+            82e6,
+            263e6,
+            661e6,
+            248e6,
+        )
+        vel_error = (
+            0.7,
+            0.7,
+            0.9,
+            1.0,
+            2.5,
+            8.2,
+            24.6,
+            27.4,
+            21.4,
+        )
         ep = TDBEpoch(2019, 5, 6)
         et = getet(ep)
         vsop87 = VSOP87()
-        @testset for body in bodies
+        @testset for (id, body) in enumerate(bodies)
             name = string(body)
             if body in (jupiter, saturn, uranus, neptune)
                 name *= " Barycenter"
@@ -189,16 +211,15 @@ end
             r_act = position!(zeros(3), vsop87, ep, ssb, body)
             v_act = velocity!(zeros(3), vsop87, ep, ssb, body)
             rv_act = state!(zeros(3), zeros(3), vsop87, ep, ssb, body)
-            # TODO: Check tolerances
             @testset for i in 1:3
-                @test r_act[i] ≈ r_exp[i]
+                @test r_act[i] ≈ r_exp[i] atol=pos_error[id]
             end
             @testset for i in 1:3
-                @test v_act[i] ≈ v_exp[i]
+                @test v_act[i] ≈ v_exp[i] atol=vel_error[id]
             end
             @testset for i in 1:3
-                @test rv_act[1][i] ≈ rv_exp[1][i]
-                @test rv_act[2][i] ≈ rv_exp[2][i]
+                @test rv_act[1][i] ≈ rv_exp[1][i] atol=pos_error[id]
+                @test rv_act[2][i] ≈ rv_exp[2][i] atol=vel_error[id]
             end
         end
     end
