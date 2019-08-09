@@ -12,13 +12,7 @@ matrix:
     - julia: nightly
 notifications:
   email: false
-git:
-  depth: 99999999
-after_success:
-  - if [[ $TRAVIS_JULIA_VERSION = 1.1 ]] && [[ $TRAVIS_OS_NAME = linux ]]; then
-    julia --project=test/coverage -e 'using Pkg; Pkg.instantiate();
-    using Coverage; Codecov.submit(Codecov.process_folder())';
-    fi
+codecov: true
 # jobs:
 #   include:
 #     - stage: Documentation
