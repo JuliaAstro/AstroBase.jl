@@ -1,6 +1,7 @@
 using AstroBase
 using RemoteFiles
-using SPICE: furnsh, kclear, sxform, tisbod
+using SPICE: furnsh, kclear, sxform, tisbod, bodfnd
+using Test
 
 pck = @RemoteFile(
     "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc",
@@ -77,6 +78,10 @@ furnsh(path(pck))
                 end
             end
         end
+        rot1 = Rotation(iau_mercury, iau_earth, ep)
+        rot2 = Rotation(iau_mercury, iau_earth, UT1Epoch(ep))
+        @test rot1.m == rot2.m
+        @test rot1.m′ == rot2.m′
     end
     @testset "IERS" begin
         # Reference values from Orekit (http://www.orekit.org)
@@ -129,6 +134,12 @@ furnsh(path(pck))
         @testset for i in eachindex(v_exp, v_act)
             @test v_exp[i] ≈ v_act[i]
         end
+
+        ep = TDBEpoch(2019, 5, 6)
+        rot1 = Rotation(icrf, itrf, ep)
+        rot2 = Rotation(icrf, itrf, UT1Epoch(ep))
+        @test rot1.m == rot2.m
+        @test rot1.m′ == rot2.m′
     end
 end
 

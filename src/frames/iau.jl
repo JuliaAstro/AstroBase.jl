@@ -14,9 +14,10 @@ for name in ALL_NAMES
         export $frame, $cname
 
         function Rotation(::ICRF, ::$frame, ep::Epoch)
+            tdb = TDBEpoch(ep)
             body = $(Symbol(name))()
-            euler = euler_angles(body, ep)
-            euler′ = collect(euler_rates(body, ep))
+            euler = euler_angles(body, tdb)
+            euler′ = collect(euler_rates(body, tdb))
 
             m = angle_to_dcm(euler..., :ZXZ)
             m′ = ddcm(m, euler′)
