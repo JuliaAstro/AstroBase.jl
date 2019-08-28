@@ -148,7 +148,7 @@ end
                 if body in (jupiter, saturn, uranus, neptune)
                     name *= " Barycenter"
                 end
-                s_exp = spkezr(name, et, "J2000", "NONE", "SUN")[1] .* 1e3
+                s_exp = spkezr(name, et, "J2000", "NONE", "SUN")[1]
                 r_exp = s_exp[1:3]
                 v_exp = s_exp[4:6]
                 rv_exp = (r_exp, v_exp)
@@ -159,8 +159,20 @@ end
                 @test norm(v_act) ≈ norm(v_exp) atol=vel_error[id]
                 @test norm(rv_act[1]) ≈ norm(rv_exp[1]) atol=pos_error[id]
                 @test norm(rv_act[2]) ≈ norm(rv_exp[2]) atol=vel_error[id]
+                s_exp = spkezr("MERCURY", et, "J2000", "NONE", "EARTH_BARYCENTER")[1]
+                r_exp = s_exp[1:3]
+                v_exp = s_exp[4:6]
+                rv_exp = (r_exp, v_exp)
+                r_act = position!(zeros(3), simon_bretagnon, ep, earth_barycenter, mercury)
+                v_act = velocity!(zeros(3), simon_bretagnon, ep, earth_barycenter, mercury)
+                rv_act = state!(zeros(3), zeros(3), simon_bretagnon, ep, earth_barycenter, mercury)
+                @test norm(r_act) ≈ norm(r_exp) atol=pos_error[3]
+                @test norm(v_act) ≈ norm(v_exp) atol=vel_error[3]
+                @test norm(rv_act[1]) ≈ norm(rv_exp[1]) atol=pos_error[3]
+                @test norm(rv_act[2]) ≈ norm(rv_exp[2]) atol=vel_error[3]
             end
         end
+        @test_throws ArgumentError state(simon_bretagnon, ep, earth, luna)
     end
     @testset "VSOP87" begin
         bodies = (
@@ -204,7 +216,7 @@ end
             if body in (jupiter, saturn, uranus, neptune)
                 name *= " Barycenter"
             end
-            s_exp = spkezr(name, et, "J2000", "NONE", "SSB")[1] .* 1e3
+            s_exp = spkezr(name, et, "J2000", "NONE", "SSB")[1]
             r_exp = s_exp[1:3]
             v_exp = s_exp[4:6]
             rv_exp = (r_exp, v_exp)
@@ -222,6 +234,24 @@ end
                 @test rv_act[2][i] ≈ rv_exp[2][i] atol=vel_error[id]
             end
         end
+        s_exp = spkezr("MERCURY", et, "J2000", "NONE", "EARTH")[1]
+        r_exp = s_exp[1:3]
+        v_exp = s_exp[4:6]
+        rv_exp = (r_exp, v_exp)
+        r_act = position!(zeros(3), vsop87, ep, earth, mercury)
+        v_act = velocity!(zeros(3), vsop87, ep, earth, mercury)
+        rv_act = state!(zeros(3), zeros(3), vsop87, ep, earth, mercury)
+        @testset for i in 1:3
+            @test r_act[i] ≈ r_exp[i] atol=pos_error[3]
+        end
+        @testset for i in 1:3
+            @test v_act[i] ≈ v_exp[i] atol=vel_error[3]
+        end
+        @testset for i in 1:3
+            @test rv_act[1][i] ≈ rv_exp[1][i] atol=pos_error[3]
+            @test rv_act[2][i] ≈ rv_exp[2][i] atol=vel_error[3]
+        end
+        @test_throws ArgumentError state(vsop87, ep, earth, luna)
     end
 
     kclear()

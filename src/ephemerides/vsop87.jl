@@ -72,9 +72,9 @@ end
         end
     end
 
-    # AU to m
+    # AU to km
     r .*= AU
-    # AU/millenium to m/s
+    # AU/millenium to km/s
     v .*= AU / 10SECONDS_PER_CENTURY
 
     VSOP87_FK5 * r, VSOP87_FK5 * v
@@ -110,18 +110,18 @@ end
 function state!(pos, vel, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::CelestialBody)
     rv1 = state!(zeros(3), zeros(3), vsop, ep, ssb, from)
     rv2 = state!(zeros(3), zeros(3), vsop, ep, ssb, to)
-    pos .+= rv2[1] .- rv1[1]
-    vel .+= rv2[2] .- rv1[2]
+    pos .+= (rv2[1] .- rv1[1])
+    vel .+= (rv2[2] .- rv1[2])
     pos, vel
 end
 
 function position!(pos, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::CelestialBody)
-    state!(pos, zeros(3), vsop, ep, from, body)
+    state!(pos, zeros(3), vsop, ep, from, to)
     pos
 end
 
 function velocity!(vel, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::CelestialBody)
-    state!(zeros(3), vel, vsop, ep, from, body)
+    state!(zeros(3), vel, vsop, ep, from, to)
     vel
 end
 

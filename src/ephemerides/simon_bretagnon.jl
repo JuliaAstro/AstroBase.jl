@@ -25,8 +25,8 @@ const simon_bretagnon = SimonBretagnon()
 
 const ϵ = 0.40909280422232897
 
-function semi_major(::CelestialBody, t)
-    throw(ArgumentError("Body '$to' is not supported by the Simon-Bretagnon ephemeris."))
+function semi_major(body::CelestialBody, t)
+    throw(ArgumentError("Body '$body' is not supported by the Simon-Bretagnon ephemeris."))
 end
 
 semi_major(::Mercury, t) = 0.3870983098
@@ -386,20 +386,20 @@ function velocity!(vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
 end
 
 function state!(pos, vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
-    rv1 = state!(zeros(0), zeros(0), simon_bretagnon, ep, sun, from)
-    rv2 = state!(zeros(0), zeros(0), simon_bretagnon, ep, sun, to)
+    rv1 = state!(zeros(3), zeros(3), simon_bretagnon, ep, sun, from)
+    rv2 = state!(zeros(3), zeros(3), simon_bretagnon, ep, sun, to)
     pos .+= rv2[1] .- rv1[1]
     vel .+= rv2[2] .- rv1[2]
     pos, vel
 end
 
 function position!(pos, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
-    state!(pos, zeros(3), simon_bretagnon, ep, from, body)
+    state!(pos, zeros(3), simon_bretagnon, ep, from, to)
     pos
 end
 
 function velocity!(vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
-    state!(zeros(3), vel, simon_bretagnon, ep, from, body)
+    state!(zeros(3), vel, simon_bretagnon, ep, from, to)
     vel
 end
 
