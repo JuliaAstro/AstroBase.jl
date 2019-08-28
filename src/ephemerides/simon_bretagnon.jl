@@ -25,6 +25,10 @@ const simon_bretagnon = SimonBretagnon()
 
 const ϵ = 0.40909280422232897
 
+function semi_major(::CelestialBody, t)
+    throw(ArgumentError("Body '$to' is not supported by the Simon-Bretagnon ephemeris."))
+end
+
 semi_major(::Mercury, t) = 0.3870983098
 eccentricity(::Mercury, t) = @evalpoly(t,
 	0.2056317526,
@@ -319,8 +323,8 @@ sl(::Saturn) = SVector(138606, -13478, -4964, 1441, -1319, -1482, 427, 1236, -91
 sl(::Uranus) = SVector(71234, -41116, 5334, -4935, -1848, 66, 434, -1748, 3780, -701)
 sl(::Neptune) = SVector(-47645, 11647, 2166, 3194, 679, 0, -244, -419, -2531, 48)
 
-function state!(pos, vel, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
-    t = value(centuries(j2000(ep))) / 10.0
+function state!(pos, vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
+    t = value(centuries(j2000(TDBEpoch(ep)))) / 10.0
 
     a = semi_major(body, t)
     e = eccentricity(body, t)
@@ -371,12 +375,31 @@ function state!(pos, vel, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::Celestial
 	return pos, vel
 end
 
-function position!(pos, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
+function position!(pos, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
     state!(pos, zeros(3), simon_bretagnon, ep, sun, body)
     pos
 end
 
-function velocity!(vel, ::SimonBretagnon, ep::TDBEpoch, ::Sun, body::CelestialBody)
+function velocity!(vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
     state!(zeros(3), vel, simon_bretagnon, ep, sun, body)
     vel
 end
+
+function state!(pos, vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
+    rv1 = state!(zeros(0), zeros(0), simon_bretagnon, ep, sun, from)
+    rv2 = state!(zeros(0), zeros(0), simon_bretagnon, ep, sun, to)
+    pos .+= rv2[1] .- rv1[1]
+    vel .+= rv2[2] .- rv1[2]
+    pos, vel
+end
+
+function position!(pos, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
+    state!(pos, zeros(3), simon_bretagnon, ep, from, body)
+    pos
+end
+
+function velocity!(vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
+    state!(zeros(3), vel, simon_bretagnon, ep, from, body)
+    vel
+end
+
