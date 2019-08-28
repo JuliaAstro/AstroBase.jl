@@ -1,3 +1,3 @@
 export AU
 
-const AU = 1.49597870700e11 # m
+const AU = 1.49597870700e8 # km
