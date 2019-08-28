@@ -27,7 +27,7 @@ furnsh(joinpath(@__DIR__, "..", "gen", "gm_de431.tpc"),
         if bodfnd(id, "GM")
             @testset "Gravitational parameter" begin
                 μ = grav_param(body)
-                @test μ ≈ bodvcd(id, "GM")[1] * 1e9
+                @test μ ≈ bodvcd(id, "GM")[1]
             end
         end
 
