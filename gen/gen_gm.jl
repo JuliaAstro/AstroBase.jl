@@ -11,8 +11,7 @@ for line in lines
     if occursin(re, s)
         m = match(re, s)
         push!(ids, parse(Int, m["id"]))
-        # From km^3/s^2 to m^3/s^2
-        push!(gms, parse(Float64, m["gm"]) * 1e9)
+        push!(gms, parse(Float64, m["gm"]))
     end
 end
 
