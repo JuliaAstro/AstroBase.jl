@@ -36,3 +36,9 @@ for (i, body) in enumerate(PLANET_NAMES)
     end
 end
 
+# FIXME: Move this to a sensible place
+export j2, mean_radius, polar_radius, equatorial_radius
+j2(::Earth) = 1.08262668e-3
+mean_radius(::Earth) = 6371.0084
+equatorial_radius(::Earth) = 6378.1366
+polar_radius(::Earth) = 6356.7519

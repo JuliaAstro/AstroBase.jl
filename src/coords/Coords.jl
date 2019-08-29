@@ -21,11 +21,12 @@ using ..Frames:
 
 import ..TwoBody:
     cartesian,
-    keplerian
+    keplerian,
+    period
 
 using StaticArrays: SVector
 
-export State, KeplerianState, epoch, scale, frame, body, epoch_type, pos_type, vel_type
+export State, KeplerianState, array, epoch, scale, frame, body, epoch_type, pos_type, vel_type
 
 #################
 # AbstractState #
@@ -40,6 +41,13 @@ function epoch end
 scale(s::AbstractState{Scale}) where {Scale} = Scale
 frame(s::AbstractState{_S, Frame}) where {_S, Frame} = Frame
 body(s::AbstractState{_S, _F, Body}) where {_S, _F, Body} = Body
+array(s::AbstractState) = vcat(state(s)...)
+
+function period(s::AbstractState)
+    μ = grav_param(body(s))
+    a, _ = keplerian(s)
+    return period(a, μ)
+end
 
 struct State{Scale, Frame, Body, T, TP, TV} <: AbstractState{Scale, Frame, Body}
     epoch::Epoch{Scale, T}
@@ -116,8 +124,8 @@ keplerian(s::KeplerianState) = (s.a, s.e, s.i, s.Ω, s.ω, s.ν)
 KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=frame(s), body=body(s))
 State(s::KeplerianState) = State(epoch(s), state(s)...; frame=frame(s), body=body(s))
 
-struct Trajectory{Scale, Frame, Body}
-end
+# struct Trajectory{Scale, Frame, Body}
+# end
 
 include("conversions.jl")
 
@@ -144,5 +152,8 @@ function KeplerianState(s::AbstractState, eph::AbstractEphemeris;
                         body::CelestialBody=body(s))
     KeplerianState(State(s, eph, frame=frame, scale=scale, body=body))
 end
+
+include("bodyfixed.jl")
+include("trajectories.jl")
 
 end

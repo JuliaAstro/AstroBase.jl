@@ -1,10 +1,8 @@
-using AstroDynBase
-using AstroDynCoordinates
+using AstroTime: Period
 using SmoothingSplines
 using LinearAlgebra
 
 import Base: getindex, lastindex, show
-import AstroDynBase: AbstractTrajectory, epoch
 import AstroBase: state
 
 export Trajectory, initial, final, state, events, times,

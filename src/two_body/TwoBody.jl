@@ -11,23 +11,25 @@ import ..angle,
     ..normalize_angle
 
 export
+    EccentricAnomaly,
+    Elliptic,
+    Hyperbolic,
+    MeanAnomaly,
+    Parabolic,
+    TrueAnomaly,
     cartesian,
+    eccentric_anomaly,
+    elliptic,
+    hyperbolic,
+    isprograde,
+    isretrograde,
     keplerian,
+    mean_anomaly,
+    parabolic,
     perifocal,
     semilatus,
-    Elliptic,
-    elliptic,
-    Hyperbolic,
-    hyperbolic,
-    Parabolic,
-    parabolic,
-    MeanAnomaly,
-    mean_anomaly,
-    TrueAnomaly,
-    true_anomaly,
-    EccentricAnomaly,
-    eccentric_anomaly,
-    transform
+    transform,
+    true_anomaly
 
 include("stumpff.jl")
 include("kepler.jl")

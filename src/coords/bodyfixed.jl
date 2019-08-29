@@ -1,13 +1,15 @@
 export RAC
 
-struct RAC <: Frame end
+using ..Frames: AbstractFrame, ICRF
 
-function Rotation(::Type{RAC}, ::Type{GCRF}, r, v)
+struct RAC <: AbstractFrame end
+
+function Rotation(::RAC, ::ICRF, r, v)
     normal = cross(r, v)
     normal = normal / norm(normal)
     tangential = v / norm(v)
     orthogonal = cross(v, normal)
     orthogonal = orthogonal / norm(orthogonal)
     m = hcat(orthogonal, tangential, normal)
-    Rotation{RAC, GCRF}(m)
+    Rotation{RAC(), icrf}(m)
 end

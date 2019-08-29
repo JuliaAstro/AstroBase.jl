@@ -14,6 +14,7 @@ Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 ReferenceFrameRotations = "74f56ac7-18b3-5285-802d-d4bd4f104033"
 Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+SmoothingSplines = "102930c3-cf33-599f-b3b1-9a29a5acab30"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
@@ -25,8 +26,8 @@ julia = "≥ 0.7.0"
 
 [extras]
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
-SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
 RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
+SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
