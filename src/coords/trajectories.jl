@@ -1,4 +1,5 @@
 using AstroTime: Period
+using DataInterpolations: AbstractInterpolation
 using SmoothingSplines
 using LinearAlgebra
 
@@ -7,6 +8,12 @@ import AstroBase: state
 
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector
+
+struct TrajectoryComponent{T, IntType<:AbstractInterpolation}
+    data::Vector{T}
+    interp::IntType
+    name::Symbol
+end
 
 struct LogEntry
     id::Int
@@ -25,6 +32,7 @@ struct Trajectory
     final
     times::Vector
     splines::Vector{SmoothingSpline}
+    # components::Vector{TrajectoryComponents}
     array::Matrix
     events::Vector{LogEntry}
 end

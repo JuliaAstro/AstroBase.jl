@@ -1,142 +1,121 @@
-using AstroTime
-using StaticArrays
+export State, KeplerianState, array, epoch, scale, frame, body, epoch_type, pos_type, vel_type
 
-import AstroBase: velocity, position, state
-import AstroDynBase: AbstractState, keplerian,
-    Rotation, period, epoch
-import Base: show, isapprox, ==
+#################
+# AbstractState #
+#################
 
-export State, ThreeBodyState, period
-export timescale, frame, body, primary, secondary, keplerian, position, velocity,
-    epoch, isapprox, ==, array, semimajor, eccentricity, inclination,
-    ascendingnode, argofpericenter, trueanomaly
+export AbstractState, epoch, frame
 
-struct State{
-        F<:Frame,
-        S, T,
-        C<:CelestialBody,
-        R, V,
-    } <: AbstractState
-    epoch::Epoch{S, T}
-    r::SVector{3,R}
-    v::SVector{3,V}
+abstract type AbstractState{Scale, Frame, Body} end
 
-    function State(ep::Epoch{S,T}, r, v,
-        frame::Type{F}=GCRF, body::Type{C}=Earth) where {
-        F<:Frame, T, S, C<:CelestialBody}
-        R = eltype(r)
-        V = eltype(v)
-        new{F,S,T,C,R,V}(ep, r, v)
+function epoch end
+
+scale(s::AbstractState{Scale}) where {Scale} = Scale
+frame(s::AbstractState{_S, Frame}) where {_S, Frame} = Frame
+body(s::AbstractState{_S, _F, Body}) where {_S, _F, Body} = Body
+array(s::AbstractState) = vcat(state(s)...)
+
+function period(s::AbstractState)
+    μ = grav_param(body(s))
+    a, _ = keplerian(s)
+    return period(a, μ)
+end
+
+struct State{Scale, Frame, Body, T, TP, TV} <: AbstractState{Scale, Frame, Body}
+    epoch::Epoch{Scale, T}
+    pos::SVector{3, TP}
+    vel::SVector{3, TV}
+    function State(epoch::Epoch{Scale, T}, pos, vel;
+                   frame::Frame=icrf, body::Body=earth) where {Scale, Frame, Body, T}
+        TP = eltype(pos)
+        TV = eltype(vel)
+        new{Scale::TimeScale, frame::AbstractFrame, body::CelestialBody, T, TP, TV}(epoch, pos, vel)
     end
 end
 
-function State(ep::Epoch,
-    sma, ecc, inc, node, peri, ano,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
-    r, v = cartesian(sma, ecc, inc, node, peri, ano, μ(body))
-    State(ep, r, v, frame, body)
+function (==)(s1::State, s2::State)
+    s1.epoch == s2.epoch && s1.pos == s2.pos && s1.vel == s2.vel
 end
 
-function State(ep::Epoch, rv,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
-    State(ep, rv[1], rv[2], frame, body)
+function Base.isapprox(s1::State, s2::State)
+    s1.epoch ≈ s2.epoch && s1.pos ≈ s2.pos && s1.vel ≈ s2.vel
 end
 
-function State(ep::Epoch, rv::AbstractArray,
-    frame::Type{F}=GCRF, body::Type{C}=Earth) where {F<:Frame,C<:CelestialBody}
-    State(ep, rv[1:3], rv[4:6], frame, body)
-end
+epoch_type(s::State{_S, _F, _B, T}) where {_S, _F, _B, T} = T
+pos_type(s::State{_S, _F, _B, _T, TP}) where {_S, _F, _B, _T, TP} = TP
+vel_type(s::State{_S, _F, _B, _T, _TP, TV}) where {_S, _F, _B, _T, _TP, TV} = TV
 
-position(s::State) = s.r
-velocity(s::State) = s.v
-array(s::State) = Array([s.r; s.v])
 epoch(s::State) = s.epoch
-keplerian(s::State) = keplerian(position(s), velocity(s), μ(body(s)))
+position(s::State) = s.pos
+velocity(s::State) = s.vel
+state(s::State) = (s.pos, s.vel)
+keplerian(s::State) = keplerian(position(s), velocity(s), grav_param(body(s)))
 
-function period(s::State)
-    ele = keplerian(s)
-    period(ele[1], μ(body(s)))
+struct KeplerianState{Scale, Frame, Body, T} <: AbstractState{Scale, Frame, Body}
+    epoch::Epoch{Scale, T}
+    a::T
+    e::T
+    i::T
+    Ω::T
+    ω::T
+    ν::T
+    function KeplerianState(epoch::Epoch{Scale, T}, a, e, i, Ω, ω, ν;
+                            frame::Frame=icrf, body::Body=earth) where {Scale, Frame, Body, T}
+        new{Scale::TimeScale, frame::AbstractFrame, body::CelestialBody, T}(epoch, a, e, i, Ω, ω, ν)
+    end
 end
 
-semimajor(s::State) = keplerian(s)[1]
-eccentricity(s::State) = keplerian(s)[2]
-inclination(s::State) = keplerian(s)[3]
-ascendingnode(s::State) = keplerian(s)[4]
-argofpericenter(s::State) = keplerian(s)[5]
-trueanomaly(s::State) = keplerian(s)[6]
-frame(::State{F}) where F<:Frame = F
-const _frame = frame
-timescale(::State{<:Any, T}) where {T} = T
-const _timescale = timescale
-body(::State{<:Any, <:Any, <:Any, C}) where C<:CelestialBody = C
-const _body = body
-(rot::Rotation)(s::State) = rot(position(s), velocity(s))
-splitrv(arr) = arr[1:3], arr[4:6]
-
-function State(s::State{F1, T1, S, C1};
-    frame::Type{F2}=_frame(s), timescale::T2=_timescale(s),
-    body::Type{C2}=_body(s)) where {F1<:Frame, F2<:Frame,
-    T1, T2, S, C1<:CelestialBody, C2<:CelestialBody}
-    convert(State{F2, T2, S, C2}, s)
+function (==)(s1::KeplerianState, s2::KeplerianState)
+    return s1.epoch == s2.epoch &&
+        s1.a == s2.a &&
+        s1.e == s2.e &&
+        s1.i == s2.i &&
+        s1.Ω == s2.Ω &&
+        s1.ω == s2.ω &&
+        s1.ν == s2.ν
 end
 
-function (==)(s1::State{F, S, T, C}, s2::State{F, S, T, C}) where {
-    F<:Frame, S, T, C<:CelestialBody}
-    s1.epoch == s2.epoch && s1.r == s2.r && s1.v == s2.v
+function Base.isapprox(s1::KeplerianState, s2::KeplerianState)
+    return s1.epoch ≈ s2.epoch &&
+        s1.a ≈ s2.a &&
+        s1.e ≈ s2.e &&
+        s1.i ≈ s2.i &&
+        s1.Ω ≈ s2.Ω &&
+        s1.ω ≈ s2.ω &&
+        s1.ν ≈ s2.ν
 end
-#= (==)(s1::State{<:Frame, , <:CelestialBody}, =#
-#=     s2::State{<:Frame, , <:CelestialBody}) = false =#
 
-function isapprox(s1::State{F, S, T, C}, s2::State{F, S, T, C}) where {
-    F<:Frame, S, T, C<:CelestialBody}
-    s1.epoch ≈ s2.epoch && s1.r ≈ s2.r && s1.v ≈ s2.v
-end
-#= isapprox(s1::State{<:Frame, , <:CelestialBody}, =#
-#=     s2::State{<:Frame, , <:CelestialBody}) = false =#
+Base.eltype(::KeplerianState{_S, _F, _B, T}) where {_S, _F, _B, T} = T
 
-function show(io::IO, s::State)
-    sma, ecc, inc, node, peri, ano = keplerian(s)
-    print(io, "State{",
-    frame(s), ", ",
-    timescale(s), ", ",
-    body(s), "}\n",
-    " Epoch: ", s.epoch, "\n",
-    " Frame: ", frame(s), "\n",
-    " Body:  ", body(s), "\n\n",
-    " rx: ", s.r[1], "\n",
-    " ry: ", s.r[2], "\n",
-    " rz: ", s.r[3], "\n",
-    " vx: ", s.v[1], "\n",
-    " vy: ", s.v[2], "\n",
-    " vz: ", s.v[3], "\n\n",
-    " a: ", sma, "\n",
-    " e: ", ecc, "\n",
-    " i: ", rad2deg(inc), "\n",
-    " ω: ", rad2deg(node), "\n",
-    " Ω: ", rad2deg(peri), "\n",
-    " ν: ", rad2deg(ano))
-end
-#=  =#
-#= struct ThreeBodyState{ =#
-#=         F<:Frame, =#
-#=         T, =#
-#=         C1<:CelestialBody, =#
-#=         C2<:CelestialBody, =#
-#=     } <: AbstractState =#
-#=     ep::Epoch{T} =#
-#=     r::SVector{3,Float64} =#
-#=     v::SVector{3,Float64} =#
-#=  =#
-#=     function ThreeBodyState( =#
-#=         ep::Epoch{T}, r, v, frame::Type{F}=GCRF, =#
-#=         primary::Type{C1}=Sun, secondary::Type{C2}=Earth =#
-#=     ) where {T,F<:Frame,C1<:CelestialBody,C2<:CelestialBody} =#
-#=         new{F, T, C1, C2}(ep, r, v) =#
-#=     end =#
-#= end =#
-#=  =#
-#= frame(::ThreeBodyState{F}) where F<:Frame = F =#
-#= timescale(::ThreeBodyState{<:Frame, T}) where T = T =#
-#= primary(::ThreeBodyState{<:Frame,,C}) where C<:CelestialBody = C =#
-#= secondary(::ThreeBodyState{<:Frame,,<:CelestialBody,C}) where { =#
-#=     C<:CelestialBody} = C =#
+epoch(s::KeplerianState) = s.epoch
+position(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))[1]
+velocity(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))[2]
+state(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))
+keplerian(s::KeplerianState) = (s.a, s.e, s.i, s.Ω, s.ω, s.ν)
+
+KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=frame(s), body=body(s))
+State(s::KeplerianState) = State(epoch(s), state(s)...; frame=frame(s), body=body(s))
+
+# struct ThreeBodyState{
+#         F<:Frame,
+#         T,
+#         C1<:CelestialBody,
+#         C2<:CelestialBody,
+#     } <: AbstractState
+#     ep::Epoch{T}
+#     r::SVector{3,Float64}
+#     v::SVector{3,Float64}
+#
+#     function ThreeBodyState(
+#         ep::Epoch{T}, r, v, frame::Type{F}=GCRF,
+#         primary::Type{C1}=Sun, secondary::Type{C2}=Earth
+#     ) where {T,F<:Frame,C1<:CelestialBody,C2<:CelestialBody}
+#         new{F, T, C1, C2}(ep, r, v)
+#     end
+# end
+#
+# frame(::ThreeBodyState{F}) where F<:Frame = F
+# timescale(::ThreeBodyState{<:Frame, T}) where T = T
+# primary(::ThreeBodyState{<:Frame,,C}) where C<:CelestialBody = C
+# secondary(::ThreeBodyState{<:Frame,,<:CelestialBody,C}) where {
+#     C<:CelestialBody} = C

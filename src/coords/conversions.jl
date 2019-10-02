@@ -55,3 +55,27 @@ function transform(ep, rv, eph, ::S1, ::F1, ::C1, ::S2, ::F2, ::C2) where {S1, S
     State(Epoch{S2()}(ep), rv′..., frame=F2(), body=C2())
 end
 
+const _scale = scale
+const _frame = frame
+const _body = body
+
+function State(s::AbstractState, eph::AbstractEphemeris;
+               frame::AbstractFrame=frame(s),
+               scale::TimeScale=scale(s),
+               body::CelestialBody=body(s))
+    inscale = _scale(s)
+    inframe = _frame(s)
+    inbody = _body(s)
+    inframe == frame && inscale == scale && inbody == body && return s
+    ep = epoch(s)
+    rv = state(s)
+    return transform(ep, rv, eph, inscale, inframe, inbody, scale, frame, body)
+end
+
+function KeplerianState(s::AbstractState, eph::AbstractEphemeris;
+                        frame::AbstractFrame=frame(s),
+                        scale::TimeScale=scale(s),
+                        body::CelestialBody=body(s))
+    KeplerianState(State(s, eph, frame=frame, scale=scale, body=body))
+end
+
