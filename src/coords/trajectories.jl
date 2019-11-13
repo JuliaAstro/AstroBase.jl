@@ -1,5 +1,5 @@
-using AstroTime: Period
-using DataInterpolations: AbstractInterpolation
+using AstroTime: Period, value, unit
+using DataInterpolations: AbstractInterpolation, BSplineInterpolation
 using SmoothingSplines
 using LinearAlgebra
 
@@ -7,13 +7,36 @@ import Base: getindex, lastindex, show
 import AstroBase: state
 
 export Trajectory, initial, final, state, events, times,
-    LogEntry, count_id, id, epoch, detector
+    LogEntry, count_id, id, epoch, detector,
+    TimeSeries
 
-struct TrajectoryComponent{T, IntType<:AbstractInterpolation}
-    data::Vector{T}
+struct TimeSeries{TType, PType, DType, Scale, Unit, IntType} <: AbstractArray{DType, 1}
+    epoch::Epoch{Scale, TType}
+    time::Vector{Period{Unit, PType}}
+    data::Vector{DType}
     interp::IntType
-    name::Symbol
 end
+
+function TimeSeries(epoch, time, data)
+    time_array = collect(time)
+    interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
+    TimeSeries(epoch, time_array, data, interp)
+end
+
+function (ts::TimeSeries)(p::Period)
+    p < ts.time[1] && throw(ArgumentError("`p` is too small"))
+    p > ts.time[end] && throw(ArgumentError("`p` is too large"))
+    return ts.interp(value(p))
+end
+
+function (ts::TimeSeries)(ep::Epoch)
+    ep < ts.epoch && throw(ArgumentError("`ep` is too small"))
+    ep > (ts.epoch + ts.time[end]) && throw(ArgumentError("`ep` is too large"))
+    return ts.interp(value(unit(ts.time[1])(ep - ts.epoch)))
+end
+
+Base.getindex(ts::TimeSeries, idx) = ts.data[idx]
+Base.size(ts::TimeSeries) = size(ts.data)
 
 struct LogEntry
     id::Int

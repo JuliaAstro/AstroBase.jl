@@ -62,5 +62,15 @@ using Test
         @test State(State(mars_rot, eph, frame=itrf, scale=UT1, body=earth), eph,
             frame=iau_mars, scale=TDB, body=mars) ≈ mars_rot
     end
+    @testset "Time Series" begin
+        t = 1seconds:4seconds
+        u = collect(1.0:4.0)
+        ep = UTCEpoch(2000, 1, 1)
+        ts = TimeSeries(ep, t, u)
+        @test collect(ts) == [1.0, 2.0, 3.0, 4.0]
+        @test ts[1] == 1.0
+        @test ts(1.5seconds) ≈ 1.5
+        @test ts(ep + 1.5seconds) ≈ 1.5
+    end
 end
 
