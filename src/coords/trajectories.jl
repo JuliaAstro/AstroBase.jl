@@ -8,6 +8,14 @@ import AstroBase: state
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector
 
+struct TypedTrajectory{T<:NamedTuple}
+    series::T
+    names::Vector{Symbol}
+end
+
+function TypedTrajectory(data::Matrix; names=Symbol[])
+end
+
 struct LogEntry
     id::Int
     detector::Symbol

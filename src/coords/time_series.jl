@@ -3,17 +3,16 @@ using DataInterpolations: BSplineInterpolation
 
 export TimeSeries
 
-struct TimeSeries{TType, PType, DType, Scale, Unit, IntType} <: AbstractArray{DType, 1}
+struct TimeSeries{Scale, TType, Unit, PType, DType} <: AbstractArray{DType, 1}
     epoch::Epoch{Scale, TType}
     time::Vector{Period{Unit, PType}}
     data::Vector{DType}
-    interp::IntType
-end
-
-function TimeSeries(epoch, time, data)
-    time_array = collect(time)
-    interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
-    TimeSeries(epoch, time_array, data, interp)
+    interp::BSplineInterpolation{Array{DType,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},true,DType}
+    function TimeSeries(epoch::Epoch{Scale, TType}, time, data) where {Scale, TType}
+        time_array = collect(time)
+        interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
+        new{Scale, TType, unit(time[1]), eltype(time[1]), eltype(data)}(epoch, time_array, data, interp)
+    end
 end
 
 function (ts::TimeSeries)(p::Period)
@@ -30,3 +29,4 @@ end
 
 Base.getindex(ts::TimeSeries, idx) = ts.data[idx]
 Base.size(ts::TimeSeries) = size(ts.data)
+Base.eltype(ts::TimeSeries) = eltype(ts.data)
