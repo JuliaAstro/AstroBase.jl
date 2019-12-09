@@ -22,14 +22,17 @@ export
 struct CIRF <: InertialFrame end
 const cirf = CIRF()
 from_sym(::Val{:CIRF}) = cirf
+add_edge!(FRAMES, :ICRF, :CIRF)
 
 struct TIRF <: RotatingFrame end
 const tirf = TIRF()
 from_sym(::Val{:TIRF}) = tirf
+add_edge!(FRAMES, :CIRF, :TIRF)
 
 struct ITRF <: RotatingFrame end
 const itrf = ITRF()
 from_sym(::Val{:ITRF}) = itrf
+add_edge!(FRAMES, :TIRF, :ITRF)
 
 function Rotation(::ICRF, ::CIRF, ep::Epoch)
     m = precession_nutation(TTEpoch(ep))

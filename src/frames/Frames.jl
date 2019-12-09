@@ -39,21 +39,5 @@ include("rotations.jl")
 include("iau.jl")
 include("iers.jl")
 
-function __init__()
-    # IAU frames
-    for name in ALL_NAMES
-        endswith(name, "Barycenter") && continue
-
-        frame = Symbol("IAU", name)
-        cname = Symbol("iau_", lowercase(name))
-        add_edge!(FRAMES, frame, :ICRF)
-    end
-
-    # IERS frames
-    add_edge!(FRAMES, :ICRF, :CIRF)
-    add_edge!(FRAMES, :CIRF, :TIRF)
-    add_edge!(FRAMES, :TIRF, :ITRF)
-end
-
 end
 

@@ -47,12 +47,14 @@ const ssb = SolarSystemBarycenter()
 Base.show(io::IO, ::SolarSystemBarycenter) = print(io, "Solar System Barycenter")
 naifid(::SolarSystemBarycenter) = 0
 from_naifid(::Val{0}) = ssb
+add_vertex!(BODIES, 0)
 
 struct Sun <: CelestialBody end
 const sun = Sun()
 parent(::Sun) = ssb
 naifid(::Sun) = 10
 from_naifid(::Val{10}) = sun
+add_edge!(BODIES, 0, 10)
 
 alpha0(::CelestialBody) = 0.0
 alpha1(::CelestialBody) = 0.0
@@ -165,73 +167,5 @@ include(gm)
 pck = joinpath(@__DIR__, "..", "..", "gen", "pck.jl")
 isfile(pck) || error("`pck.jl` has not been generated, yet. Run `gen/gen_pck.jl`")
 include(pck)
-
-function __init__()
-    # Sun and SSB
-    add_vertex!(BODIES, 0)
-    add_edge!(BODIES, 0, 10)
-
-    # Planets and barycenters
-    for i in 1:length(PLANET_NAMES)
-        id = 100i + 99
-        add_edge!(BODIES, 0, i)
-        add_edge!(BODIES, i, id)
-    end
-
-    # Earth satellite
-    add_edge!(BODIES, 3, 301)
-
-    # Mars satellites
-    add_edge!(BODIES, 4, 401)
-    add_edge!(BODIES, 4, 402)
-
-    # Jupiter satellites
-    for i in 1:length(JUPITER_SATELLITE_NAMES[1:end-1])
-        id = 500 + i
-        add_edge!(BODIES, 5, id)
-    end
-    add_edge!(BODIES, 5, 553)
-
-    # Saturn satellites
-    for i in 1:length(SATURN_SATELLITE_NAMES)
-        id = 600 + i
-        add_edge!(BODIES, 6, id)
-    end
-
-    # Uranus satellites
-    for i in 1:length(URANUS_SATELLITE_NAMES)
-        id = 700 + i
-        add_edge!(BODIES, 7, id)
-    end
-
-    # Neptune satellites
-    for i in 1:length(NEPTUNE_SATELLITE_NAMES)
-        id = 800 + i
-        add_edge!(BODIES, 8, id)
-    end
-
-    # Pluto satellites
-    for i in 1:length(PLUTO_SATELLITE_NAMES)
-        id = 900 + i
-        add_edge!(BODIES, 9, id)
-    end
-
-    # Minor bodies
-    add_edge!(BODIES, 0, 9)
-    add_edge!(BODIES, 9, 999)
-    add_edge!(BODIES, 0, 2000001)
-    add_edge!(BODIES, 0, 2000002)
-    add_edge!(BODIES, 0, 2000004)
-    add_edge!(BODIES, 0, 2000016)
-    add_edge!(BODIES, 0, 2000021)
-    add_edge!(BODIES, 0, 2431010)
-    add_edge!(BODIES, 0, 2000433)
-    add_edge!(BODIES, 0, 2000511)
-    add_edge!(BODIES, 0, 9511010)
-    add_edge!(BODIES, 0, 2002867)
-    add_edge!(BODIES, 0, 2025143)
-    add_edge!(BODIES, 0, 1000093)
-    add_edge!(BODIES, 0, 1000005)
-end
 
 end

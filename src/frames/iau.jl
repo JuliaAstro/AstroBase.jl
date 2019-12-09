@@ -7,6 +7,8 @@ for name in ALL_NAMES
 
     frame = Symbol("IAU", name)
     cname = Symbol("iau_", lowercase(name))
+    add_edge!(FRAMES, frame, :ICRF)
+
     @eval begin
         struct $frame <: RotatingFrame end
         const $cname = $frame()

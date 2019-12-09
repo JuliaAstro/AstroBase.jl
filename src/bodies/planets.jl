@@ -18,6 +18,8 @@ for (i, body) in enumerate(PLANET_NAMES)
     typ_bc = Symbol(body, "Barycenter")
     nam_bc = string(Symbol(body, " Barycenter"))
     sym_bc = Symbol(lowercase(body), "_barycenter")
+    add_edge!(BODIES, 0, i)
+    add_edge!(BODIES, i, id)
     @eval begin
         struct $typ_bc <: Barycenter end
         const $sym_bc = $typ_bc()

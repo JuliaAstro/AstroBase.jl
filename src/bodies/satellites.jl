@@ -10,6 +10,7 @@ const moon = luna
 parent(::Luna) = earth_barycenter
 naifid(::Luna) = 301
 from_naifid(::Val{301}) = luna
+add_edge!(BODIES, 3, 301)
 
 # Mars
 
@@ -18,12 +19,14 @@ const phobos = Phobos()
 parent(::Phobos) = mars_barycenter
 naifid(::Phobos) = 401
 from_naifid(::Val{401}) = phobos
+add_edge!(BODIES, 4, 401)
 
 struct Deimos <: NaturalSatellite end
 const deimos = Deimos()
 parent(::Deimos) = mars_barycenter
 naifid(::Deimos) = 402
 from_naifid(::Val{402}) = deimos
+add_edge!(BODIES, 4, 402)
 
 # Jupiter
 
@@ -85,6 +88,7 @@ for (i, body) in enumerate(JUPITER_SATELLITE_NAMES[1:end-1])
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 500 + i
+    add_edge!(BODIES, 5, id)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
@@ -100,6 +104,7 @@ const dia = Dia()
 parent(::Dia) = jupiter_barycenter
 naifid(::Dia) = 553
 from_naifid(::Val{553}) = dia
+add_edge!(BODIES, 5, 553)
 export dia, Dia
 
 # Saturn
@@ -164,6 +169,7 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 600 + i
+    add_edge!(BODIES, 6, id)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
@@ -173,6 +179,8 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
         export $sym, $typ
     end
 end
+
+# Uranus
 
 const URANUS_SATELLITE_NAMES = (
     "Ariel",
@@ -208,6 +216,7 @@ for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 700 + i
+    add_edge!(BODIES, 7, id)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
@@ -240,6 +249,7 @@ for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 800 + i
+    add_edge!(BODIES, 8, id)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
@@ -264,6 +274,7 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
     typ = Symbol(body)
     sym = Symbol(lowercase(body))
     id = 900 + i
+    add_edge!(BODIES, 9, id)
     @eval begin
         struct $typ <: NaturalSatellite end
         const $sym = $typ()
