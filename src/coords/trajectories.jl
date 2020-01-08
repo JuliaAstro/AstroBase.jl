@@ -10,7 +10,7 @@ export TypedTrajectory, Trajectory, initial, final, state, events, times,
 
 abstract type AbstractTrajectory{Scale, Frame, Body} end
 
-scale(s::AbstractTrajectory{Scale}) where {Scale} = Scale
+timescale(s::AbstractTrajectory{Scale}) where {Scale} = Scale
 frame(s::AbstractTrajectory{_S, Frame}) where {_S, Frame} = Frame
 body(s::AbstractTrajectory{_S, _F, Body}) where {_S, _F, Body} = Body
 
@@ -54,9 +54,23 @@ function (tra::TypedTrajectory)(t)
     return out
 end
 
+epoch(tra::TypedTrajectory) = tra.series[1].epoch
+
 function keplerian(tra::TypedTrajectory, t)
     rv = tra(t)[1:6]
     return keplerian(rv[1:3], rv[4:6], grav_param(body(tra)))
+end
+
+function State(tra::TypedTrajectory, t)
+    rv = tra(t)[1:6]
+    return State(epoch(tra), rv[1:3], rv[4:6],
+                 scale=timescale(tra), frame=frame(tra), body=body(tra))
+end
+
+function KeplerianState(tra::TypedTrajectory, t)
+    ele = keplerian(tra, t)
+    return KeplerianState(epoch(tra), ele...,
+                          scale=timescale(tra), frame=frame(tra), body=body(tra))
 end
 
 struct LogEntry

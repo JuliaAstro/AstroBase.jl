@@ -27,6 +27,8 @@ ep = UTCEpoch("2016-05-30T12:00:00.000")
 
 ele = keplerian(r, v, grav_param(earth))
 t1 = period(ele[1], grav_param(earth))
+s0_exp = State(ep, r, v)
+k0_exp = KeplerianState(s0_exp)
 
 @testset "Coords" begin
     @testset "States" begin
@@ -98,12 +100,20 @@ t1 = period(ele[1], grav_param(earth))
             tra = TypedTrajectory(ep, sol.t * seconds, sol.u)
             rv0 = tra(0.0seconds)
             ele0 = keplerian(tra, 0.0seconds)
+            s0 = State(tra, 0.0seconds)
+            k0 = KeplerianState(tra, 0.0seconds)
             @test rv0 ≈ rv
             @test collect(ele0) ≈ collect(ele)
+            @test s0_exp ≈ s0
+            @test k0_exp ≈ k0
             rv1 = tra(t1)
             ele1 = keplerian(tra, t1)
+            s1 = State(tra, t1)
+            k1 = KeplerianState(tra, t1)
             @test rv1 ≈ rv atol=0.1
             @test collect(ele1) ≈ collect(ele) atol=0.1
+            @test s0_exp ≈ s1 atol=0.1
+            @test k0_exp ≈ k1 atol=0.1
         end
     end
 end
