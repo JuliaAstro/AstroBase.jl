@@ -1,9 +1,11 @@
 using AstroTime: Period, Epoch, TimeScale
 using SmoothingSplines
 using LinearAlgebra
+using Roots: find_zero
 
 import Base: getindex, lastindex, show
 import AstroBase: state
+import AstroTime: unit
 
 export TypedTrajectory, Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector
@@ -24,25 +26,53 @@ function transpose_aoa(input::Vector{Vector{T}}) where T
     return output
 end
 
-struct TypedTrajectory{Scale, Frame, Body, TType, T<:NamedTuple} <: AbstractTrajectory{Scale, Frame, Body}
-    series::T
-    function TypedTrajectory(epoch::Epoch{Scale, TType}, time, input::Vector{Vector{T}};
+struct TypedTrajectory{Scale, Frame, Body, T, TType, Unit, PType, NT} <: AbstractTrajectory{Scale, Frame, Body}
+    series::NT
+    events::Vector{Event{Scale, TType}}
+    data::Vector{Vector{T}}
+    time::Vector{Period{Unit, PType}}
+    function TypedTrajectory(epoch::Epoch{Scale, TType},
+                             time::Vector{Period{Unit, PType}},
+                             data::Vector{Vector{T}};
                              frame::Frame=icrf,
                              body::Body=earth,
-                             names::Vector{Symbol}=Symbol[]) where {Scale, Frame, Body, TType, T}
-        data = transpose_aoa(input)
+                             names::Vector{Symbol}=Symbol[]) where {Scale, Frame, Body, TType, Unit, PType, T}
+        columns = transpose_aoa(data)
         if isempty(names)
-            if length(data) == 3
+            n = length(columns)
+            if n == 3
                 names = [:x, :y, :z]
-            elseif length(data) == 6
+            elseif n == 6
                 names = [:x, :y, :z, :vx, :vy, :vz]
             else
-                throw(ArgumentError("Explicit `names` need to provided if `data` does not have either 3 or 6 elements."))
+                throw(ArgumentError("Explicit `names` need to provided if `data` does not have either 3 or 6 columns."))
             end
         end
-        series = (; zip(names, [TimeSeries(epoch, time, d) for d in data])...)
-        new{Scale::TimeScale, frame::AbstractFrame, body::CelestialBody, TType, typeof(series)}(series)
+        series = (; zip(names, [TimeSeries(epoch, time, c) for c in columns])...)
+        events = Vector{Event{Scale, TType}}[]
+        new{Scale::TimeScale, frame::AbstractFrame, body::CelestialBody,
+            T, TType, Unit, PType, typeof(series)}(series, events, data, time)
     end
+end
+
+unit(tra::TypedTrajectory) = unit(tra.time[1])
+Base.float(p::Period) = float(value(p))
+
+function find_events!(tra::TypedTrajectory, detectors::Vector{Detector})
+    for detector in detectors
+        for (i, t) in enumerate(tra.time[1:end-1])
+            t1 = tra.time[i+1]
+            s0 = sign(detect(detector, t, tra))
+            s1 = sign(detect(detector, t1, tra))
+            detected = s1 > s0
+            detected || continue
+
+            t_event = find_zero(t -> detect(detector, t * unit(tra), tra), (value(t), value(t1)))
+            evt = Event(epoch(tra) + t_event * unit(tra), nameof(typeof(detector)))
+            evt in tra.events || push!(tra.events, evt)
+        end
+    end
+    sort!(tra.events, lt=(a, b)->isless(a.epoch, b.epoch))
 end
 
 function (tra::TypedTrajectory)(t)
@@ -61,15 +91,27 @@ function keplerian(tra::TypedTrajectory, t)
     return keplerian(rv[1:3], rv[4:6], grav_param(body(tra)))
 end
 
-function State(tra::TypedTrajectory, t)
+function State(tra::TypedTrajectory, t::Period)
     rv = tra(t)[1:6]
-    return State(epoch(tra), rv[1:3], rv[4:6],
+    return State(epoch(tra) + t, rv[1:3], rv[4:6],
                  scale=timescale(tra), frame=frame(tra), body=body(tra))
 end
 
-function KeplerianState(tra::TypedTrajectory, t)
+function State(tra::TypedTrajectory, ep::Epoch)
+    rv = tra(t)[1:6]
+    return State(ep, rv[1:3], rv[4:6],
+                 scale=timescale(tra), frame=frame(tra), body=body(tra))
+end
+
+function KeplerianState(tra::TypedTrajectory, t::Period)
     ele = keplerian(tra, t)
-    return KeplerianState(epoch(tra), ele...,
+    return KeplerianState(epoch(tra) + t, ele...,
+                          scale=timescale(tra), frame=frame(tra), body=body(tra))
+end
+
+function KeplerianState(tra::TypedTrajectory, ep::Epoch)
+    ele = keplerian(tra, ep)
+    return KeplerianState(ep, ele...,
                           scale=timescale(tra), frame=frame(tra), body=body(tra))
 end
 

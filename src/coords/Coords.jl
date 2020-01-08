@@ -29,8 +29,8 @@ using StaticArrays: SVector
 include("states.jl")
 include("conversions.jl")
 include("bodyfixed.jl")
-include("events.jl")
 include("time_series.jl")
+include("events.jl")
 include("trajectories.jl")
 
 end

@@ -1,5 +1,6 @@
 using AstroTime: Epoch, Period, unit, value
-using DataInterpolations: BSplineInterpolation
+# using DataInterpolations: CubicSpline
+using DataInterpolations
 
 export TimeSeries
 
@@ -7,10 +8,12 @@ struct TimeSeries{Scale, TType, Unit, PType, DType} <: AbstractArray{DType, 1}
     epoch::Epoch{Scale, TType}
     time::Vector{Period{Unit, PType}}
     data::Vector{DType}
-    interp::BSplineInterpolation{Array{DType,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},true,DType}
+    # interp::BSplineInterpolation{Array{DType,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},true,DType}
+    interp
     function TimeSeries(epoch::Epoch{Scale, TType}, time, data) where {Scale, TType}
         time_array = collect(time)
-        interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
+        # interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
+        interp = CubicSpline(data, float(value.(time)))
         new{Scale, TType, unit(time[1]), eltype(time[1]), eltype(data)}(epoch, time_array, data, interp)
     end
 end
