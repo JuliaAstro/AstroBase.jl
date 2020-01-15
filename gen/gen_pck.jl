@@ -1,5 +1,5 @@
 using SPICE
-using Statistics
+using Statistics: mean
 
 file = "pck00010.tpc"
 furnsh(file)
@@ -20,6 +20,26 @@ open("pck.jl", "w") do f
     for id in ids
         body = replace(titlecase(bodc2n(parse(Int, id))), r"\s"=>"")
         body = body == "Moon" ? "Luna" : body
+
+        # Radii
+        try
+            r = bodvrd(id, "RADII")
+            subplan, along, polar = r
+            write(f, "subplanetary_radius(::Type{Float64}, ::$body) = $subplan\n")
+            write(f, "subplanetary_radius(::$body) = subplanetary_radius(Float64, $body())\n")
+            write(f, "along_orbit_radius(::Type{Float64}, ::$body) = $along\n")
+            write(f, "along_orbit_radius(::$body) = along_orbit_radius(Float64, $body())\n")
+            if subplan == along
+                write(f, "equatorial_radius(::Type{Float64}, ::$body) = $subplan\n")
+                write(f, "equatorial_radius(::$body) = equatorial_radius(Float64, $body())\n")
+            end
+            write(f, "polar_radius(::Type{Float64}, ::$body) = $polar\n")
+            write(f, "polar_radius(::$body) = polar_radius(Float64, $body())\n")
+            write(f, "mean_radius(::Type{Float64}, ::$body) = $(mean(r))\n")
+            write(f, "mean_radius(::$body) = mean_radius(Float64, $body())\n")
+        catch err
+            err isa SpiceError || rethrow(err)
+        end
 
         # Right ascension
         try

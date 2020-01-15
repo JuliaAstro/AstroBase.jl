@@ -9,19 +9,24 @@ export CelestialBody,
     NAIFId,
     SolarSystemBarycenter,
     Sun,
+    along_orbit_radius,
     declination,
     declination_rate,
+    equatorial_radius,
     euler_angles,
     euler_rates,
     from_naifid,
     grav_param,
+    mean_radius,
     naifid,
     parent,
+    polar_radius,
     right_ascension,
     right_ascension_rate,
     rotation_angle,
     rotation_rate,
     ssb,
+    subplanetary_radius,
     sun
 
 const NAIFId = Int
@@ -33,6 +38,8 @@ function grav_param end
 function mean_radius end
 function polar_radius end
 function equatorial_radius end
+function subplanetary_radius end
+function along_orbit_radius end
 
 Base.show(io::IO, body::CelestialBody) = print(io, string(nameof(typeof(body))))
 
