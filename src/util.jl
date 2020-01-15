@@ -1,3 +1,5 @@
+module Util
+
 using LinearAlgebra: norm, ⋅, ×
 using StaticArrays: SVector
 
@@ -86,5 +88,7 @@ function angular_velocity(ψ, δψ, θ, δθ, ϕ, δϕ)
     Ω₂ = δψ * sin(θ) * cos(ϕ) + δθ * sin(ϕ)
     Ω₃ = δψ * cos(θ) + δϕ
     [Ω₁, Ω₂, Ω₃]
+end
+
 end
 

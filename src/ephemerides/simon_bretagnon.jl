@@ -1,4 +1,4 @@
-using AstroBase: AU, sec2rad, normalize_angle
+using AstroBase: AU
 using AstroTime: TDBEpoch, TTEpoch, centuries, j2000, value, julian_twopart
 using ReferenceFrameRotations: angleaxis_to_dcm
 using StaticArrays: SVector
@@ -17,6 +17,7 @@ using ..Bodies: CelestialBody,
     grav_param
 using ..EarthAttitude: obliquity_of_ecliptic_06
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
+using ..Util: sec2rad, normalize_angle
 
 export SimonBretagnon, simon_bretagnon
 

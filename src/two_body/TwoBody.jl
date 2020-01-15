@@ -6,9 +6,7 @@ using ReferenceFrameRotations: angle_to_dcm
 
 using Roots: find_zero, Order5, Order2
 
-import ..angle,
-    ..azimuth,
-    ..normalize_angle
+using ..Util: angle, azimuth, normalize_angle
 
 export
     EccentricAnomaly,

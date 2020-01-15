@@ -1,7 +1,7 @@
 module EarthAttitude
 
-using ..AstroBase: sec2rad
 using ..Bodies
+using ..Util: sec2rad
 using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
 export

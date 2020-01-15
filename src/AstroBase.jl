@@ -21,6 +21,7 @@ include(joinpath("n_body", "NBody.jl"))
 include(joinpath("frames", "Frames.jl"))
 include(joinpath("coords", "Coords.jl"))
 
+@reexport using .Util
 @reexport using .Bodies
 @reexport using .Ephemerides
 @reexport using .EarthAttitude

@@ -1,7 +1,6 @@
 import EarthOrientation
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
-import ..sec2rad
 using AstroTime: value, julian, julian_twopart, TTEpoch, UT1Epoch, TDBEpoch
 using ..EarthAttitude:
     celestial_to_intermediate,
@@ -10,6 +9,7 @@ using ..EarthAttitude:
     s06,
     tio_locator,
     xy06
+using ..Util: sec2rad
 
 export
     CIRF,
