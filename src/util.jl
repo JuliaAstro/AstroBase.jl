@@ -1,6 +1,6 @@
 module Util
 
-using LinearAlgebra: norm, ⋅, ×
+using LinearAlgebra: norm, ⋅, ×, normalize
 using StaticArrays: SVector
 
 export
@@ -88,6 +88,29 @@ function angular_velocity(ψ, δψ, θ, δθ, ϕ, δϕ)
     Ω₂ = δψ * sin(θ) * cos(ϕ) + δθ * sin(ϕ)
     Ω₃ = δψ * cos(θ) + δϕ
     [Ω₁, Ω₂, Ω₃]
+end
+
+@inbounds function frame(x)
+    length(x) < 3 && throw(ArgumentError("Input vector must have three elements."))
+    iszero(x) && return [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]
+
+    x̂ = normalize(x[1:3])
+    ŷ = Array{Float64}(undef, 3)
+    ẑ = Array{Float64}(undef, 3)
+
+    x2 = x̂ .^ 2
+    _, idx = findmin(x2)
+    s1, s2, s3 = circshift(1:3, 1-idx)
+    f = sqrt(x2[s2] + x2[s3])
+
+    ŷ[s1] = 0.0
+    ŷ[s2] = -x̂[s3] / f
+    ŷ[s3] = x̂[s2] / f
+    ẑ[s1] = f
+    ẑ[s2] = -x̂[s1] * ŷ[s3]
+    ẑ[s3] = x̂[s1] * ŷ[s2]
+
+    return x̂, ŷ, ẑ
 end
 
 end

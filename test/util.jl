@@ -1,3 +1,5 @@
+import SPICE
+
 @testset "Utils" begin
     @testset "sec2rad" begin
         # Radians <-> arcseconds
@@ -11,6 +13,16 @@
             @test c <= (b + π)
             two_k = round((a - c) / π)
             @test c ≈ a - two_k * π atol=1.0e-14
+        end
+    end
+    @testset "frame" begin
+        y = zeros(3)
+        @test all(AstroBase.Util.frame(y) .== SPICE.frame(y))
+        x = randn(3)
+        @testset for i in 1:3
+            exp = SPICE.frame(x)
+            act = AstroBase.Util.frame(x)
+            @test act[i] ≈ exp[i]
         end
     end
 end
