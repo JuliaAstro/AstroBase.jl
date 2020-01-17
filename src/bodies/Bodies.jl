@@ -12,6 +12,7 @@ export CelestialBody,
     along_orbit_radius,
     declination,
     declination_rate,
+    ellipsoid,
     equatorial_radius,
     euler_angles,
     euler_rates,
@@ -40,6 +41,10 @@ function polar_radius end
 function equatorial_radius end
 function subplanetary_radius end
 function along_orbit_radius end
+
+function ellipsoid(body::CelestialBody)
+    subplanetary_radius(body), along_orbit_radius(body), polar_radius(body)
+end
 
 Base.show(io::IO, body::CelestialBody) = print(io, string(nameof(typeof(body))))
 

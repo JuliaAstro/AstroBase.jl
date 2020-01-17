@@ -1,3 +1,6 @@
+using AstroBase
+using Test
+
 import SPICE
 
 @testset "Utils" begin
@@ -24,5 +27,9 @@ import SPICE
             act = AstroBase.Util.frame(x)
             @test act[i] ≈ exp[i]
         end
+    end
+    @testset "plane_section" begin
+        xy = plane_section([1.0, 2.0, 3.0], zeros(3), [0.0, 0.0, 1.0])
+        @show xy
     end
 end

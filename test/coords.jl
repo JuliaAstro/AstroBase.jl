@@ -97,7 +97,7 @@ k0_exp = KeplerianState(s0_exp)
         @testset "Propagation" begin
             prob = ODEProblem(rhs, rv, (0.0, value(t1)), p=grav_param(earth))
             sol = solve(prob, Vern9())
-            tra = TypedTrajectory(ep, sol.t * seconds, sol.u)
+            tra = Trajectory(ep, sol.t * seconds, sol.u)
             rv0 = tra(0.0seconds)
             ele0 = keplerian(tra, 0.0seconds)
             s0 = State(tra, 0.0seconds)
