@@ -12,7 +12,7 @@ Base.showerror(io::IO, err::AstroException) = print(io, err.msg)
 
 include("constants.jl")
 include("stubs.jl")
-include("util.jl")
+include(joinpath("util", "Util.jl"))
 include(joinpath("bodies", "Bodies.jl"))
 include(joinpath("earth_attitude", "EarthAttitude.jl"))
 include(joinpath("two_body", "TwoBody.jl"))
