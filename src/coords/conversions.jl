@@ -1,3 +1,4 @@
+using ..Ephemerides: AbstractEphemeris
 using ..Frames: Rotation
 
 # F1 -> F2
@@ -55,16 +56,13 @@ function transform(ep, rv, eph, ::S1, ::F1, ::C1, ::S2, ::F2, ::C2) where {S1, S
     State(Epoch{S2()}(ep), rv′..., frame=F2(), body=C2())
 end
 
-const _frame = frame
-const _body = body
-
 function State(s::AbstractState, eph::AbstractEphemeris;
-               frame::AbstractFrame=frame(s),
+               frame::AbstractFrame=refframe(s),
                scale::TimeScale=timescale(s),
-               body::CelestialBody=body(s))
+               body::CelestialBody=centralbody(s))
     inscale = timescale(s)
-    inframe = _frame(s)
-    inbody = _body(s)
+    inframe = refframe(s)
+    inbody = centralbody(s)
     inframe == frame && inscale == scale && inbody == body && return s
     ep = epoch(s)
     rv = state(s)
@@ -72,9 +70,9 @@ function State(s::AbstractState, eph::AbstractEphemeris;
 end
 
 function KeplerianState(s::AbstractState, eph::AbstractEphemeris;
-                        frame::AbstractFrame=frame(s),
+                        frame::AbstractFrame=refframe(s),
                         scale::TimeScale=timescale(s),
-                        body::CelestialBody=body(s))
+                        body::CelestialBody=centralbody(s))
     KeplerianState(State(s, eph, frame=frame, scale=scale, body=body))
 end
 

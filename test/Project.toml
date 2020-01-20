@@ -1,5 +1,8 @@
 [deps]
+AstroTime = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
+EarthOrientation = "732a3c5d-d6c0-58bc-adb1-1b51709a25e2"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
 SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"

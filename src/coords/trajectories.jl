@@ -1,18 +1,12 @@
 using AstroTime: Period, Epoch, TimeScale
 using Roots: find_zero
 
-import AstroBase: state
 import AstroTime: unit
+import ..Interfaces: AbstractTrajectory
 
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector,
     Apocenter, Pericenter, Eclipse
-
-abstract type AbstractTrajectory{Scale, Frame, Body} end
-
-timescale(s::AbstractTrajectory{Scale}) where {Scale} = Scale
-frame(s::AbstractTrajectory{_S, Frame}) where {_S, Frame} = Frame
-body(s::AbstractTrajectory{_S, _F, Body}) where {_S, _F, Body} = Body
 
 function transpose_aoa(input::Vector{Vector{T}}) where T
     n = length(input[1])
@@ -24,17 +18,17 @@ function transpose_aoa(input::Vector{Vector{T}}) where T
     return output
 end
 
-struct Trajectory{Scale, Frame, Body, T, TType, Unit, PType, NT} <: AbstractTrajectory{Scale, Frame, Body}
+struct Trajectory{S, F, B, T, TType, Unit, PType, NT} <: AbstractTrajectory{S, F, B, T}
     series::NT
-    events::Vector{Event{Scale, TType}}
+    events::Vector{Event{S, TType}}
     data::Vector{Vector{T}}
     time::Vector{Period{Unit, PType}}
-    function Trajectory(epoch::Epoch{Scale, TType},
-                             time::Vector{Period{Unit, PType}},
-                             data::Vector{Vector{T}};
-                             frame::Frame=icrf,
-                             body::Body=earth,
-                             names::Vector{Symbol}=Symbol[]) where {Scale, Frame, Body, TType, Unit, PType, T}
+    function Trajectory(epoch::Epoch{S, TType},
+                        time::Vector{Period{Unit, PType}},
+                        data::Vector{Vector{T}};
+                        frame::F=icrf,
+                        body::B=earth,
+                        names::Vector{Symbol}=Symbol[]) where {S, F, B, TType, Unit, PType, T}
         columns = transpose_aoa(data)
         if isempty(names)
             n = length(columns)
@@ -47,14 +41,13 @@ struct Trajectory{Scale, Frame, Body, T, TType, Unit, PType, NT} <: AbstractTraj
             end
         end
         series = (; zip(names, [TimeSeries(epoch, time, c) for c in columns])...)
-        events = Vector{Event{Scale, TType}}[]
-        new{Scale::TimeScale, frame::AbstractFrame, body::CelestialBody,
+        events = Vector{Event{S, TType}}[]
+        new{S::TimeScale, frame::AbstractFrame, body::CelestialBody,
             T, TType, Unit, PType, typeof(series)}(series, events, data, time)
     end
 end
 
 unit(tra::Trajectory) = unit(tra.time[1])
-Base.float(p::Period) = float(value(p))
 
 function find_events!(tra::Trajectory, detectors::Vector{<:Detector})
     for detector in detectors
@@ -96,30 +89,38 @@ epoch(tra::Trajectory) = tra.series[1].epoch
 
 function keplerian(tra::Trajectory, t)
     rv = tra(t)[1:6]
-    return keplerian(rv[1:3], rv[4:6], grav_param(body(tra)))
+    return keplerian(rv[1:3], rv[4:6], grav_param(centralbody(tra)))
 end
 
 function State(tra::Trajectory, t::Period)
     rv = tra(t)[1:6]
     return State(epoch(tra) + t, rv[1:3], rv[4:6],
-                 scale=timescale(tra), frame=frame(tra), body=body(tra))
+                 scale=timescale(tra),
+                 frame=refframe(tra),
+                 body=centralbody(tra))
 end
 
 function State(tra::Trajectory, ep::Epoch)
     rv = tra(t)[1:6]
     return State(ep, rv[1:3], rv[4:6],
-                 scale=timescale(tra), frame=frame(tra), body=body(tra))
+                 scale=timescale(tra),
+                 frame=refframe(tra),
+                 body=centralbody(tra))
 end
 
 function KeplerianState(tra::Trajectory, t::Period)
     ele = keplerian(tra, t)
     return KeplerianState(epoch(tra) + t, ele...,
-                          scale=timescale(tra), frame=frame(tra), body=body(tra))
+                          scale=timescale(tra),
+                          frame=refframe(tra),
+                          body=centralbody(tra))
 end
 
 function KeplerianState(tra::Trajectory, ep::Epoch)
     ele = keplerian(tra, ep)
     return KeplerianState(ep, ele...,
-                          scale=timescale(tra), frame=frame(tra), body=body(tra))
+                          scale=timescale(tra),
+                          frame=refframe(tra),
+                          body=centralbody(tra))
 end
 

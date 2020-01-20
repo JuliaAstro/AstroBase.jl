@@ -2,10 +2,8 @@ using MuladdMacro
 using Parameters: @with_kw
 using StaticArrays: @SMatrix
 
-import ..AU
-
-import AstroTime: Epoch, TDBEpoch, j2000, centuries, value, SECONDS_PER_CENTURY
-import ..Bodies:
+using AstroTime: Epoch, TDBEpoch, j2000, centuries, value, SECONDS_PER_CENTURY
+using ..Bodies:
     SolarSystemBarycenter,
     Sun,
     Mercury,
@@ -16,6 +14,7 @@ import ..Bodies:
     Saturn,
     Uranus,
     Neptune
+using ..Constants: astronomical_unit
 
 export VSOP87
 
@@ -73,9 +72,9 @@ end
     end
 
     # AU to km
-    r .*= AU
+    r .*= astronomical_unit()
     # AU/millenium to km/s
-    v .*= AU / 10SECONDS_PER_CENTURY
+    v .*= astronomical_unit() / 10SECONDS_PER_CENTURY
 
     VSOP87_FK5 * r, VSOP87_FK5 * v
 end

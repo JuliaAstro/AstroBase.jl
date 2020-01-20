@@ -1,7 +1,7 @@
-using AstroBase: AU
 using AstroTime: TDBEpoch, TTEpoch, centuries, j2000, value, julian_twopart
 using ReferenceFrameRotations: angleaxis_to_dcm
 using StaticArrays: SVector
+
 using ..Bodies: CelestialBody,
     Mercury,
     Venus,
@@ -15,9 +15,12 @@ using ..Bodies: CelestialBody,
     Sun,
     sun,
     grav_param
+using ..Constants: astronomical_unit
 using ..EarthAttitude: obliquity_of_ecliptic_06
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
 using ..Util: sec2rad, normalize_angle
+
+import ..Interfaces: AbstractEphemeris, position!, state!, velocity!
 
 export SimonBretagnon, simon_bretagnon
 
@@ -367,7 +370,7 @@ function state!(pos, vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBod
 
     μ = grav_param(sun)
 
-    r, v = cartesian(a * AU, e, i, Ω, ω, ν, μ)
+    r, v = cartesian(a * astronomical_unit(), e, i, Ω, ω, ν, μ)
 
     rot = angleaxis_to_dcm(-ϵ, [1, 0, 0])
     pos .+= rot * r

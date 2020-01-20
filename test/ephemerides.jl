@@ -4,7 +4,7 @@ import AstroBase
 using AstroTime: Epoch, TDBEpoch, SECONDS_PER_DAY, j2000, seconds, value, julian_twopart
 using AstroBase.Ephemerides
 using AstroBase.Bodies
-using AstroBase: AU
+using AstroBase.Constants: astronomical_unit
 using ERFA
 using LinearAlgebra: norm
 using SPICE: spkezr, furnsh, kclear
@@ -125,8 +125,8 @@ end
         @testset for (id, body) in enumerate(bodies)
             @testset "ERFA" begin
                 r_erfa, v_erfa = ERFA.plan94(jd1, jd2, id)
-                r_erfa .*= AU
-                v_erfa .*= AU
+                r_erfa .*= astronomical_unit()
+                v_erfa .*= astronomical_unit()
                 v_erfa ./= SECONDS_PER_DAY
                 rv_erfa = (r_erfa, v_erfa)
                 r_act = position!(zeros(3), simon_bretagnon, ep, sun, body)

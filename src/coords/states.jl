@@ -1,26 +1,22 @@
+using AstroTime: Epoch, TimeScale
 using LinearAlgebra: promote_leaf_eltypes
-import AstroTime: timescale
+using StaticArrays: SVector
 
-export State, KeplerianState, array, epoch, scale, frame, body, epoch_type, pos_type, vel_type
+using ..Bodies: CelestialBody, earth, grav_param
+using ..Frames: AbstractFrame, icrf
 
-#################
-# AbstractState #
-#################
+import Base: ==
+import ..Interfaces: AbstractState,
+    centralbody,
+    epoch,
+    position,
+    refframe,
+    state,
+    timescale,
+    velocity
+import ..TwoBody: period, cartesian, keplerian
 
-export AbstractState, epoch, frame
-
-abstract type AbstractState{Scale, Frame, Body, T} <: AbstractArray{T, 1} end
-
-function epoch end
-
-timescale(s::AbstractState{Scale}) where {Scale} = Scale
-frame(s::AbstractState{_S, Frame}) where {_S, Frame} = Frame
-body(s::AbstractState{_S, _F, Body}) where {_S, _F, Body} = Body
-array(s::AbstractState) = vcat(state(s)...)
-
-Base.size(::AbstractState) = (6,)
-Base.length(::AbstractState) = 6
-Base.IndexStyle(::Type{<:AbstractState}) = IndexLinear()
+export State, KeplerianState, pos_type, vel_type, period
 
 function period(s::AbstractState)
     μ = grav_param(body(s))
@@ -28,14 +24,14 @@ function period(s::AbstractState)
     return period(a, μ)
 end
 
-struct State{Scale, Frame, Body, T, TP, TV} <: AbstractState{Scale, Frame, Body, T}
-    epoch::Epoch{Scale, T}
+struct State{S, F, B, T, TP, TV} <: AbstractState{S, F, B, T}
+    epoch::Epoch{S, T}
     pos::SVector{3, TP}
     vel::SVector{3, TV}
-    function State(epoch::Epoch{Scale, T}, pos, vel;
+    function State(epoch::Epoch{S, T}, pos, vel;
                    scale::TimeScale=timescale(epoch),
-                   frame::Frame=icrf,
-                   body::Body=earth) where {Scale, Frame, Body, T}
+                   frame::F=icrf,
+                   body::B=earth) where {S, F, B, T}
         TP = eltype(pos)
         TV = eltype(vel)
         ep = Epoch{scale}(epoch)
@@ -62,15 +58,14 @@ function Base.isapprox(s1::State, s2::State, atol::Real=0,
     isapprox(s1.vel, s2.vel, atol=atol, rtol=rtol)
 end
 
-epoch_type(s::State{_S, _F, _B, T}) where {_S, _F, _B, T} = T
-pos_type(s::State{_S, _F, _B, _T, TP}) where {_S, _F, _B, _T, TP} = TP
-vel_type(s::State{_S, _F, _B, _T, _TP, TV}) where {_S, _F, _B, _T, _TP, TV} = TV
+pos_type(s::State{S, F, B, T, TP}) where {S, F, B, T, TP} = TP
+vel_type(s::State{S, F, B, T, TP, TV}) where {S, F, B, T, TP, TV} = TV
 
 epoch(s::State) = s.epoch
 position(s::State) = s.pos
 velocity(s::State) = s.vel
 state(s::State) = (s.pos, s.vel)
-keplerian(s::State) = keplerian(position(s), velocity(s), grav_param(body(s)))
+keplerian(s::State) = keplerian(position(s), velocity(s), grav_param(centralbody(s)))
 
 struct KeplerianState{Scale, Frame, Body, T} <: AbstractState{Scale, Frame, Body, T}
     epoch::Epoch{Scale, T}
@@ -127,8 +122,8 @@ velocity(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_pa
 state(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))
 keplerian(s::KeplerianState) = (s.a, s.e, s.i, s.Ω, s.ω, s.ν)
 
-KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=frame(s), body=body(s))
-State(s::KeplerianState) = State(epoch(s), state(s)...; frame=frame(s), body=body(s))
+KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=refframe(s), body=centralbody(s))
+State(s::KeplerianState) = State(epoch(s), state(s)...; frame=refframe(s), body=body(s))
 
 # struct ThreeBodyState{
 #         F<:Frame,
