@@ -123,4 +123,3 @@ function KeplerianState(tra::Trajectory, ep::Epoch)
                           frame=refframe(tra),
                           body=centralbody(tra))
 end
-

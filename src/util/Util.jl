@@ -7,6 +7,7 @@ using StaticArrays: SVector
 export
     sec2rad, rad2sec, normalize_angle, angle,
     dms2rad, rad2dms, sec2deg, deg2sec,
+    elevation,
     plane_section, point_on_limb
 
 """
@@ -215,4 +216,3 @@ function point_on_limb(ellipsoid, observer, outside)
 end
 
 end
-
