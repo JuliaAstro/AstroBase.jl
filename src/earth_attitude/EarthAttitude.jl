@@ -70,6 +70,8 @@ export
     celestial_to_terrestrial_b00,
     c2tpe
 
+include("iau_models.jl")
+
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
 const ARCSECONDS_IN_CIRCLE = 1296000.0
