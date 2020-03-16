@@ -1,4 +1,12 @@
-@testset "IERS" begin
+@testset "Earth Attitude" begin
+    @testset "Nutation" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        jd = value.(julian_twopart(TTEpoch(ep)))
+        nut00b_exp = ERFA.nut00b(jd...)
+        nut00b_act = nutation(iau2000b, ep)
+        @test nut00b_act[1] ≈ nut00b_exp[1]
+        @test nut00b_act[2] ≈ nut00b_exp[2]
+    end
     @test obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
     @test mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl80(2.4578265e6, 0.30434616919175345)
     @test earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)

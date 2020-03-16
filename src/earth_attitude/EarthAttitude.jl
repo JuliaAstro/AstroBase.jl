@@ -71,6 +71,7 @@ export
     c2tpe
 
 include("iau_models.jl")
+include("nutation.jl")
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
