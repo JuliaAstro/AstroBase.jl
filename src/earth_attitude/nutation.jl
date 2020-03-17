@@ -18,6 +18,16 @@ Return the nutation components for a given epoch and model.
 - `δψ`: Nutation in longitude (radians)
 - `δϵ`: Nutation in obliquity (radians)
 
+# Example
+
+```jldoctest
+julia> ep = TTEpoch(2020, 1, 1)
+2020-01-01T00:00:00.000 TT
+
+julia> nutation(iau2006, ep)
+(-7.996558232098883e-5, -8.25141288270117e-6)
+```
+
 # References
 
 - [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
