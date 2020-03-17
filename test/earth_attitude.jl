@@ -12,6 +12,11 @@
         nut00b_act = nutation(iau2000b, ep)
         @test nut00b_act[1] ≈ nut00b_exp[1]
         @test nut00b_act[2] ≈ nut00b_exp[2]
+
+        nut06_exp = ERFA.nut06a(jd...)
+        nut06_act = nutation(iau2006, ep)
+        @test nut06_act[1] ≈ nut06_exp[1]
+        @test nut06_act[2] ≈ nut06_exp[2]
     end
     @test obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
     @test mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl80(2.4578265e6, 0.30434616919175345)
@@ -54,12 +59,6 @@
         @test y1 ≈ y2
     end
 
-    let (x1, y1) = nutation_00b(2.4578265e6, 0.30440190993249416)
-        (x2, y2) = ERFA.nut00b(2.4578265e6, 0.30440190993249416)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-    end
-
     @test fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
     @test numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
 
@@ -97,18 +96,6 @@
 
     @test s00(2.4578265e6, 0.30434616919175345, 0, 0) ≈ ERFA.s00(2.4578265e6, 0.30434616919175345, 0, 0)
     @test s06(2.4578265e6, 0.30434616919175345, 0, 0) ≈ ERFA.s06(2.4578265e6, 0.30434616919175345, 0, 0)
-
-    let (x1, y1) = nutation_00a(2.4578265e6, 0.30440190993249416)
-        (x2, y2) = ERFA.nut00a(2.4578265e6, 0.30440190993249416)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-    end
-
-    let (x1, y1) = nutation_a06(2.4578265e6, 0.30434616919175345)
-        (x2, y2) = ERFA.nut06a(2.4578265e6, 0.30434616919175345)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-    end
 
     let t = [0.9999989440476103608 -0.1332881761240011518e-2 -0.5790767434730085097e-3;
             0.1332858254308954453e-2 0.9999991109044505944 -0.4097782710401555759e-4;
