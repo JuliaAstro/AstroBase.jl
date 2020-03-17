@@ -1,4 +1,11 @@
 @testset "Earth Attitude" begin
+    @testset "Obliquity" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        jd = value.(julian_twopart(TTEpoch(ep)))
+
+        @test obliquity(iau1980, ep) ≈ ERFA.obl80(jd...)
+        @test obliquity(iau2006, ep) ≈ ERFA.obl06(jd...)
+    end
     @testset "Nutation" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
         jd = value.(julian_twopart(TTEpoch(ep)))
@@ -23,8 +30,6 @@
         @test nut06_act[1] ≈ nut06_exp[1]
         @test nut06_act[2] ≈ nut06_exp[2]
     end
-    @test obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl06(2.4578265e6, 0.30434616919175345)
-    @test mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345) ≈ ERFA.obl80(2.4578265e6, 0.30434616919175345)
     @test earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
 
     let (w1, x1, y1, z1) = precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)

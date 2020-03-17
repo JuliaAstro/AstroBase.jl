@@ -22,9 +22,7 @@ export
     mean_longitude,
     mean_longitude_ascending_node,
     mean_longitude_minus_lan,
-    mean_obliquity_of_ecliptic,
     numat,
-    obliquity_of_ecliptic_06,
     polar_motion,
     precession_fukushima_williams06,
     precession_rate_part_of_nutation,
@@ -68,6 +66,7 @@ export
     c2tpe
 
 include("iau_models.jl")
+include("obliquity.jl")
 include("nutation.jl")
 
 const J2000 = 2451545.0
@@ -164,42 +163,6 @@ function tio_locator(jd1, jd2)
     sec2rad(-47e-6 * t)
 end
 
-
-"""
-    mean_obliquity_of_ecliptic(jd1, jd2)
-
-Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
-
-# Example
-
-```jldoctest
-julia> mean_obliquity_of_ecliptic(2.4578265e6, 0.30434616919175345)
-0.40905376936136706
-```
-"""
-function mean_obliquity_of_ecliptic(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    sec2rad(@evalpoly t 84381.448 -46.8150 0.00059 0.001813)
-end
-
-"""
-    obliquity_of_ecliptic_06(jd1, jd2)
-
-Returns obliquity of ecliptic (radians) for a given 2 part Julain date (TT).
-
-# Example
-
-```jldoctest
-julia> obliquity_of_ecliptic_06(2.4578265e6, 0.30434616919175345)
-0.409053547482157
-```
-"""
-function obliquity_of_ecliptic_06(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    sec2rad(@evalpoly t 84381.406 -46.836769 -0.0001831 0.00200340 -0.000000576 -0.0000000434)
-end
-
-
 """
     precession_fukushima_williams06(jd1, jd2)
 
@@ -218,7 +181,7 @@ function precession_fukushima_williams06(jd1, jd2)
     sec2rad(@evalpoly t -0.052928 10.556378 0.4932044 -0.00031238 -0.000002788 0.0000000260),
     sec2rad(@evalpoly t 84381.412819 -46.811016 0.0511268 0.00053289 -0.000000440 -0.0000000176),
     sec2rad(@evalpoly t -0.041775 5038.481484 1.5584175 -0.00018522 -0.000026452 -0.0000000148),
-    obliquity_of_ecliptic_06(jd1, jd2)
+    obliquity(iau2006, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
 end
 
 """
@@ -904,7 +867,7 @@ function equation_of_equinoxes_94(jd1, jd2)
       + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
 
     dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    eps0 = mean_obliquity_of_ecliptic(jd1, jd2)
+    eps0 = obliquity(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
 
     dpsi*cos(eps0) + sec2rad((0.00264 * sin(om) + 0.000063 * sin(om + om)))
 end
@@ -926,7 +889,7 @@ julia> nutation_matrix80(2.4578265e6, 0.30434616919175345)
 """
 function nutation_matrix80(jd1, jd2)
     dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    epsa = mean_obliquity_of_ecliptic(jd1, jd2)
+    epsa = obliquity(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
     numat(epsa, dpsi, deps)
 end
 
@@ -950,8 +913,9 @@ julia> pn00(2.4578265e6, 0.30434616919175345, 0.2, 0.2)
 ```
 """
 function precession_nutation00(jd1, jd2, dpsi, deps)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
-    epsa = mean_obliquity_of_ecliptic(jd1, jd2) + depspr
+    epsa = obliquity(iau1980, ep) + depspr
     rb, rp, rbpw = bias_precession_matrix_00(jd1, jd2)
     rnw = numat(epsa, dpsi, deps)
     epsa, rb, rp, rbpw, rnw, rbpw * rnw
@@ -978,7 +942,8 @@ julia> precession_nutation_a00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function precession_nutation_a00(jd1, jd2)
-    dpsi, deps = nutation(iau2000a, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    dpsi, deps = nutation(iau2000a, ep)
     dpsi, deps, precession_nutation00(jd1, jd2, dpsi, deps)
 end
 
@@ -1154,8 +1119,9 @@ julia> precession_nutation_b00(2.4578265e6, 0.30434616919175345)[3][5]
 ```
 """
 function nutation_matrix_day(jd1, jd2)
-    eps = mean_obliquity_of_ecliptic(jd1, jd2)
-    dp, de = nutation(iau2006, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    eps = obliquity(iau1980, ep)
+    dp, de = nutation(iau2006, ep)
 
     numat(eps, dp, de)
 end
@@ -1224,9 +1190,10 @@ julia> equation_of_equinoxes_a00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function equation_of_equinoxes_a00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
-    epsa = mean_obliquity_of_ecliptic(jd1, jd2) + depspr
-    dpsi, deps = nutation(iau2000a, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
+    epsa = obliquity(iau1980, ep) + depspr
+    dpsi, deps = nutation(iau2000a, ep)
     dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
 end
 
@@ -1243,9 +1210,10 @@ julia> equation_of_equinoxes_b00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function equation_of_equinoxes_b00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
     dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
-    epsa = mean_obliquity_of_ecliptic(jd1, jd2) + depspr
-    dpsi, deps = nutation(iau2000b, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
+    epsa = obliquity(iau1980, ep) + depspr
+    dpsi, deps = nutation(iau2000b, ep)
     dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
 end
 
