@@ -30,7 +30,7 @@ Parameters = "^0.12"
 Reexport = "^0.2"
 ReferenceFrameRotations = "^0.5"
 Roots = "^0.8.4"
-SpecialFunctions = "^0.8"
+SpecialFunctions = "^0.8, 0.10"
 StaticArrays = "^0.12"
 julia = "^1"
 
