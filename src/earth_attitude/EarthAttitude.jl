@@ -76,10 +76,8 @@ const ARCSECONDS_IN_CIRCLE = 1296000.0
 const SECONDS_PER_DAY = 24.0 * 60.0 * 60.0
 
 include(joinpath("constants", "mfals.jl"))
-include(joinpath("constants", "nut_const.jl"))
 include(joinpath("constants", "cio_locator.jl"))
 include(joinpath("constants", "EE00.jl"))
-include(joinpath("constants", "NUTATION80.jl"))
 
 """
     celestial_to_intermediate(x, y, s)
