@@ -174,3 +174,15 @@ function nutation(::IAU2000B, ep::Epoch)
    return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end
 
+function nutation(::IAU2006, ep::Epoch)
+   t = ep |> TTEpoch |> j2000 |> centuries |> value
+
+   fj2 = -2.7774e-6 * t
+   δψ, δϵ = nutation(iau2000a, ep)
+
+   δψ += δψ * (0.4697e-6 + fj2)
+   δϵ += δϵ * fj2
+
+   return δψ, δϵ
+end
+
