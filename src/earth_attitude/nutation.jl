@@ -3,6 +3,27 @@ using ..Util: normalize_angle
 
 export nutation
 
+"""
+    nutation(model, ep)
+
+Return the nutation components for a given epoch and model.
+
+# Arguments
+
+- `model`: IAU model, one of: `iau1980`, `iau2000a`, `iau2000b`, `iau2006`
+- `ep`: An epoch
+
+# Output
+
+- `δψ`: Nutation in longitude (radians)
+- `δϵ`: Nutation in obliquity (radians)
+
+# References
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+nutation
+
 struct NutationLuniSolar
     # Coefficients of l,l',F,D,Om
     nl::Int
@@ -49,17 +70,6 @@ include(joinpath("constants", "nutation_1980.jl"))
 include(joinpath("constants", "nutation_2000a.jl"))
 include(joinpath("constants", "nutation_2000b.jl"))
 
-"""
-    nutation(jd1, jd2)
-
-Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
-
-# Example
-
-julia> nutation(2.4578265e6, 0.30434616919175345)
-(-3.7565297299394694e-5, -3.665617105048724e-5
-```
-"""
 function nutation(::IAU1980, ep)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
@@ -93,18 +103,6 @@ function nutation(::IAU1980, ep)
     return δψ, δϵ
 end
 
-"""
-    nutation_00a(jd1, jd2)
-
-Returns luni-solar and planetary nutations for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> nutation_00a(2.4578265e6, 0.30440190993249416)
-(-3.7589903391357206e-5, -3.6659049617818334e-5)
-```
-"""
 function nutation(::IAU2000A, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
@@ -177,18 +175,6 @@ function nutation(::IAU2000A, ep::Epoch)
     return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end
 
-"""
-    nutation_00b(jd1, jd2)
-
-Returns luni-solar and planetary nutation for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-julia> nutation_00b(2.4578265e6, 0.30440190993249416)
-(-3.7589177912131684e-5, -3.6657431214029895e-5)
-```
-"""
 function nutation(::IAU2000B, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
