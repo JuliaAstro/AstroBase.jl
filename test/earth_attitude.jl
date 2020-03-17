@@ -2,6 +2,12 @@
     @testset "Nutation" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
         jd = value.(julian_twopart(TTEpoch(ep)))
+
+        nut00a_exp = ERFA.nut00a(jd...)
+        nut00a_act = nutation(iau2000a, ep)
+        @test nut00a_act[1] ≈ nut00a_exp[1]
+        @test nut00a_act[2] ≈ nut00a_exp[2]
+
         nut00b_exp = ERFA.nut00b(jd...)
         nut00b_act = nutation(iau2000b, ep)
         @test nut00b_act[1] ≈ nut00b_exp[1]
