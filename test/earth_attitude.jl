@@ -3,6 +3,11 @@
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
         jd = value.(julian_twopart(TTEpoch(ep)))
 
+        nut80_exp = ERFA.nut80(jd...)
+        nut80_act = nutation(iau1980, ep)
+        @test nut80_act[1] ≈ nut80_exp[1]
+        @test nut80_act[2] ≈ nut80_exp[2]
+
         nut00a_exp = ERFA.nut00a(jd...)
         nut00a_act = nutation(iau2000a, ep)
         @test nut00a_act[1] ≈ nut00a_exp[1]
@@ -83,12 +88,6 @@
          0.1332858254308954453e-2 0.9999991109044505944 -0.4097782710401555759e-4;
          0.5791308472168153320e-3 0.4020595661593994396e-4 0.9999998314954572365]
         @test equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
-    end
-
-    let (x1, y1) = nutation(2.4578265e6, 0.30434616919175345),
-        (x2, y2) = ERFA.nut80(2.4578265e6, 0.30434616919175345)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
     end
 
     @test equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345) ≈ ERFA.eect00(2.4578265e6, 0.30434616919175345)

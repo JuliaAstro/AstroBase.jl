@@ -24,7 +24,6 @@ export
     mean_longitude_minus_lan,
     mean_obliquity_of_ecliptic,
     numat,
-    nutation,
     obliquity_of_ecliptic_06,
     polar_motion,
     precession_fukushima_williams06,
@@ -699,61 +698,6 @@ function equation_of_origins(rnpb, s)
 end
 
 """
-    nutation(jd1, jd2)
-
-Returns nutation in longitude(radians) and obliquity(radians) for a given 2 part Julian date (TT format).
-
-# Example
-
-julia> nutation(2.4578265e6, 0.30434616919175345)
-(-3.7565297299394694e-5, -3.665617105048724e-5
-```
-"""
-function nutation(jd1, jd2)
-
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-
-    mean_longitude_moon_minus_mean_longitude_moon_perigee = rem2pi(
-        sec2rad(@evalpoly t 485866.733 715922.633 31.310 0.064 )
-      + mod(1325.0 * t, 1.0) * 2pi, RoundNearest)
-
-    mean_longitude_sun_minus_mean_longitude_sun_perigee = rem2pi(
-        sec2rad(@evalpoly t 1287099.804 1292581.224 -0.577 - 0.012)
-      + mod(99.0 * t, 1.0) * 2pi, RoundNearest)
-
-    mean_longitude_moon_minus_mean_longitude_moon_node = rem2pi(
-        sec2rad(@evalpoly t 335778.877 295263.137 -13.257 0.011)
-      + mod(1342.0 * t, 1.0) * 2pi, RoundNearest)
-
-    mean_elongation_moon_from_sun = rem2pi(
-        sec2rad(@evalpoly t 1072261.307 1105601.328 -6.891 0.019)
-      + mod(1236.0 * t, 1.0) * 2pi, RoundNearest)
-
-    mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date = rem2pi(
-        sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
-      + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
-
-    dp = 0.0
-    de = 0.0
-
-    for i in reverse(eachindex(multiples_of_coefficients))
-        arg = (multiples_of_coefficients[i][1]  * mean_longitude_moon_minus_mean_longitude_moon_perigee
-        + multiples_of_coefficients[i][2] * mean_longitude_sun_minus_mean_longitude_sun_perigee
-        + multiples_of_coefficients[i][3]  * mean_longitude_moon_minus_mean_longitude_moon_node
-        + multiples_of_coefficients[i][4]  * mean_elongation_moon_from_sun
-        + multiples_of_coefficients[i][5] * mean_ascending_node_lunar_orbit_ecliptic_measured_mean_equinox_date)
-
-        s = multiples_of_arguments[i][1] + multiples_of_arguments[i][2] * t
-        c = multiples_of_arguments[i][3] + multiples_of_arguments[i][4] * t
-        sinarg, cosarg = sincos(arg)
-        dp += s * sinarg
-        de += c * cosarg
-    end
-
-    sec2rad(1e-4dp), sec2rad(1e-4de)
-end
-
-"""
     equation_of_equinoxes_complementary_terms(jd1, jd2)
 
 Returns complementary terms for a given 2 part Julian date (TT).
@@ -961,7 +905,7 @@ function equation_of_equinoxes_94(jd1, jd2)
     om = rem2pi(sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
       + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
 
-    dpsi, deps = nutation(jd1, jd2)
+    dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
     eps0 = mean_obliquity_of_ecliptic(jd1, jd2)
 
     dpsi*cos(eps0) + sec2rad((0.00264 * sin(om) + 0.000063 * sin(om + om)))
@@ -983,7 +927,7 @@ julia> nutation_matrix80(2.4578265e6, 0.30434616919175345)
  ```
 """
 function nutation_matrix80(jd1, jd2)
-    dpsi, deps = nutation(jd1, jd2)
+    dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
     epsa = mean_obliquity_of_ecliptic(jd1, jd2)
     numat(epsa, dpsi, deps)
 end
