@@ -35,7 +35,7 @@ import SPICE
         act = spherical_to_cartesian(3.0123, -0.999)
         exp = (-0.5366267667260523906, 0.0697711109765145365, -0.8409302618566214041)
         @testset for i in eachindex(exp, act)
-            @test isapprox(exp[i], act[i], rtol=0, atol=1e-12)
+            @test exp[i] ≈ act[i] atol=1e-12
         end
 
     end
