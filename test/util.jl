@@ -31,4 +31,12 @@ import SPICE
     @testset "plane_section" begin
         xy = plane_section([1.0, 2.0, 3.0], zeros(3), [0.0, 0.0, 1.0])
     end
+    @testset "spherical_to_cartesian" begin
+        act = spherical_to_cartesian(3.0123, -0.999)
+        exp = (-0.5366267667260523906, 0.0697711109765145365, -0.8409302618566214041)
+        @testset for i in eachindex(exp, act)
+            @test isapprox(exp[i], act[i], rtol=0, atol=1e-12)
+        end
+
+    end
 end
