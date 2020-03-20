@@ -230,7 +230,9 @@ Convert spherical coordinates to Cartesian.
 - `y`: magnitude of projection on y axis
 - `z`: magnitude of projection on z axis
 
-Derived, with permission, from the SOFA library.  See notes at end of file.
+### References ###
+
+- [ERFA](https://github.com/liberfa/erfa/blob/master/src/s2c.c)
 """
 function spherical_to_cartesian(theta, phi)
    cp = cos(phi);
@@ -304,4 +306,3 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 end
-
