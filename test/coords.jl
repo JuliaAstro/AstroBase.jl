@@ -78,43 +78,43 @@ k0_exp = KeplerianState(s0_exp)
                 frame=iau_mars, scale=TDB, body=mars) ≈ mars_rot
         end
     end
-    @testset "Time Series" begin
-        t = 1seconds:4seconds
-        u = collect(1.0:4.0)
-        ep = UTCEpoch(2000, 1, 1)
-        ts = TimeSeries(ep, t, u)
-        @test collect(ts) == [1.0, 2.0, 3.0, 4.0]
-        @test ts[1] == 1.0
-        @test ts(1.5seconds) ≈ 1.5
-        @test ts(ep + 1.5seconds) ≈ 1.5
-    end
-    @testset "Trajectories" begin
-        @testset "Transpose - Array of Arrays" begin
-            a = [[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]]
-            b = [[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]
-            @test AstroBase.Coords.transpose_aoa(a) == b
-        end
-        @testset "Propagation" begin
-            prob = ODEProblem(rhs, rv, (0.0, value(t1)), p=grav_param(earth))
-            sol = solve(prob, Vern9())
-            tra = Trajectory(ep, sol.t * seconds, sol.u)
-            rv0 = tra(0.0seconds)
-            ele0 = keplerian(tra, 0.0seconds)
-            s0 = State(tra, 0.0seconds)
-            k0 = KeplerianState(tra, 0.0seconds)
-            @test rv0 ≈ rv
-            @test collect(ele0) ≈ collect(ele)
-            @test s0_exp ≈ s0
-            @test k0_exp ≈ k0
-            rv1 = tra(t1)
-            ele1 = keplerian(tra, t1)
-            s1 = State(tra, t1)
-            k1 = KeplerianState(tra, t1)
-            @test rv1 ≈ rv atol=0.1
-            @test collect(ele1) ≈ collect(ele) atol=0.1
-            @test s0_exp ≈ s1 atol=0.1
-            @test k0_exp ≈ k1 atol=0.1
-        end
-    end
+    # @testset "Time Series" begin
+    #     t = 1seconds:4seconds
+    #     u = collect(1.0:4.0)
+    #     ep = UTCEpoch(2000, 1, 1)
+    #     ts = TimeSeries(ep, t, u)
+    #     @test collect(ts) == [1.0, 2.0, 3.0, 4.0]
+    #     @test ts[1] == 1.0
+    #     @test ts(1.5seconds) ≈ 1.5
+    #     @test ts(ep + 1.5seconds) ≈ 1.5
+    # end
+    # @testset "Trajectories" begin
+    #     @testset "Transpose - Array of Arrays" begin
+    #         a = [[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]]
+    #         b = [[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]
+    #         @test AstroBase.Coords.transpose_aoa(a) == b
+    #     end
+    #     @testset "Propagation" begin
+    #         prob = ODEProblem(rhs, rv, (0.0, value(t1)), p=grav_param(earth))
+    #         sol = solve(prob, Vern9())
+    #         tra = Trajectory(ep, sol.t * seconds, sol.u)
+    #         rv0 = tra(0.0seconds)
+    #         ele0 = keplerian(tra, 0.0seconds)
+    #         s0 = State(tra, 0.0seconds)
+    #         k0 = KeplerianState(tra, 0.0seconds)
+    #         @test rv0 ≈ rv
+    #         @test collect(ele0) ≈ collect(ele)
+    #         @test s0_exp ≈ s0
+    #         @test k0_exp ≈ k0
+    #         rv1 = tra(t1)
+    #         ele1 = keplerian(tra, t1)
+    #         s1 = State(tra, t1)
+    #         k1 = KeplerianState(tra, t1)
+    #         @test rv1 ≈ rv atol=0.1
+    #         @test collect(ele1) ≈ collect(ele) atol=0.1
+    #         @test s0_exp ≈ s1 atol=0.1
+    #         @test k0_exp ≈ k1 atol=0.1
+    #     end
+    # end
 end
 

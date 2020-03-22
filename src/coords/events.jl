@@ -10,9 +10,9 @@ abstract type Detector end
 abstract type DiscreteDetector <: Detector end
 abstract type IntervalDetector <: Detector end
 
-struct Event{Scale, TType, T<:Detector}
+struct Event{S,TT,T<:Detector}
     type::Symbol
-    epoch::Epoch{Scale, TType}
+    epoch::Epoch{S,TT}
     detector::T
 end
 

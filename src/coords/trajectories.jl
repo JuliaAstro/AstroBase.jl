@@ -18,17 +18,19 @@ function transpose_aoa(input::Vector{Vector{T}}) where T
     return output
 end
 
-struct Trajectory{S, F, B, T, TType, Unit, PType, NT} <: AbstractTrajectory{S, F, B, T}
+struct Trajectory{S,F,B,T,TT,U,PT,NT} <: AbstractTrajectory{S,F,B,T,TT}
+    frame::F
+    body::B
     series::NT
-    events::Vector{Event{S, TType}}
+    events::Vector{Event{S,TT}}
     data::Vector{Vector{T}}
-    time::Vector{Period{Unit, PType}}
-    function Trajectory(epoch::Epoch{S, TType},
-                        time::Vector{Period{Unit, PType}},
+    time::Vector{Period{U,PT}}
+    function Trajectory(epoch::Epoch{S,TT},
+                        time::Vector{Period{U,PT}},
                         data::Vector{Vector{T}};
                         frame::F=icrf,
                         body::B=earth,
-                        names::Vector{Symbol}=Symbol[]) where {S, F, B, TType, Unit, PType, T}
+                        names::Vector{Symbol}=Symbol[]) where {S,F,B,T,TT,U,PT}
         columns = transpose_aoa(data)
         if isempty(names)
             n = length(columns)
@@ -41,9 +43,9 @@ struct Trajectory{S, F, B, T, TType, Unit, PType, NT} <: AbstractTrajectory{S, F
             end
         end
         series = (; zip(names, [TimeSeries(epoch, time, c) for c in columns])...)
+        NT = typeof(series)
         events = Vector{Event{S, TType}}[]
-        new{S::TimeScale, frame::AbstractFrame, body::CelestialBody,
-            T, TType, Unit, PType, typeof(series)}(series, events, data, time)
+        new{S,F,B,T,TT,U,PT,NT}(frame, body, series, events, data, time)
     end
 end
 
