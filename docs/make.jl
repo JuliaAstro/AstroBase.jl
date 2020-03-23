@@ -14,6 +14,17 @@ makedocs(
     authors = "Helge Eichhorn and the AstroBase.jl contributors",
     pages = [
 	"Home" => "index.md",
+	"Modules" => [
+	    "Celestial Bodies" => joinpath("modules", "bodies.md"),
+	    "Constants" => joinpath("modules", "constants.md"),
+	    "Coordinates" => joinpath("modules", "coords.md"),
+	    "Earth Attitude" => joinpath("modules", "earth_attitude.md"),
+	    "Ephemerides" => joinpath("modules", "ephemerides.md"),
+	    "Interfaces" => joinpath("modules", "interfaces.md"),
+	    "Reference Frames" => joinpath("modules", "frames.md"),
+	    "Two-Body Problem" => joinpath("modules", "two_body.md"),
+	    "Utilities" => joinpath("modules", "util.md"),
+	],
     ],
     # strict = true,
     doctest = false,
