@@ -1,7 +1,9 @@
 # AstroBase
 
-[![Build Status](https://travis-ci.org/JuliaAstro/AstroBase.jl.svg?branch=master)](https://travis-ci.org/JuliaAstro/AstroBase.jl)
+*Interfaces, types, and functions for space science packages*
 
-[![Build status](https://ci.appveyor.com/api/projects/status/79f9pgfjo22iwc5e?svg=true)](https://ci.appveyor.com/project/helgee/astrobase-jl)
+[![Build Status](https://github.com/JuliaAstro/AstroBase.jl/workflows/CI/badge.svg?branch=master)](https://github.com/JuliaAstro/AstroBase.jl/actions)
+[![Coverage](https://codecov.io/gh/JuliaAstro/AstroBase.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaAstro/AstroBase.jl)
+[![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaAstro.github.io/AstroBase.jl/stable)
+[![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaAstro.github.io/AstroBase.jl/dev)
 
-[![codecov.io](http://codecov.io/github/JuliaAstro/AstroBase.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaAstro/AstroBase.jl?branch=master)
