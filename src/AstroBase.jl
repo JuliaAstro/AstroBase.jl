@@ -17,20 +17,22 @@ include(joinpath("bodies", "Bodies.jl"))
 include(joinpath("earth_attitude", "EarthAttitude.jl"))
 include(joinpath("two_body", "TwoBody.jl"))
 include(joinpath("ephemerides", "Ephemerides.jl"))
-include(joinpath("n_body", "NBody.jl"))
 include(joinpath("frames", "Frames.jl"))
 include(joinpath("coords", "Coords.jl"))
-include(joinpath("astrometry", "Astrometry.jl"))
 
-@reexport using .Interfaces
+# include(joinpath("n_body", "NBody.jl"))
+# include(joinpath("astrometry", "Astrometry.jl"))
+
 @reexport using .Constants
+@reexport using .Interfaces
 @reexport using .Util
 @reexport using .Bodies
-@reexport using .Ephemerides
 @reexport using .EarthAttitude
 @reexport using .TwoBody
+@reexport using .Ephemerides
 @reexport using .Frames
 @reexport using .Coords
-@reexport using .Astrometry
+
+# @reexport using .Astrometry
 
 end # module

@@ -24,42 +24,49 @@ function period(s::AbstractState)
     return period(a, μ)
 end
 
-struct State{S, F, B, T, TP, TV} <: AbstractState{S, F, B, T}
-    epoch::Epoch{S, T}
-    pos::SVector{3, TP}
-    vel::SVector{3, TV}
-    function State(epoch::Epoch{S, T}, pos, vel;
-                   scale::TimeScale=timescale(epoch),
-                   frame::F=icrf,
-                   body::B=earth) where {S, F, B, T}
+struct State{S,F,B,T,ET} <: AbstractState{S,F,B,T,ET}
+    epoch::Epoch{S,ET}
+    frame::F
+    body::B
+    pos::SVector{3,T}
+    vel::SVector{3,T}
+
+    function State(
+        epoch::Epoch{S1,ET}, pos, vel;
+        scale::S2=timescale(epoch),
+        frame::F=icrf,
+        body::B=earth
+    ) where {S1,S2,F,B,ET}
         TP = eltype(pos)
         TV = eltype(vel)
-        ep = Epoch{scale}(epoch)
-        new{scale::TimeScale, frame::AbstractFrame, body::CelestialBody, T, TP, TV}(ep, pos, vel)
+        T = Union{TP,TV}
+        ep = Epoch{S2}(epoch)
+        new{S2,F,B,T,ET}(ep, frame, body, pos, vel)
     end
 end
 
-Base.getindex(s::State, i::Int) = getindex(s, Val(i))
-Base.getindex(s::State, ::Val{1}) = s.pos[1]
-Base.getindex(s::State, ::Val{2}) = s.pos[2]
-Base.getindex(s::State, ::Val{3}) = s.pos[3]
-Base.getindex(s::State, ::Val{4}) = s.vel[1]
-Base.getindex(s::State, ::Val{5}) = s.vel[2]
-Base.getindex(s::State, ::Val{6}) = s.vel[3]
+function Base.getindex(s::State, i::Int)
+    return ifelse(i <= 3, s.pos[i], s.vel[i])
+end
 
 function (==)(s1::State, s2::State)
     s1.epoch == s2.epoch && s1.pos == s2.pos && s1.vel == s2.vel
 end
 
-function Base.isapprox(s1::State, s2::State, atol::Real=0,
-                       rtol::Real=Base.rtoldefault(promote_leaf_eltypes(s1), promote_leaf_eltypes(s2), atol))
+function Base.isapprox(
+    s1::State,
+    s2::State,
+    atol::Real=0,
+    rtol::Real=Base.rtoldefault(
+        promote_leaf_eltypes(s1),
+        promote_leaf_eltypes(s2),
+        atol,
+    ),
+)
     isapprox(s1.epoch, s2.epoch, atol=atol, rtol=rtol) &&
     isapprox(s1.pos, s2.pos, atol=atol, rtol=rtol) &&
     isapprox(s1.vel, s2.vel, atol=atol, rtol=rtol)
 end
-
-pos_type(s::State{S, F, B, T, TP}) where {S, F, B, T, TP} = TP
-vel_type(s::State{S, F, B, T, TP, TV}) where {S, F, B, T, TP, TV} = TV
 
 epoch(s::State) = s.epoch
 position(s::State) = s.pos
@@ -67,19 +74,32 @@ velocity(s::State) = s.vel
 state(s::State) = (s.pos, s.vel)
 keplerian(s::State) = keplerian(position(s), velocity(s), grav_param(centralbody(s)))
 
-struct KeplerianState{Scale, Frame, Body, T} <: AbstractState{Scale, Frame, Body, T}
-    epoch::Epoch{Scale, T}
+struct KeplerianState{S,F,B,T,ET} <: AbstractState{S,F,B,T,ET}
+    epoch::Epoch{S,ET}
+    frame::F
+    body::B
     a::T
     e::T
     i::T
     Ω::T
     ω::T
     ν::T
-    function KeplerianState(epoch::Epoch{Scale, T}, a, e, i, Ω, ω, ν;
-                            scale::TimeScale=timescale(epoch),
-                            frame::Frame=icrf, body::Body=earth) where {Scale, Frame, Body, T}
-        ep = Epoch{scale}(epoch)
-        new{scale::TimeScale, frame::AbstractFrame, body::CelestialBody, T}(ep, a, e, i, Ω, ω, ν)
+
+    function KeplerianState(
+        epoch::Epoch{S1,ET},
+        a::A,
+        e::E,
+        i::AT,
+        Ω::AT,
+        ω::AT,
+        ν::AT;
+        scale::S2=timescale(epoch),
+        frame::F=icrf,
+        body::B=earth
+    ) where {S1,S2,F,B,A,E,AT,ET}
+        ep = Epoch{S2}(epoch)
+        T = Union{A,E,AT}
+        new{S2,F,B,T,ET}(ep, frame, body, a, e, i, Ω, ω, ν)
     end
 end
 
@@ -102,27 +122,34 @@ function (==)(s1::KeplerianState, s2::KeplerianState)
         s1.ν == s2.ν
 end
 
-function Base.isapprox(s1::KeplerianState, s2::KeplerianState,
-                       atol::Real=0,
-                       rtol::Real=Base.rtoldefault(promote_leaf_eltypes(s1), promote_leaf_eltypes(s2), atol))
-    isapprox(s1.epoch, s2.epoch, atol=atol, rtol=rtol) &&
-    isapprox(s1.a, s2.a, atol=atol, rtol=rtol) &&
-    isapprox(s1.e, s2.e, atol=atol, rtol=rtol) &&
-    isapprox(s1.i, s2.i, atol=atol, rtol=rtol) &&
-    isapprox(s1.Ω, s2.Ω, atol=atol, rtol=rtol) &&
-    isapprox(s1.ω, s2.ω, atol=atol, rtol=rtol) &&
-    isapprox(s1.ν, s2.ν, atol=atol, rtol=rtol)
+function Base.isapprox(
+    s1::KeplerianState,
+    s2::KeplerianState,
+    atol::Real=0,
+    rtol::Real=Base.rtoldefault(
+        promote_leaf_eltypes(s1),
+        promote_leaf_eltypes(s2),
+        atol,
+    ),
+)
+    return isapprox(s1.epoch, s2.epoch, atol=atol, rtol=rtol) &&
+        isapprox(s1.a, s2.a, atol=atol, rtol=rtol) &&
+        isapprox(s1.e, s2.e, atol=atol, rtol=rtol) &&
+        isapprox(s1.i, s2.i, atol=atol, rtol=rtol) &&
+        isapprox(s1.Ω, s2.Ω, atol=atol, rtol=rtol) &&
+        isapprox(s1.ω, s2.ω, atol=atol, rtol=rtol) &&
+        isapprox(s1.ν, s2.ν, atol=atol, rtol=rtol)
 end
 
-Base.eltype(::KeplerianState{_S, _F, _B, T}) where {_S, _F, _B, T} = T
-
 epoch(s::KeplerianState) = s.epoch
-position(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))[1]
-velocity(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))[2]
-state(s::KeplerianState) = cartesian(s.a, s.e, s.i, s.Ω, s.ω, s.ν, grav_param(body(s)))
+position(s::KeplerianState) = cartesian(s..., grav_param(body(s)))[1]
+velocity(s::KeplerianState) = cartesian(s..., grav_param(body(s)))[2]
+state(s::KeplerianState) = cartesian(s..., grav_param(body(s)))
 keplerian(s::KeplerianState) = (s.a, s.e, s.i, s.Ω, s.ω, s.ν)
 
-KeplerianState(s::AbstractState) = KeplerianState(epoch(s), keplerian(s)...; frame=refframe(s), body=centralbody(s))
+function KeplerianState(s::AbstractState)
+    return KeplerianState(epoch(s), keplerian(s)...; frame=refframe(s), body=centralbody(s))
+end
 State(s::KeplerianState) = State(epoch(s), state(s)...; frame=refframe(s), body=body(s))
 
 # struct ThreeBodyState{

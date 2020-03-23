@@ -4,17 +4,23 @@ using DataInterpolations
 
 export TimeSeries
 
-struct TimeSeries{Scale, TType, Unit, PType, DType} <: AbstractArray{DType, 1}
-    epoch::Epoch{Scale, TType}
-    time::Vector{Period{Unit, PType}}
-    data::Vector{DType}
+struct TimeSeries{S,TT,U,PT,T} <: AbstractArray{T,1}
+    epoch::Epoch{S,TT}
+    time::Vector{Period{U,PT}}
+    data::Vector{T}
     # interp::BSplineInterpolation{Array{DType,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},true,DType}
     interp
-    function TimeSeries(epoch::Epoch{Scale, TType}, time, data) where {Scale, TType}
-        time_array = collect(time)
+    function TimeSeries(epoch::Epoch{S,TT}, time, data) where {S,TT}
+        @show time_array = collect(time)
+        @show U = unit(time_array[1])
+        @show PT = eltype(time_array[1])
+        @show T = eltype(data)
         # interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
         interp = CubicSpline(data, float(value.(time)))
-        new{Scale, TType, unit(time[1]), eltype(time[1]), eltype(data)}(epoch, time_array, data, interp)
+        @show typeof(epoch)
+        @show typeof(time_array)
+        @show typeof(data)
+        new{S,TT,U,PT,T}(epoch, time_array, data, interp)
     end
 end
 
