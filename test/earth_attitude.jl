@@ -93,7 +93,8 @@ import ERFA
             pr00_act = precession(iau2000, ep)
             @test pr00_act[1] ≈ pr00_exp[1]
             @test pr00_act[2] ≈ pr00_exp[2]
-
+        end
+        @testset "bp00" begin
             bp00_exp = ERFA.bp00(jd...)
             bp00_act = bias_precession_matrix(iau2000, ep)
             @testset for i in eachindex(bp00_act)
@@ -102,6 +103,21 @@ import ERFA
                 @testset for j in eachindex(act, exp)
                     @test act[j] ≈ exp[j]
                 end
+            end
+        end
+        @testset "pfw06" begin
+            pfw06_exp = ERFA.pfw06(jd...)
+            pfw06_act = fukushima_williams(iau2006, ep)
+            @testset for i in eachindex(pfw06_act)
+                @test pfw06_act[i] ≈ pfw06_exp[i]
+            end
+        end
+        @testset "fw2m" begin
+            pfw = fukushima_williams(iau2006, ep)
+            fw2m_exp = ERFA.fw2m(pfw...)
+            fw2m_act = fukushima_williams_matrix(pfw...)
+            @testset for i in eachindex(fw2m_act)
+                @test fw2m_act[i] ≈ fw2m_exp[i]
             end
         end
     end
@@ -169,16 +185,15 @@ import ERFA
                 @test pnm00b_act[i] ≈ pnm00b_exp[i]
             end
         end
+        @testset "pnm06a" begin
+            pnm06a_exp = ERFA.pnm06a(jd...)
+            pnm06a_act = precession_nutation_matrix(iau2006a, ep)
+            @testset for i in eachindex(pnm06a_act, pnm06a_exp)
+                @test pnm06a_act[i] ≈ pnm06a_exp[i]
+            end
+        end
     end
     @test earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
-
-    let (w1, x1, y1, z1) = precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
-        (w2, x2, y2, z2) = ERFA.pfw06(2.4578265e6, 0.30434616919175345)
-        @test w1 ≈ w2
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-        @test z1 ≈ z2
-    end
 
     # Celestial to intermediate frame of date
     @test celestial_to_intermediate(0.2, 0.2, 0.2) ≈ ERFA.c2ixys(0.2, 0.2, 0.2)
@@ -208,8 +223,6 @@ import ERFA
         @test x1 ≈ x2
         @test y1 ≈ y2
     end
-
-    @test fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
 
     @test greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
     @test greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)

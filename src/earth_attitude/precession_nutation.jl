@@ -28,3 +28,9 @@ function nutation_matrix(iau::IAU2000Model, ep::Epoch)
     return pn[end-1]
 end
 
+function precession_nutation_matrix(::IAU2006A, ep::Epoch)
+    γ, ϕ, ψ, ϵ = fukushima_williams(iau2006, ep)
+    δψ, δϵ = nutation(iau2006a, ep)
+    return fukushima_williams_matrix(γ, ϕ, ψ + δψ, ϵ + δϵ)
+end
+

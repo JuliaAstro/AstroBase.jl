@@ -1,6 +1,11 @@
 using AstroTime: Epoch, TTEpoch, centuries, j2000, value
 
-export bias, precession, bias_precession_matrix
+export
+    bias,
+    bias_precession_matrix,
+    fukushima_williams,
+    fukushima_williams_matrix,
+    precession
 
 function bias(::IAU2000)
     δψ_b = sec2rad(-0.041775)
@@ -14,6 +19,47 @@ function precession(::IAU2000, ep::Epoch)
     precor = sec2rad(-0.29965)
     oblcor = sec2rad(-0.02524)
     return precor * t, oblcor * t
+end
+
+function fukushima_williams(::IAU2006, ep::Epoch)
+    t = ep |> TTEpoch |> j2000 |> centuries |> value
+
+    γ = @evalpoly(
+        t,
+        -0.052928,
+        10.556378,
+        0.4932044,
+        -0.00031238,
+        -0.000002788,
+        0.0000000260,
+    ) |> sec2rad
+    ϕ = @evalpoly(
+        t,
+        84381.412819,
+        -46.811016,
+        0.0511268,
+        0.00053289,
+        -0.000000440,
+        -0.0000000176,
+    ) |> sec2rad
+    ψ = @evalpoly(
+        t,
+        -0.041775,
+        5038.481484,
+        1.5584175,
+        -0.00018522,
+        -0.000026452,
+        -0.0000000148,
+    ) |> sec2rad
+    ϵ = obliquity(iau2006, ep)
+    return γ, ϕ, ψ, ϵ
+end
+
+function fukushima_williams_matrix(γ, ϕ, ψ, ϵ)
+    return compose_rotation(
+        angleaxis_to_dcm(γ, [0.0, 0.0, 1.0]),
+        angle_to_dcm(ϕ, -ψ, -ϵ, :XZX),
+    )
 end
 
 function bias_precession_matrix(::IAU2000, ep::Epoch)

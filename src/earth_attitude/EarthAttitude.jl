@@ -12,7 +12,6 @@ export
     equation_of_equinoxes_00,
     equation_of_equinoxes_complementary_terms,
     equation_of_origins,
-    fukushima_williams_matrix,
     general_precession_in_longitude,
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
@@ -22,14 +21,12 @@ export
     mean_longitude_ascending_node,
     mean_longitude_minus_lan,
     polar_motion,
-    precession_fukushima_williams06,
     s00,
     s06,
     tio_locator,
     xy06,
     greenwich_apparent_sidereal_time06,
     equation_of_equinoxes_94,
-    precession_nutation_matrix_a06,
     s00a,
     s00b,
     xys00a,
@@ -151,27 +148,6 @@ julia> AstroBase.tio_locator(2.4578265e6, 0.30434616919175345)
 function tio_locator(jd1, jd2)
     t = (jd1 - J2000 + jd2) / DAYS_PER_CENTURY
     sec2rad(-47e-6 * t)
-end
-
-"""
-    precession_fukushima_williams06(jd1, jd2)
-
-Returns fukushima angles(radians) for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-julia> precession_fukushima_williams06(2.4578265e6, 0.30434616919175345)
-(8.616170933989655e-6, 0.4090536093366178, 0.004201176043952816, 0.409053547482157)
-```
-"""
-function precession_fukushima_williams06(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-
-    sec2rad(@evalpoly t -0.052928 10.556378 0.4932044 -0.00031238 -0.000002788 0.0000000260),
-    sec2rad(@evalpoly t 84381.412819 -46.811016 0.0511268 0.00053289 -0.000000440 -0.0000000176),
-    sec2rad(@evalpoly t -0.041775 5038.481484 1.5584175 -0.00018522 -0.000026452 -0.0000000148),
-    obliquity(iau2006, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
 end
 
 """
@@ -463,25 +439,6 @@ function xy06(jd1, jd2)
         ialast = ia - 1
     end
     sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6)), sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
-end
-
-"""
-    fukushima_williams_matrix(gamb, phib, psi, eps)
-
-Returns  obliquity of the ecliptic (radians) for a given Julian 2 part date (TT).
-
-# Example
-
-```jldoctest
-julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
-3×3 RotMatrix{Float64}:
-  0.951082   0.21718   0.219716
- -0.274534   0.920305  0.278692
- -0.14168   -0.325378  0.93491
-```
-"""
-function fukushima_williams_matrix(gamb, phib, psi, eps)
-    compose_rotation(angleaxis_to_dcm(gamb, [0.0, 0.0, 1.0]), angle_to_dcm(phib, -psi, -eps, :XZX))
 end
 
 """
@@ -792,26 +749,6 @@ function equation_of_equinoxes_94(jd1, jd2)
 end
 
 """
-    precession_nutation_matrix_a06(jd1, jd2)
-
-Returns classical NBP matrix for a given 2 part Julian date(TT)
-
-# Example
-
-```jldoctest
-julia> precession_nutation_matrix_a06(2.4578265e6, 0.30434616919175345)
-3×3 Rotations.RotMatrix{3,Float64,9}:
-  0.999991    0.00381151   0.00165589
- -0.00381145  0.999993    -3.98694e-5
- -0.00165602  3.35578e-5   0.999999
-```
-"""
-function precession_nutation_matrix_a06(jd1, jd2)
-    gamb, phib, psib, epsa = precession_fukushima_williams06(jd1, jd2)
-    dp, de = nutation(iau2006a, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    fukushima_williams_matrix(gamb, phib, psib + dp, epsa + de)
-end
-"""
     s00a(jd1, jd2)
 
 Returns the CIO locator (radians) for a given 2 part Julian date (TT).
@@ -900,7 +837,8 @@ julia> s06a(2.4578265e6, 0.30434616919175345)
 ```
 """
 function s06a(jd1, jd2)
-    rbpn = precession_nutation_matrix_a06(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2006a, ep)
     s06(jd1, jd2, cip_coords(rbpn)...)
 end
 
@@ -958,7 +896,8 @@ Returns greenwich apparent sidereal time for given two, 2 part Julian dates (UT1
 ```
 """
 function greenwich_mean_sidereal_time_a06(uta, utb, tta, ttb)
-    rnpb = precession_nutation_matrix_a06(tta, ttb)
+    ep = TTEpoch(tta * days, ttb * days, origin=:julian)
+    rnpb = precession_nutation_matrix(iau2006a, ep)
     greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
 end
 
@@ -1048,7 +987,8 @@ julia> greenwich_apparent_sidereal_time_a06(2.4579405e6, 0.0, 2.4579405e6, -0.00
 ```
 """
 function greenwich_apparent_sidereal_time_a06(uta, utb, tta, ttb)
-    rnpb = precession_nutation_matrix_a06(tta, ttb)
+    ep = TTEpoch(tta * days, ttb * days, origin=:julian)
+    rnpb = precession_nutation_matrix(iau2006a, ep)
     greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
 end
 
