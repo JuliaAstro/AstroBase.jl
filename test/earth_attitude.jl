@@ -1,3 +1,8 @@
+using AstroBase
+using Test
+
+import ERFA
+
 @testset "Earth Attitude" begin
     @testset "Obliquity" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
@@ -10,25 +15,93 @@
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
         jd = value.(julian_twopart(TTEpoch(ep)))
 
-        nut80_exp = ERFA.nut80(jd...)
-        nut80_act = nutation(iau1980, ep)
-        @test nut80_act[1] ≈ nut80_exp[1]
-        @test nut80_act[2] ≈ nut80_exp[2]
+        @testset "nut80" begin
+            nut80_exp = ERFA.nut80(jd...)
+            nut80_act = nutation(iau1980, ep)
+            @test nut80_act[1] ≈ nut80_exp[1]
+            @test nut80_act[2] ≈ nut80_exp[2]
+        end
 
-        nut00a_exp = ERFA.nut00a(jd...)
-        nut00a_act = nutation(iau2000a, ep)
-        @test nut00a_act[1] ≈ nut00a_exp[1]
-        @test nut00a_act[2] ≈ nut00a_exp[2]
+        @testset "nut00a" begin
+            nut00a_exp = ERFA.nut00a(jd...)
+            nut00a_act = nutation(iau2000a, ep)
+            @test nut00a_act[1] ≈ nut00a_exp[1]
+            @test nut00a_act[2] ≈ nut00a_exp[2]
+        end
 
-        nut00b_exp = ERFA.nut00b(jd...)
-        nut00b_act = nutation(iau2000b, ep)
-        @test nut00b_act[1] ≈ nut00b_exp[1]
-        @test nut00b_act[2] ≈ nut00b_exp[2]
+        @testset "nut00b" begin
+            nut00b_exp = ERFA.nut00b(jd...)
+            nut00b_act = nutation(iau2000b, ep)
+            @test nut00b_act[1] ≈ nut00b_exp[1]
+            @test nut00b_act[2] ≈ nut00b_exp[2]
+        end
 
-        nut06_exp = ERFA.nut06a(jd...)
-        nut06_act = nutation(iau2006, ep)
-        @test nut06_act[1] ≈ nut06_exp[1]
-        @test nut06_act[2] ≈ nut06_exp[2]
+        @testset "nut06" begin
+            nut06_exp = ERFA.nut06a(jd...)
+            nut06_act = nutation(iau2006, ep)
+            @test nut06_act[1] ≈ nut06_exp[1]
+            @test nut06_act[2] ≈ nut06_exp[2]
+        end
+
+        @testset "numat" begin
+            ϵ = obliquity(iau2006, ep)
+            δψ, δϵ = nutation(iau2006, ep)
+            numat_exp = ERFA.numat(ϵ, δψ, δϵ)
+            numat_act = nutation_matrix(ϵ, δψ, δϵ)
+            @testset for i in eachindex(numat_act, numat_exp)
+                @test numat_act[i] ≈ numat_exp[i]
+            end
+        end
+    end
+    @testset "Precession" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        jd = value.(julian_twopart(TTEpoch(ep)))
+
+        @testset "bi00" begin
+            bi00_exp = ERFA.bi00()
+            bi00_act = bias(iau2000)
+            @testset for i in eachindex(bi00_act, bi00_exp)
+                @test bi00_act[i] ≈ bi00_exp[i]
+            end
+        end
+
+        @testset "pr00" begin
+            pr00_exp = ERFA.pr00(jd...)
+            pr00_act = precession(iau2000, ep)
+            @test pr00_act[1] ≈ pr00_exp[1]
+            @test pr00_act[2] ≈ pr00_exp[2]
+
+            bp00_exp = ERFA.bp00(jd...)
+            bp00_act = bias_precession_matrix(iau2000, ep)
+            @testset for i in eachindex(bp00_act)
+                act = bp00_act[i]
+                exp = bp00_exp[i]
+                @testset for j in eachindex(act, exp)
+                    @test act[j] ≈ exp[j]
+                end
+            end
+        end
+    end
+    @testset "Precession-Nutation" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        jd = value.(julian_twopart(TTEpoch(ep)))
+
+        @testset "pn00" begin
+            nut = nutation(iau2000a, ep)
+            pn00_exp = ERFA.pn00(jd..., nut...)
+            pn00_act = precession_nutation(iau2000, ep, nut...)
+            @testset for i in eachindex(pn00_act, pn00_exp)
+                if i == 1
+                    @test pn00_act[i] ≈ pn00_exp[i]
+                else
+                    act = pn00_act[i]
+                    exp = pn00_exp[i]
+                    @testset for j in eachindex(act, exp)
+                        @test act[j] ≈ exp[j]
+                    end
+                end
+            end
+        end
     end
     @test earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
 
@@ -70,24 +143,11 @@
     end
 
     @test fukushima_williams_matrix(0.2,0.3,0.5,0.6) ≈ ERFA.fw2m(0.2,0.3,0.5,0.6)
-    @test numat(0.7, 1.4, 1.3) ≈ ERFA.numat(0.7, 1.4, 1.3)
-
-    let (ap, ao) = precession_rate_part_of_nutation(2.4578265e6, 0.30434616919175345)
-        (ep, eo) = ERFA.pr00(2.4578265e6, 0.30434616919175345)
-        @test ap ≈ ep
-        @test ao ≈ eo
-    end
 
     @test greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
     @test greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
     @test greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345) ≈ ERFA.gmst82(2.4578265e6, 0.30434616919175345)
     @test greenwich_mean_sidereal_time82(0.30434616919175345, 2.4578265e6) ≈ ERFA.gmst82(0.30434616919175345, 2.4578265e6)
-    let (b1, p1, bp1) = bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
-        (b2, p2, bp2) = ERFA.bp00(2.4578265e6, 0.30434616919175345)
-        @test b1 ≈ b2
-        @test p1 ≈ p2
-        @test bp1 ≈ bp2
-    end
 
     let a = [0.9999989440476103608 -0.1332881761240011518e-2 -0.5790767434730085097e-3;
          0.1332858254308954453e-2 0.9999991109044505944 -0.4097782710401555759e-4;
@@ -111,16 +171,6 @@ end
 
 @testset "Dependencies" begin
     @test nutation_matrix80(2.4578265e6, 0.30434616919175345) ≈ ERFA.nutm80(2.4578265e6, 0.30434616919175345)
-
-    let (a1, b1, c1, d1, e1, f1) = precession_nutation00(2.4578265e6, 0.30434616919175345, 0.2, 0.2)
-        (a2, b2, c2, d2, e2, f2) = ERFA.pn00(2.4578265e6, 0.30434616919175345, 0.2, 0.2)
-        @test a1 ≈ a2
-        @test b1 ≈ b2
-        @test c1 ≈ c2
-        @test d1 ≈ d2
-        @test e1 ≈ e2
-        @test f1 ≈ f2
-    end
 
     let (a1, b1, c1) = precession_nutation_a00(2.4578265e6, 0.30434616919175345)
         (a2, b2, c2, d2, e2, f2, g2, h2) = ERFA.pn00a(2.4578265e6, 0.30434616919175345)

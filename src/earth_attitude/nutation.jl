@@ -1,7 +1,9 @@
 using AstroTime: Epoch, TTEpoch, centuries, j2000, value
+using ReferenceFrameRotations: angle_to_dcm
+
 using ..Util: normalize_angle
 
-export nutation
+export nutation, nutation_matrix
 
 """
     nutation(model, ep)
@@ -226,5 +228,9 @@ function nutation(::IAU2006, ep::Epoch)
     δϵ += δϵ * fj2
 
     return δψ, δϵ
+end
+
+function nutation_matrix(ϵ, δψ, δϵ)
+    angle_to_dcm(ϵ, -δψ, -(ϵ + δϵ), :XZX)
 end
 

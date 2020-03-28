@@ -1,0 +1,42 @@
+using AstroTime: Epoch, TTEpoch, centuries, j2000, value
+
+export bias, precession, bias_precession_matrix
+
+function bias(::IAU2000)
+    δψ_b = sec2rad(-0.041775)
+    δϵ_b = sec2rad(-0.0068192)
+    δra₀ = sec2rad(-0.0146)
+    return δψ_b, δϵ_b, δra₀
+end
+
+function precession(::IAU2000, ep::Epoch)
+    t = ep |> TTEpoch |> j2000 |> centuries |> value
+    precor = sec2rad(-0.29965)
+    oblcor = sec2rad(-0.02524)
+    return precor * t, oblcor * t
+end
+
+function bias_precession_matrix(::IAU2000, ep::Epoch)
+    t = ep |> TTEpoch |> j2000 |> centuries |> value
+
+    ϵ₀ = sec2rad(84381.448)
+
+    δψ_b, δϵ_b, δra₀ = bias(iau2000)
+
+    ψ_a77 = sec2rad(@evalpoly(t, 0.0, 5038.7784, -1.07259, -0.001147))
+    ω_a77  = ϵ₀ + sec2rad(@evalpoly(t, 0.0, 0.0, 0.05127, -0.007726))
+    χ_a   = sec2rad(@evalpoly(t, 0.0, 10.5526, -2.38064, -0.001125))
+
+    δψ_pr, δϵ_pr = precession(iau2000, ep)
+    ψ_a = ψ_a77 + δψ_pr
+    ω_a  = ω_a77 + δϵ_pr
+
+    rb = angle_to_dcm(δra₀, δψ_b * sin(ϵ₀), -δϵ_b, :ZYX)
+    rp = compose_rotation(
+        angleaxis_to_dcm(ϵ₀, [1.0, 0.0, 0.0]),
+        angle_to_dcm(-ψ_a, -ω_a, χ_a, :ZXZ),
+    )
+
+    return rb, rp, compose_rotation(rb, rp)
+end
+

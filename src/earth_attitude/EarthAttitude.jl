@@ -7,7 +7,6 @@ using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
 export
     J2000,
-    bias_precession_matrix_00,
     celestial_to_intermediate,
     earth_rotation_angle,
     equation_of_equinoxes_00,
@@ -22,7 +21,6 @@ export
     mean_longitude,
     mean_longitude_ascending_node,
     mean_longitude_minus_lan,
-    numat,
     polar_motion,
     precession_fukushima_williams06,
     precession_rate_part_of_nutation,
@@ -33,7 +31,6 @@ export
     greenwich_apparent_sidereal_time06,
     equation_of_equinoxes_94,
     nutation_matrix80,
-    precession_nutation00,
     precession_nutation_a00,
     precession_nutation_b00,
     precession_nutation_matrix_a00,
@@ -68,6 +65,9 @@ export
 include("iau_models.jl")
 include("obliquity.jl")
 include("nutation.jl")
+include("precession.jl")
+include("precession_nutation.jl")
+include("icrs.jl")
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -98,7 +98,7 @@ function celestial_to_intermediate(x, y, s)
     r2 = x^2 + y^2
     e = r2 > 0.0 ? atan(y, x) : 0.0
     d = atan(sqrt(r2 / (1.0 - r2)))
-    angle_to_dcm(e + s, -d, -e, :ZYZ)
+    angle_to_dcm(e, d, -(e+s), :ZYZ)
 end
 
 """
@@ -116,8 +116,8 @@ julia> polar_motion(20, 30, 50)
   0.912945   0.403198   0.0629472
 ```
 """
-function polar_motion(rx, ry, sp)
-    angle_to_dcm(ry, rx, -sp, :XYZ)
+function polar_motion(xp, yp, sp)
+    angle_to_dcm(sp, -xp, -yp, :ZYX)
 end
 
 
@@ -491,26 +491,7 @@ julia> fukushima_williams_matrix(0.2,0.3,0.5,0.6)
 ```
 """
 function fukushima_williams_matrix(gamb, phib, psi, eps)
-    compose_rotation(angleaxis_to_dcm(eps, [1.0, 0.0, 0.0]), angle_to_dcm(psi, -phib, -gamb, :ZXZ))
-end
-
-"""
-    numat(epsa, dpsi, deps)
-
-Returns nutation matrix for a given epsa(mean obliquity), dpsi and deps nutation.
-
-# Example
-
-```jldoctest
-julia> numat(0.7, 1.4, 1.3)
-3×3 RotXZX{Float64}(0.7, -1.4, -2.0):
-  0.169967  -0.410092   0.896067
- -0.753714   0.531687   0.386296
- -0.634844  -0.741035  -0.218722
-```
-"""
-function numat(epsa, dpsi, deps)
-    angle_to_dcm(epsa + deps, dpsi, -epsa, :XZX)
+    compose_rotation(angleaxis_to_dcm(gamb, [0.0, 0.0, 1.0]), angle_to_dcm(phib, -psi, -eps, :XZX))
 end
 
 """
@@ -601,41 +582,6 @@ function precession_rate_part_of_nutation(jd1, jd2)
 end
 
 """
-    bias_precession_matrix_00(jd1, jd2)
-
-Returns a tuple of array, rb (frame bias), rp (precession matrix), rbp (bias precession matrix)
-given 2 part Julian date (TT).
-
-# Example
-
-julia> bias_precession_matrix_00(2.4578265e6, 0.30434616919175345)
-(RotZYX(-7.07828e-8, -8.05622e-8, 3.30604e-8), [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.2343e-6; -0.00167106 -3.1924e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.26705e-6; -0.00167098 -3.15946e-6 0.999999])
-```
-"""
-function bias_precession_matrix_00(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-
-    dpbias = sec2rad(-0.041775)
-    debias = sec2rad(-0.0068192)
-    dra0 = sec2rad(-0.0146)
-    eps0 = sec2rad(84381.448)
-
-    psia77 = sec2rad((@evalpoly t 0 5038.7784 -1.07259 -0.001147))
-    oma77  = eps0 + sec2rad(@evalpoly t 0 0 0.05127 -0.007726)
-    chia   = sec2rad((@evalpoly t 0 10.5526 -2.38064 -0.001125))
-
-    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
-    psia = psia77 + dpsipr
-    oma  = oma77 + depspr
-
-    rbw = angle_to_dcm(debias, -(dpbias * sin(eps0)), -dra0, :XYZ)
-    rp = compose_rotation(angleaxis_to_dcm(-chia, [0.0, 0.0, 1.0]),
-                          angle_to_dcm(oma, psia, -eps0, :XZX))
-
-    rbw, rp, compose_rotation(rp, rbw)
-end
-
-"""
     equation_of_origins(rnpb, s)
 
 Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
@@ -648,13 +594,13 @@ equation_of_origins(rand(3,3), 0.2)
  ```
 """
 function equation_of_origins(rnpb, s)
-    x = rnpb[1, 3]
-    ax = x / (1.0 + rnpb[3, 3])
+    x = rnpb[3,1]
+    ax = x / (1.0 + rnpb[3,3])
     xs = 1.0 - ax * x
-    ys = -ax * rnpb[2, 3]
+    ys = -ax * rnpb[3,2]
     zs = -x
-    p = rnpb[1, 1] * xs + rnpb[2, 1] * ys + rnpb[3, 1] * zs
-    q = rnpb[1, 2] * xs + rnpb[2, 2] * ys + rnpb[3, 2] * zs
+    p = rnpb[1,1] * xs + rnpb[1,2] * ys + rnpb[1,3] * zs
+    q = rnpb[2,1] * xs + rnpb[2,2] * ys + rnpb[2,3] * zs
     p != 0 || q != 0 ? s - atan(q, p) : s
 end
 
@@ -841,7 +787,7 @@ julia> gst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, rand(3,3))
 ```
 """
 function greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
-    x, y = rnpb[1, 3], rnpb[2, 3]
+    x, y = cip_coords(rnpb)
     s = s06(tta, ttb, x, y)
     era = earth_rotation_angle(uta, utb)
     eors = equation_of_origins(rnpb,s)
@@ -890,35 +836,7 @@ julia> nutation_matrix80(2.4578265e6, 0.30434616919175345)
 function nutation_matrix80(jd1, jd2)
     dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
     epsa = obliquity(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    numat(epsa, dpsi, deps)
-end
-
-"""
-    precession_nutation00(jd1, jd2, dpsi, deps)
-
-Returns
-    epsa
-    rb
-    rp
-    rbp
-    rn
-    rbpn
- for a given 2 part Julian date (TT) and nutations.
-
-# Example
-
-```jldoctest
-julia> pn00(2.4578265e6, 0.30434616919175345, 0.2, 0.2)
-(0.40905374831590824, [1.0 7.07828e-8 -8.05622e-8; -7.07828e-8 1.0 -3.30604e-8; 8.05622e-8 3.30604e-8 1.0], [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.24146e-6; -0.00167106 -3.18524e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.27421e-6; -0.00167098 -3.1523e-6 0.999999], [0.980067 0.162947 0.113657; -0.182279 0.965066 0.188206; -0.079019 -0.205172 0.975531], [0.979225 0.166314 0.11601; -0.186046 0.964433 0.187765; -0.080656 -0.205447 0.975339])
-```
-"""
-function precession_nutation00(jd1, jd2, dpsi, deps)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
-    epsa = obliquity(iau1980, ep) + depspr
-    rb, rp, rbpw = bias_precession_matrix_00(jd1, jd2)
-    rnw = numat(epsa, dpsi, deps)
-    epsa, rb, rp, rbpw, rnw, rbpw * rnw
+    nutation_matrix(epsa, dpsi, deps)
 end
 
 """
@@ -944,7 +862,7 @@ julia> precession_nutation_a00(2.4578265e6, 0.30434616919175345)
 function precession_nutation_a00(jd1, jd2)
     ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
     dpsi, deps = nutation(iau2000a, ep)
-    dpsi, deps, precession_nutation00(jd1, jd2, dpsi, deps)
+    dpsi, deps, precession_nutation(iau2000, ep, dpsi, deps)
 end
 
 """
@@ -968,8 +886,9 @@ julia> precession_nutation_b00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function precession_nutation_b00(jd1, jd2)
-    dpsi, deps = nutation(iau2000b, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    dpsi, deps, precession_nutation00(jd1, jd2, dpsi, deps)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    dpsi, deps = nutation(iau2000b, ep)
+    dpsi, deps, precession_nutation(iau2000, ep, dpsi, deps)
 end
 
 
@@ -1045,7 +964,8 @@ julia> s00a(2.4578265e6, 0.30434616919175345)
 """
 function s00a(jd1, jd2)
     rbpn = precession_nutation_matrix_a00(jd1, jd2)
-    s00(jd1, jd2, rbpn[1, 3], rbpn[2, 3])
+    x, y = cip_coords(rbpn)
+    s00(jd1, jd2, x, y)
 end
 
 """
@@ -1062,7 +982,8 @@ julia> s00b(2.4578265e6, 0.30434616919175345)
 """
 function s00b(jd1, jd2)
     rbpn = precession_nutation_matrix_b00(jd1, jd2)
-    s00(jd1, jd2, rbpn[1,3], rbpn[2,3])
+    x, y = cip_coords(rbpn)
+    s00(jd1, jd2, x, y)
 end
 
 """
@@ -1123,7 +1044,7 @@ function nutation_matrix_day(jd1, jd2)
     eps = obliquity(iau1980, ep)
     dp, de = nutation(iau2006, ep)
 
-    numat(eps, dp, de)
+    nutation_matrix(eps, dp, de)
 end
 
 """
@@ -1140,7 +1061,8 @@ julia> xys00a(2.4578265e6, 0.30434616919175345)
 """
 function xys00a(jd1, jd2)
     rbpn = precession_nutation_matrix_a00(jd1, jd2)
-    rbpn[1,3], rbpn[2,3], s00(jd1, jd2, rbpn[1,3], rbpn[2,3])
+    x, y = cip_coords(rbpn)
+    return x, y, s00(jd1, jd2, x, y)
 end
 
 """
@@ -1157,7 +1079,8 @@ julia> xys00b(2.4578265e6, 0.30434616919175345)
 """
 function xys00b(jd1, jd2)
     rbpn = precession_nutation_matrix_b00(jd1, jd2)
-    rbpn[1,3], rbpn[2,3], s00(jd1, jd2, rbpn[1,3], rbpn[2,3])
+    x, y = cip_coords(rbpn)
+    return x, y, s00(jd1, jd2, x, y)
 end
 
 """
@@ -1173,8 +1096,8 @@ julia> s06a(2.4578265e6, 0.30434616919175345)
 ```
 """
 function s06a(jd1, jd2)
-    rnpb = precession_nutation_matrix_a06(jd1, jd2)
-    s06(jd1, jd2, rnpb[1,3], rnpb[2,3])
+    rbpn = precession_nutation_matrix_a06(jd1, jd2)
+    s06(jd1, jd2, cip_coords(rbpn)...)
 end
 
 """
@@ -1360,7 +1283,7 @@ julia> celestial_to_intermediate_matrix(2.4578265e6, 0.30434616919175345, rand(3
 ```
 """
 function celestial_to_intermediate_matrix(jd1, jd2, rbpn)
-    x, y = rbpn[1,3], rbpn[2,3]
+    x, y = cip_coords(rbpn)
     celestial_to_intermediate_frame_of_date(jd1, jd2, x, y)
 end
 
@@ -1404,6 +1327,11 @@ function celestial_to_intermediate_matrix_b00(jd1, jd2)
     celestial_to_intermediate_matrix(jd1, jd2, rbpn)
 end
 
+function c2tcio(rc2i, era, rpom)
+    rera = angleaxis_to_dcm(era, [0.0, 0.0, 1.0])
+    return compose_rotation(rc2i, rera, rpom)
+end
+
 """
     celestial_to_terrestrial_matrix(tta, ttb, uta, utb, x, y, xp, yp)
 
@@ -1425,7 +1353,7 @@ function celestial_to_terrestrial_matrix(tta, ttb, uta, utb, x, y, xp, yp)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
+    return c2tcio(rc2i, era, rpom)
 end
 
 """
@@ -1449,7 +1377,7 @@ function celestial_to_terrestrial_a00(tta, ttb, uta, utb, xp, yp)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
+    return c2tcio(rc2i, era, rpom)
 end
 
 """
@@ -1472,7 +1400,12 @@ function celestial_to_terrestrial_b00(tta, ttb, uta, utb, xp, yp)
     era = earth_rotation_angle(uta, utb)
 
     rpom = polar_motion(xp, yp, 0.0)
-    compose_rotation(rpom, angleaxis_to_dcm(-era, [0.0, 0.0, 1.0]), rc2i)
+    return c2tcio(rc2i, era, rpom)
+end
+
+function c2teqx(rbpn, gst, rpom)
+    rgst = angleaxis_to_dcm(gst, [0.0, 0.0, 1.0])
+    return compose_rotation(rbpn, rgst, rpom)
 end
 
 """
@@ -1491,13 +1424,14 @@ julia> c2tpe(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3, 0.
 ```
 """
 function c2tpe(tta, ttb, uta, utb, dpsi, deps, xp, yp)
-    epsa, rb, rp, rbp, rn, rbpn = precession_nutation00(tta, ttb, dpsi, deps)
+    tt = TTEpoch(tta * days, ttb * days, origin=:julian)
+    epsa, rb, rp, rbp, rn, rbpn = precession_nutation(iau2000, tt, dpsi, deps)
     gmst = greenwich_mean_sidereal_time00(uta, utb, tta, ttb)
     ee = equation_of_equinoxes_00(tta, ttb, epsa, dpsi)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
-    compose_rotation(rpom, angleaxis_to_dcm(-(gmst + ee), [0.0, 0.0, 1.0]), rbpn)
+    return c2teqx(rbpn, gmst + ee, rpom)
 end
 
 end
