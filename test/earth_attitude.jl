@@ -214,94 +214,227 @@ import ERFA
             end
         end
     end
-    @testset "Rotation" begin
+    @testset "ICRS" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
-        jd = value.(julian_twopart(UT1Epoch(ep)))
+        jd = value.(julian_twopart(TTEpoch(ep)))
+        ut = value.(julian_twopart(UT1Epoch(ep)))
 
-        @testset "era00" begin
-            @test earth_rotation_angle(iau2000, ep) ≈ ERFA.era00(jd...)
+        @testset "c2ixys" begin
+            x, y, s = cip_coords_cio_locator(iau2000a, ep)
+            c2ixys_act = celestial_to_intermediate(x, y, s)
+            c2ixys_exp = ERFA.c2ixys(x, y, s)
+            @testset for i in eachindex(c2ixys_act, c2ixys_exp)
+                @test c2ixys_act[i] ≈ c2ixys_exp[i]
+            end
+        end
+        @testset "c2ixy" begin
+            x, y, _ = cip_coords_cio_locator(iau2000a, ep)
+            c2ixy_act = celestial_to_intermediate(iau2000, ep, x, y)
+            c2ixy_exp = ERFA.c2ixy(jd..., x, y)
+            @testset for i in eachindex(c2ixy_act, c2ixy_exp)
+                @test c2ixy_act[i] ≈ c2ixy_exp[i]
+            end
+        end
+        @testset "c2ibpn" begin
+            rnpb = precession_nutation_matrix(iau2000a, ep)
+            c2ibpn_act = celestial_to_intermediate(iau2000, ep, rnpb)
+            c2ibpn_exp = ERFA.c2ibpn(jd..., Array(rnpb))
+            @testset for i in eachindex(c2ibpn_act, c2ibpn_exp)
+                @test c2ibpn_act[i] ≈ c2ibpn_exp[i]
+            end
+        end
+        @testset "c2i00a" begin
+            c2i00a_act = celestial_to_intermediate(iau2000a, ep)
+            c2i00a_exp = ERFA.c2i00a(jd...)
+            @testset for i in eachindex(c2i00a_act, c2i00a_exp)
+                @test c2i00a_act[i] ≈ c2i00a_exp[i]
+            end
+        end
+        @testset "c2i00b" begin
+            c2i00b_act = celestial_to_intermediate(iau2000b, ep)
+            c2i00b_exp = ERFA.c2i00b(jd...)
+            @testset for i in eachindex(c2i00b_act, c2i00b_exp)
+                @test c2i00b_act[i] ≈ c2i00b_exp[i]
+            end
+        end
+        @testset "c2tcio/c2teqx" begin
+            xys = randn(3)
+            a = polar_motion(iau2000, xys...)
+            b = π
+            c = polar_motion(iau2000, xys...)
+            d_act = celestial_to_terrestrial_cio(a, b, c)
+            e_act = celestial_to_terrestrial_equinox(a, b, c)
+            d_exp = ERFA.c2tcio(Array(a), b, Array(c))
+            e_exp = ERFA.c2teqx(Array(a), b, Array(c))
+            @testset for i in eachindex(d_act, d_exp)
+                @test d_act[i] ≈ d_exp[i]
+            end
+            @testset for i in eachindex(e_act, e_exp)
+                @test e_act[i] ≈ e_exp[i]
+            end
+            @testset for i in eachindex(d_act, e_act)
+                @test d_act[i] ≈ e_act[i]
+            end
+        end
+        @testset "c2t00a" begin
+            xp = π/4
+            yp = π/8
+            c2t00a_act = celestial_to_terrestrial_cio(iau2000a, ep, xp, yp)
+            c2t00a_exp = ERFA.c2t00a(jd..., ut..., xp, yp)
+            @testset for i in eachindex(c2t00a_act, c2t00a_exp)
+                @test c2t00a_act[i] ≈ c2t00a_exp[i]
+            end
+        end
+        @testset "c2t00b" begin
+            xp = π/4
+            yp = π/8
+            c2t00b_act = celestial_to_terrestrial_cio(iau2000b, ep, xp, yp)
+            c2t00b_exp = ERFA.c2t00b(jd..., ut..., xp, yp)
+            @testset for i in eachindex(c2t00b_act, c2t00b_exp)
+                @test c2t00b_act[i] ≈ c2t00b_exp[i]
+            end
+        end
+        @testset "c2tpe" begin
+            xp = π/4
+            yp = π/8
+            δψ, δϵ = nutation(iau2000b, ep)
+            c2tpe_act = celestial_to_terrestrial_equinox(iau2000, ep, δψ, δϵ, xp, yp)
+            c2tpe_exp = ERFA.c2tpe(jd..., ut..., δψ, δϵ, xp, yp)
+            @testset for i in eachindex(c2tpe_act, c2tpe_exp)
+                @test c2tpe_act[i] ≈ c2tpe_exp[i]
+            end
+        end
+        @testset "c2txy" begin
+            xp = float(π/4)
+            yp = float(π/8)
+            rnpb = precession_nutation_matrix(iau2000a, ep)
+            x, y = cip_coords(rnpb)
+            c2txy_act = celestial_to_terrestrial_cio(iau2000, ep, x, y, xp, yp)
+            c2txy_exp = ERFA.c2txy(jd..., ut..., x, y, xp, yp)
+            @testset for i in eachindex(c2txy_act, c2txy_exp)
+                @test c2txy_act[i] ≈ c2txy_exp[i]
+            end
+        end
+        @testset "eors" begin
+            rnpb = precession_nutation_matrix(iau2000a, ep)
+            x, y = cip_coords(rnpb)
+            s = cio_locator(iau2000, ep, x, y)
+            @test equation_of_origins(rnpb, s) ≈ ERFA.eors(Array(rnpb), s)
+        end
+        @testset "pom00" begin
+            xp = π/4
+            yp = π/8
+            s′ = tio_locator(iau2000, ep)
+            pom00_act = polar_motion(iau2000, xp, yp, s′)
+            pom00_exp = ERFA.pom00(xp, yp, s′)
+            @testset for i in eachindex(pom00_act, pom00_exp)
+                @test pom00_act[i] ≈ pom00_exp[i]
+            end
+        end
+        @testset "s00" begin
+            rnpb = precession_nutation_matrix(iau2000a, ep)
+            x, y = cip_coords(rnpb)
+            @test cio_locator(iau2000, ep, x, y) ≈ ERFA.s00(jd..., x, y)
+        end
+        @testset "s00a" begin
+            @test cio_locator(iau2000a, ep) ≈ ERFA.s00a(jd...)
+        end
+        @testset "s00b" begin
+            @test cio_locator(iau2000b, ep) ≈ ERFA.s00b(jd...)
+        end
+        @testset "s06" begin
+            rnpb = precession_nutation_matrix(iau2000a, ep)
+            x, y = cip_coords(rnpb)
+            @test cio_locator(iau2006, ep, x, y) ≈ ERFA.s06(jd..., x, y)
+        end
+        @testset "s06a" begin
+            @test cio_locator(iau2006a, ep) ≈ ERFA.s06a(jd...)
+        end
+        @testset "sp00" begin
+            @test tio_locator(iau2000, ep) ≈ ERFA.sp00(jd...)
+        end
+        @testset "xy06" begin
+            x_act, y_act = cip_coords(iau2006, ep)
+            x_exp, y_exp = ERFA.xy06(jd...)
+            @test x_act ≈ x_exp
+            @test y_act ≈ y_exp
+        end
+        @testset "xys00a" begin
+            xys00a_act = cip_coords_cio_locator(iau2000a, ep)
+            xys00a_exp = ERFA.xys00a(jd...)
+            @testset for i in eachindex(xys00a_act, xys00a_exp)
+                @test xys00a_act[i] ≈ xys00a_exp[i]
+            end
+        end
+        @testset "xys00b" begin
+            xys00b_act = cip_coords_cio_locator(iau2000b, ep)
+            xys00b_exp = ERFA.xys00b(jd...)
+            @testset for i in eachindex(xys00b_act, xys00b_exp)
+                @test xys00b_act[i] ≈ xys00b_exp[i]
+            end
         end
     end
+    @testset "Rotation" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        ut = value.(julian_twopart(UT1Epoch(ep)))
+        tt = value.(julian_twopart(TTEpoch(ep)))
+        tdb = value.(julian_twopart(TDBEpoch(ep)))
 
-    # Celestial to intermediate frame of date
-    @test celestial_to_intermediate(0.2, 0.2, 0.2) ≈ ERFA.c2ixys(0.2, 0.2, 0.2)
-
-    # Polar motion
-    @test polar_motion(30, 30, 30) ≈ ERFA.pom00(30, 30, 30)
-    @test polar_motion(20, 30, 50) ≈ ERFA.pom00(20, 30, 50)
-
-    @test tio_locator(2.4578265e6, 0.30434616919175345) ≈ ERFA.sp00(2.4578265e6, 0.30434616919175345)
-
-    let (x1, y1) = xy06(2.4578265e6, 0.30440190993249416)
-        (x2, y2) = ERFA.xy06(2.4578265e6, 0.30440190993249416)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
+        @testset "era00" begin
+            @test earth_rotation_angle(iau2000, ep) ≈ ERFA.era00(ut...)
+        end
+        @testset "eqeq94" begin
+            @test equinoxes(iau1994, ep) ≈ ERFA.eqeq94(tdb...)
+        end
+        @testset "eect00" begin
+            @test equinoxes(iau2000, ep) ≈ ERFA.eect00(tt...)
+        end
+        @testset "ee00" begin
+            ϵ = obliquity(iau1980, ep)
+            δψ, _ = nutation(iau2000a, ep)
+            @test equinoxes(iau2000, ep, ϵ, δψ) ≈ ERFA.ee00(tt..., ϵ, δψ)
+        end
+        @testset "ee00a" begin
+            @test equinoxes(iau2000a, ep) ≈ ERFA.ee00a(tt...)
+        end
+        @testset "ee00b" begin
+            @test equinoxes(iau2000b, ep) ≈ ERFA.ee00b(tt...)
+        end
+        @testset "ee06a" begin
+            @test equinoxes(iau2006a, ep) ≈ ERFA.ee06a(tt...)
+        end
+        @testset "gmst82" begin
+            @test mean_sidereal(iau1982, ep) ≈ ERFA.gmst82(ut...)
+        end
+        @testset "gmst00" begin
+            @test mean_sidereal(iau2000, ep) ≈ ERFA.gmst00(ut..., tt...)
+        end
+        @testset "gmst06" begin
+            @test mean_sidereal(iau2006, ep) ≈ ERFA.gmst06(ut..., tt...)
+        end
+        @testset "gst94" begin
+            @test apparent_sidereal(iau1994, ep) ≈ ERFA.gst94(ut...)
+        end
+        @testset "gst00a" begin
+            @test apparent_sidereal(iau2000a, ep) ≈ ERFA.gst00a(ut..., tt...)
+        end
+        @testset "gst00b" begin
+            @test apparent_sidereal(iau2000b, ep) ≈ ERFA.gst00b(ut...)
+        end
+        @testset "gst06" begin
+            rnpb = precession_nutation_matrix(iau2006a, ep)
+            @test apparent_sidereal(iau2006, ep, rnpb) ≈ ERFA.gst06(ut..., tt..., Array(rnpb))
+        end
+        @testset "gst06a" begin
+            @test apparent_sidereal(iau2006a, ep) ≈ ERFA.gst06a(ut..., tt...)
+        end
     end
-
-    @test greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-    @test greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈  ERFA.gmst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-    @test greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345) ≈ ERFA.gmst82(2.4578265e6, 0.30434616919175345)
-    @test greenwich_mean_sidereal_time82(0.30434616919175345, 2.4578265e6) ≈ ERFA.gmst82(0.30434616919175345, 2.4578265e6)
-
-    let a = [0.9999989440476103608 -0.1332881761240011518e-2 -0.5790767434730085097e-3;
-         0.1332858254308954453e-2 0.9999991109044505944 -0.4097782710401555759e-4;
-         0.5791308472168153320e-3 0.4020595661593994396e-4 0.9999998314954572365]
-        @test equation_of_origins(a, 0.3) ≈ ERFA.eors(a, 0.3)
-    end
-
-    @test equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345) ≈ ERFA.eect00(2.4578265e6, 0.30434616919175345)
-    @test equation_of_equinoxes_00(2.4578265e6, 0.30440190993249416, 1.5, 1.7) ≈ ERFA.ee00(2.4578265e6, 0.30440190993249416, 1.5, 1.7)
-
-    @test s00(2.4578265e6, 0.30434616919175345, 0, 0) ≈ ERFA.s00(2.4578265e6, 0.30434616919175345, 0, 0)
-    @test s06(2.4578265e6, 0.30434616919175345, 0, 0) ≈ ERFA.s06(2.4578265e6, 0.30434616919175345, 0, 0)
-
-    let t = [0.9999989440476103608 -0.1332881761240011518e-2 -0.5790767434730085097e-3;
-            0.1332858254308954453e-2 0.9999991109044505944 -0.4097782710401555759e-4;
-            0.5791308472168153320e-3 0.4020595661593994396e-4 0.9999998314954572365]
-        @test greenwich_apparent_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, t) ≈ ERFA.gst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, t)
-    end
-    @test equation_of_equinoxes_94(2.4578265e6, 0.30434616919175345) ≈ equation_of_equinoxes_94(2.4578265e6, 0.30434616919175345)
 end
 
 @testset "Dependencies" begin
-    @test s06a(2.4578265e6, 0.30434616919175345) ≈ ERFA.s06a(2.4578265e6, 0.30434616919175345)
-
-    @test equation_of_equinoxes_a00(2.4578265e6, 0.30434616919175345) ≈ ERFA.ee00a(2.4578265e6, 0.30434616919175345)
-    @test equation_of_equinoxes_b00(2.4578265e6, 0.30434616919175345) ≈ ERFA.ee00b(2.4578265e6, 0.30434616919175345)
-
-    @test greenwich_mean_sidereal_time_a06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈ ERFA.gst06a(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-    @test equation_of_equinoxes_a06(2.4578265e6, 0.30434616919175345) ≈ ERFA.ee06a(2.4578265e6, 0.30434616919175345)
-    @test greenwich_apparent_sidereal_time94(2.4578265e6, 0.30434616919175345) ≈ ERFA.gst94(2.4578265e6, 0.30434616919175345)
-    @test greenwich_apparent_sidereal_time_a00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈ ERFA.gst00a(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-    @test greenwich_apparent_sidereal_time_b00(2.4579405e6, 0.0) ≈ ERFA.gst00b(2.4579405e6, 0.0)
-    @test greenwich_apparent_sidereal_time_a06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851) ≈ ERFA.gst06a(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-    @test celestial_to_intermediate_frame_of_date(2.4578265e6, 0.30434616919175345, 0.2, 0.3) ≈ ERFA.c2ixy(2.4578265e6, 0.30434616919175345, 0.2, 0.3)
-    let t = [9.999962358680738e-1 -2.516417057665452e-3 -1.093569785342370e-3;
-            2.516462370370876e-3 9.999968329010883e-1 4.006159587358310e-5;
-            1.093465510215479e-3 -4.281337229063151e-5 9.999994012499173e-1]
-        @test celestial_to_intermediate_matrix(2.4578265e6, 0.30434616919175345, t) ≈ ERFA.c2ibpn(2.4578265e6, 0.30434616919175345, t)
-    end
-    @test celestial_to_intermediate_matrix_a00(2.4578265e6, 0.30434616919175345) ≈ ERFA.c2i00a(2.4578265e6, 0.30434616919175345)
-    @test celestial_to_intermediate_matrix_b00(2.4578265e6, 0.30434616919175345) ≈ ERFA.c2i00b(2.4578265e6, 0.30434616919175345)
     @test celestial_to_terrestrial_matrix(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3, 0.5, 0.7) ≈ ERFA.c2txy(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3, 0.5, 0.7)
     @test celestial_to_terrestrial_a00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3) ≈ ERFA.c2t00a(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3)
     @test celestial_to_terrestrial_b00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3) ≈ ERFA.c2t00b(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3)
     @test c2tpe(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3, 0.5, 0.7) ≈ ERFA.c2tpe(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, 0.1, 0.3, 0.5, 0.7)
-
-    @test s00a(2.4578265e6, 0.30434616919175345) ≈ ERFA.s00a(2.4578265e6, 0.30434616919175345)
-    @test s00b(2.4578265e6, 0.30434616919175345) ≈ ERFA.s00b(2.4578265e6, 0.30434616919175345)
-
-    let (x1, y1, z1) = xys00a(2.4578265e6, 0.30434616919175345)
-        (x2, y2, z2) = ERFA.xys00a(2.4578265e6, 0.30434616919175345)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-        @test z1 ≈ z2
-    end
-    let (x1, y1, z1) = xys00b(2.4578265e6, 0.30434616919175345)
-        (x2, y2, z2) = ERFA.xys00b(2.4578265e6, 0.30434616919175345)
-        @test x1 ≈ x2
-        @test y1 ≈ y2
-        @test z1 ≈ z2
-    end
 end
 

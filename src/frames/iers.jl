@@ -6,9 +6,9 @@ using ..EarthAttitude:
     celestial_to_intermediate,
     earth_rotation_angle,
     polar_motion,
-    s06,
+    cio_locator,
     tio_locator,
-    xy06
+    cip_coords
 using ..Util: sec2rad
 
 export
@@ -73,8 +73,8 @@ end
 function precession_nutation(ep::TTEpoch)
     dx, dy = EarthOrientation.precession_nutation00(value(julian(ep)))
     jd1, jd2 = value.(julian_twopart(ep))
-    x, y = xy06(jd1, jd2)
-    s = s06(jd1, jd2, x, y)
+    x, y = cip_coords(iau2006, ep)
+    s = cio_locator(iau2006, ep, x, y)
     x += sec2rad(dx/1000.0)
     y += sec2rad(dy/1000.0)
     reshape(celestial_to_intermediate(x, y, s), (3,3))

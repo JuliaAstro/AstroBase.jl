@@ -1,13 +1,13 @@
-export iau1980, iau2000, iau2000a, iau2000b, iau2006, iau2006a
+export iau1980, iau1982, iau1994, iau2000, iau2000a, iau2000b, iau2006, iau2006a
 
 abstract type IAUModel end
 abstract type IAU1980Model <: IAUModel end
 abstract type IAU2000Model <: IAUModel end
 abstract type IAU2006Model <: IAUModel end
 
-########################
-# IAU 1976/1980 models #
-########################
+#############################
+# IAU 1976/1980/1994 models #
+#############################
 
 struct IAU1980 <: IAU1980Model end
 
@@ -17,6 +17,24 @@ struct IAU1980 <: IAU1980Model end
 The singleton instance of type `IAU1980`, representing the IAU 1980 family of models.
 """
 const iau1980 = IAU1980()
+
+struct IAU1982 <: IAU1980Model end
+
+"""
+    `iau1982`
+
+The singleton instance of type `IAU1982`, representing the IAU 1982 family of models.
+"""
+const iau1982 = IAU1982()
+
+struct IAU1994 <: IAU1980Model end
+
+"""
+    `iau1994`
+
+The singleton instance of type `IAU1994`, representing the IAU 1994 family of models.
+"""
+const iau1994 = IAU1994()
 
 ###################
 # IAU 2000 models #
