@@ -118,9 +118,9 @@ end
 function nutation(::IAU2000A, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
-    el = mean_anomaly(luna, t)
-    f  = mean_longitude_minus_lan(luna, t)
-    om = mean_longitude_ascending_node(luna, t)
+    el = fundamental(luna, t)
+    f  = fundamental(luna, Longitude(), t)
+    om = fundamental(luna, AscendingNode(), t)
 
     elp_as = @evalpoly t 1287104.79305 129596581.0481 -0.5532 0.000136 -0.00001149
     elp = sec2rad(elp_as % ARCSECONDS_IN_CIRCLE)
@@ -144,14 +144,14 @@ function nutation(::IAU2000A, ep::Epoch)
     aom  = mod2pi(2.18243920 - 33.757045 * t)
     alne = mod2pi(5.321159000 + 3.8127774000 * t)
 
-    apa  = general_precession_in_longitude(t)
-    alme = mean_longitude(mercury, t)
-    alve = mean_longitude(venus, t)
-    alea = mean_longitude(earth, t)
-    alma = mean_longitude(mars, t)
-    alju = mean_longitude(jupiter, t)
-    alsa = mean_longitude(saturn, t)
-    alur = mean_longitude(uranus, t)
+    apa  = fundamental(t)
+    alme = fundamental(mercury, t)
+    alve = fundamental(venus, t)
+    alea = fundamental(earth, t)
+    alma = fundamental(mars, t)
+    alju = fundamental(jupiter, t)
+    alsa = fundamental(saturn, t)
+    alur = fundamental(uranus, t)
 
     dppl = 0.0
     depl = 0.0

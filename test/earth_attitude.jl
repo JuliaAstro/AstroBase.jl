@@ -4,6 +4,27 @@ using Test
 import ERFA
 
 @testset "Earth Attitude" begin
+    @testset "Fundamental Arguments" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        t = ep |> TDBEpoch |> j2000 |> centuries |> value
+        longitude = AstroBase.EarthAttitude.Longitude()
+        elongation = AstroBase.EarthAttitude.Elongation()
+        node = AstroBase.EarthAttitude.AscendingNode()
+        @test fundamental(luna, t)  ≈ ERFA.fal03(t)
+        @test fundamental(sun, t) ≈ ERFA.falp03(t)
+        @test fundamental(luna, longitude, t) ≈ ERFA.faf03(t)
+        @test fundamental(luna, elongation, t) ≈ ERFA.fad03(t)
+        @test fundamental(luna, node, t) ≈ ERFA.faom03(t)
+        @test fundamental(mercury, t) ≈ ERFA.fame03(t)
+        @test fundamental(venus, t) ≈ ERFA.fave03(t)
+        @test fundamental(earth, t) ≈ ERFA.fae03(t)
+        @test fundamental(mars, t) ≈ ERFA.fama03(t)
+        @test fundamental(jupiter, t) ≈ ERFA.faju03(t)
+        @test fundamental(saturn, t) ≈ ERFA.fasa03(t)
+        @test fundamental(uranus, t) ≈ ERFA.faur03(t)
+        @test fundamental(neptune, t) ≈ ERFA.fane03(t)
+        @test fundamental(t) ≈ ERFA.fapa03(t)
+    end
     @testset "Obliquity" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
         jd = value.(julian_twopart(TTEpoch(ep)))
@@ -193,7 +214,14 @@ import ERFA
             end
         end
     end
-    @test earth_rotation_angle(2.4578265e6, 0.30434616919175345) ≈ ERFA.era00(2.4578265e6, 0.30434616919175345)
+    @testset "Rotation" begin
+        ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
+        jd = value.(julian_twopart(UT1Epoch(ep)))
+
+        @testset "era00" begin
+            @test earth_rotation_angle(iau2000, ep) ≈ ERFA.era00(jd...)
+        end
+    end
 
     # Celestial to intermediate frame of date
     @test celestial_to_intermediate(0.2, 0.2, 0.2) ≈ ERFA.c2ixys(0.2, 0.2, 0.2)
@@ -204,20 +232,6 @@ import ERFA
 
     @test tio_locator(2.4578265e6, 0.30434616919175345) ≈ ERFA.sp00(2.4578265e6, 0.30434616919175345)
 
-    @test AstroBase.EarthAttitude.mean_anomaly(luna, 1)  ≈ ERFA.fal03(1)
-    @test AstroBase.EarthAttitude.mean_anomaly(sun, 1) ≈ ERFA.falp03(1)
-    @test mean_longitude_minus_lan(luna, 1) ≈ ERFA.faf03(1)
-    @test mean_elongation(luna, 1) ≈ ERFA.fad03(1)
-    @test mean_longitude_ascending_node(luna, 1) ≈ ERFA.faom03(1)
-    @test mean_longitude(mercury, 1) ≈ ERFA.fame03(1)
-    @test mean_longitude(venus, 1) ≈ ERFA.fave03(1)
-    @test mean_longitude(earth, 1) ≈ ERFA.fae03(1)
-    @test mean_longitude(mars, 1) ≈ ERFA.fama03(1)
-    @test mean_longitude(jupiter, 1) ≈ ERFA.faju03(1)
-    @test mean_longitude(saturn, 1) ≈ ERFA.fasa03(1)
-    @test mean_longitude(uranus, 1) ≈ ERFA.faur03(1)
-    @test mean_longitude(neptune, 1) ≈ ERFA.fane03(1)
-    @test general_precession_in_longitude(1) ≈ ERFA.fapa03(1)
     let (x1, y1) = xy06(2.4578265e6, 0.30440190993249416)
         (x2, y2) = ERFA.xy06(2.4578265e6, 0.30440190993249416)
         @test x1 ≈ x2

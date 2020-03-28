@@ -1,14 +1,12 @@
 module EarthAttitude
 
 using AstroTime: days
-using ..Bodies
 using ..Util: sec2rad
 using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
 export
     J2000,
     celestial_to_intermediate,
-    earth_rotation_angle,
     equation_of_equinoxes_00,
     equation_of_equinoxes_complementary_terms,
     equation_of_origins,
@@ -16,10 +14,6 @@ export
     greenwich_mean_sidereal_time00,
     greenwich_mean_sidereal_time06,
     greenwich_mean_sidereal_time82,
-    mean_elongation,
-    mean_longitude,
-    mean_longitude_ascending_node,
-    mean_longitude_minus_lan,
     polar_motion,
     s00,
     s06,
@@ -50,11 +44,13 @@ export
     c2tpe
 
 include("iau_models.jl")
+include("fundamental.jl")
 include("obliquity.jl")
 include("nutation.jl")
 include("precession.jl")
 include("precession_nutation.jl")
 include("icrs.jl")
+include("rotation.jl")
 
 const J2000 = 2451545.0
 const DAYS_PER_CENTURY = 36525.0
@@ -109,31 +105,6 @@ end
 
 
 """
-    earth_rotation_angle(jd1, jd2)
-
-Return Earth rotation angle (radians) for a given UT1 2-part Julian Date (jd1, jd2).
-
-# Example
-
-```jldoctest
-julia> earth_rotation_angle(2.4578265e6, 0.30434616919175345)
-4.912208135094597
-```
-"""
-function earth_rotation_angle(jd1, jd2)
-    if jd1 < jd2
-        d1 = jd1
-        d2 = jd2
-    else
-        d1 = jd2
-        d2 = jd1
-    end
-    t = d1 + d2 - J2000
-    f = mod(d1, 1.0) + mod(d2, 1.0)
-    mod2pi(2pi * (f + 0.7790572732640 + 0.00273781191135448 * t))
-end
-
-"""
     tio_locator(jd1, jd2)
 
 Returns TIO locator s' position for a given TT 2-part Julian date (jd1, jd2).
@@ -150,215 +121,6 @@ function tio_locator(jd1, jd2)
     sec2rad(-47e-6 * t)
 end
 
-"""
-    mean_anomaly(::Luna, t)
-
-Returns mean anomaly of Moon for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_anomaly(moon, 23.0)
-0.5891752616281019
-```
-"""
-function mean_anomaly(::Luna, t)
-    p = @evalpoly t 485868.249036 1717915923.2178 31.8792 0.051635 -0.00024470
-    sec2rad(p % ARCSECONDS_IN_CIRCLE)
-end
-
-"""
-    mean_anomaly(::Sun, t)
-
-# Example
-
-Returns mean anomaly of the Sun for Julian centuries since J2000.0 in TDB.
-julia> mean_anomaly(sun, 23.0)
-5.857396217361825
-```
-"""
-function mean_anomaly(::Sun, t)
-    p = @evalpoly t 1287104.793048 129596581.0481 -0.5532 0.000136 -0.00001149
-    sec2rad(p % ARCSECONDS_IN_CIRCLE)
-end
-
-"""
-    mean_longitude_minus_lan(::Luna, t)
-
-Returns mean longitude of the Moon minus mean longitude of the ascending node for Julian
-centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude_minus_lan(23.0)
-3.103138156410118
-```
-"""
-function mean_longitude_minus_lan(::Luna, t)
-    p = @evalpoly t 335779.526232 1739527262.8478 -12.7512 -0.001037 0.00000417
-    sec2rad(p % ARCSECONDS_IN_CIRCLE)
-end
-
-"""
-    mean_elongation(::Luna, t)
-
-Returns mean elongation of the Moon from the Sun for Julian centuries since
-J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_elongation(::Luna, 23.0)
-2.8012040574296484
-```
-"""
-function mean_elongation(::Luna, t)
-    p = @evalpoly t 1072260.703692 1602961601.2090 -6.3706 0.006593 -0.00003169
-    sec2rad(p % ARCSECONDS_IN_CIRCLE)
-end
-
-"""
-    mean_longitude_ascending_node(::Luna, t)
-
-Return fundamental argument for Julian centuries since J2000.0 in TDB.
-
-# Example
-```jldoctest
-julia> mean_longitude_ascending_node(luna, 23.0)
-4.904897783682109
-```
-"""
-function mean_longitude_ascending_node(::Luna, t)
-    p = @evalpoly t 450160.398036 -6962890.5431 7.4722 0.007702 -0.00005939
-    sec2rad(p % ARCSECONDS_IN_CIRCLE)
-end
-
-"""
-    mean_longitude(::Mercury, t)
-
-Returns mean longitude of Mercury for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(mercury, 23.0)
-2.160150897150834
-```
-"""
-mean_longitude(::Mercury, t) = mod2pi(4.402608842 + 2608.7903141574t)
-
-"""
-    mean_longitude(::Venus, t)
-
-Returns mean longitude of Venus for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(venus, 23.0)
-0.9030394378238363
-```
-"""
-mean_longitude(::Venus, t) = mod2pi(3.176146697 + 1021.3285546211t)
-
-"""
-    mean_longitude(::Earth, t)
-
-Returns mean longitude of Earth for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(earth, 23.0)
-1.501718780251826
-```
-"""
-mean_longitude(::Earth, t) = mod2pi(1.753470314 + 628.3075849991t)
-
-"""
-    mean_longitude(::Mars, t)
-
-Returns mean longitude of Mars for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(mars, 23.0)
-5.276431642365657
-```
-"""
-mean_longitude(::Mars, t) = mod2pi(6.203480913 + 334.0612426700t)
-
-"""
-    mean_longitude(::Jupiter, t)
-
-Returns mean longitude of Jupiter for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(jupiter, 23.0)
-6.233996285639864
-```
-"""
-mean_longitude(::Jupiter, t) = mod2pi(0.599546497 + 52.9690962641t)
-
-"""
-    mean_longitude(::Saturn, t)
-
-Returns mean longitude of Saturn for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(saturn, 23.0)
-1.3735042049922535
-```
-"""
-mean_longitude(::Saturn, t) = mod2pi(0.874016757 + 21.3299104960t)
-
-"""
-    mean_longitude(::Uranus, t)
-
-Returns mean longitude of Uranus for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(uranus, 23.0)
-1.5497819750715893
-```
-"""
-mean_longitude(::Uranus, t) = mod2pi(5.481293872 + 7.4781598567t)
-
-"""
-    mean_longitude(::Neptune, t)
-
-Returns mean longitude of Neptune for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> mean_longitude(neptune, 23.0)
-5.053273953885775
-```
-"""
-mean_longitude(::Neptune, t) = mod2pi(5.311886287 + 3.8133035638t)
-
-"""
-    general_precession_in_longitude(t)
-
-Returns general accumulated precession in longitude for Julian centuries since J2000.0 in TDB.
-
-# Example
-
-```jldoctest
-julia> general_precession_in_longitude(23.0)
-0.56362992539
-```
-"""
-general_precession_in_longitude(t) = @evalpoly t 0.00000538691 0.024381750
 
 """
     xy06(jd1, jd2)
@@ -377,20 +139,20 @@ function xy06(jd1, jd2)
     # Powers of T.
     pt = [t^i for i = 0:6]
 
-    fa = (mean_anomaly(luna, t),
-          mean_anomaly(sun, t),
-          mean_longitude_minus_lan(luna, t),
-          mean_elongation(luna, t),
-          mean_longitude_ascending_node(luna, t),
-          mean_longitude(mercury, t),
-          mean_longitude(venus, t),
-          mean_longitude(earth, t),
-          mean_longitude(mars, t),
-          mean_longitude(jupiter, t),
-          mean_longitude(saturn, t),
-          mean_longitude(uranus, t),
-          mean_longitude(neptune, t),
-          general_precession_in_longitude(t))
+    fa = (fundamental(luna, t),
+          fundamental(sun, t),
+          fundamental(luna, Longitude(), t),
+          fundamental(luna, Elongation(), t),
+          fundamental(luna, AscendingNode(), t),
+          fundamental(mercury, t),
+          fundamental(venus, t),
+          fundamental(earth, t),
+          fundamental(mars, t),
+          fundamental(jupiter, t),
+          fundamental(saturn, t),
+          fundamental(uranus, t),
+          fundamental(neptune, t),
+          fundamental(t))
 
     xpr = @evalpoly t x_coeff[1] x_coeff[2] x_coeff[3] x_coeff[4] x_coeff[5] x_coeff[6]
     ypr = @evalpoly t y_coeff[1] y_coeff[2] y_coeff[3] y_coeff[4] y_coeff[5] y_coeff[6]
@@ -442,76 +204,6 @@ function xy06(jd1, jd2)
 end
 
 """
-    greenwich_mean_sidereal_time82(jd1, jd2)
-
-Returns Greenwich mean sidereal time(radians) for given 2 part Julian dates (UT1).
-(consistent with IAU 1982 model)
-
-# Example
-
-```jldoctest
-julia> greenwich_mean_sidereal_time82(2.4578265e6, 0.30434616919175345)
-4.916054244834956
-```
-"""
-function greenwich_mean_sidereal_time82(jd1, jd2)
-    A = 24110.54841  -  SECONDS_PER_DAY / 2.0
-    B = 8640184.812866
-    C = 0.093104
-    D = -6.2e-6
-
-    if jd1 < jd2
-        d1 = jd1
-        d2 = jd2
-    else
-        d1 = jd2
-        d2 = jd1
-    end
-
-    t = (d1 + (d2 - J2000)) / DAYS_PER_CENTURY
-    f = SECONDS_PER_DAY * (mod(d1, 1.0) + mod(d2, 1.0))
-    mod2pi(7.272205216643039903848712e-5 * (@evalpoly t A + f B C D))
-end
-
-"""
-    greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
-
-Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
-(consistent with IAU 2000 precession)
-
-# Example
-
-```jldoctest
-julia> greenwich_mean_sidereal_time00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-4.9596733720586075
-```
-"""
-function greenwich_mean_sidereal_time00(ut1, ut2, tt1, tt2)
-    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
-    mod2pi(earth_rotation_angle(ut1, ut2) +
-           sec2rad(@evalpoly t 0.014506 4612.15739966 1.39667721 -0.00009344 0.00001882))
-end
-
-"""
-    greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
-
-Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
-(consistent with IAU 2006 precession)
-
-# Example
-
-```jldoctest
-julia> greenwich_mean_sidereal_time06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-4.959673370568533
-```
-"""
-function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
-    t = ((tt1 - J2000) + tt2) / DAYS_PER_CENTURY
-    mod2pi(earth_rotation_angle(ut1, ut2) +
-           sec2rad(@evalpoly t 0.014506 4612.156534 1.3915817 -0.00000044 -0.000029956 -0.0000000368))
-end
-
-"""
     equation_of_origins(rnpb, s)
 
 Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
@@ -534,79 +226,18 @@ function equation_of_origins(rnpb, s)
     p != 0 || q != 0 ? s - atan(q, p) : s
 end
 
-"""
-    equation_of_equinoxes_complementary_terms(jd1, jd2)
-
-Returns complementary terms for a given 2 part Julian date (TT).
-
-# Example
-
-julia> equation_of_equinoxes_complementary_terms(2.4578265e6, 0.30434616919175345)
-5.706799075288604e-9
-```
-"""
-function equation_of_equinoxes_complementary_terms(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-
-    fa = (mean_anomaly(luna, t),
-          mean_anomaly(sun, t),
-          mean_longitude_minus_lan(luna, t),
-          mean_elongation(luna, t),
-          mean_longitude_ascending_node(luna, t),
-          mean_longitude(venus, t),
-          mean_longitude(earth, t),
-          general_precession_in_longitude(t))
-
-    s0 = 0.0
-    s1 = 0.0
-
-    for i in reverse(eachindex(e0_coefficent))
-        a = 0.0
-        for j in 1:8
-            a += e0_coefficent[i][j] * fa[j]
-        end
-        s0 += e0_arg[i][1] * sin(a) + e0_arg[i][2] * cos(a)
-    end
-
-    for i in reverse(eachindex(e1_coefficent))
-        a = 0.0;
-        for j in 1:8
-            a += e1_coefficent[i][j] * fa[j]
-        end
-        s1 += e1_arg[i][1] * sin(a) + e1_arg[i][2] * cos(a)
-    end
-
-    sec2rad(s0 + s1 * t)
-end
-
-"""
-    equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
-
-Return equation of equinoxes for given 2 part Julian date (TT), mean obliquity and nutation in longitude.
-
-# Example
-
-```jldoctest
-julia> equation_of_equinoxes_00(2.4578265e6, 0.30440190993249416, 1.5, 1.7)
-0.12025324854189404
-```
-"""
-function equation_of_equinoxes_00(jd1, jd2, epsa, dpsi)
-    dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
-end
-
 function cio_locator(coeffs, terms0, terms1, terms2, terms3, terms4, jd1, jd2, x, y)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
 
     fa = (
-        mean_anomaly(luna, t),
-        mean_anomaly(sun, t),
-        mean_longitude_minus_lan(luna, t),
-        mean_elongation(luna, t),
-        mean_longitude_ascending_node(luna,t),
-        mean_longitude(venus, t),
-        mean_longitude(earth, t),
-        general_precession_in_longitude(t),
+        fundamental(luna, t),
+        fundamental(sun, t),
+        fundamental(luna, Longitude(), t),
+        fundamental(luna, Elongation(), t),
+        fundamental(luna, AscendingNode(), t),
+        fundamental(venus, t),
+        fundamental(earth, t),
+        fundamental(t),
     )
 
     w = collect(coeffs)
@@ -704,49 +335,6 @@ julia> AstroBase.s06(2.4578265e6, 0.30434616919175345, 20, 50)
 """
 s06
 
-"""
-    greenwich_mean_sidereal_time06(uta, utb, tta, ttb, rnpb)
-
-Returns Greenwich mean sidereal time(radians) for given two, 2 part Julian dates (TT and UT1).
-
-# Example
-
-```jldoctest
-julia> gst06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851, rand(3,3))
-3.738379033673736
-```
-"""
-function greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
-    x, y = cip_coords(rnpb)
-    s = s06(tta, ttb, x, y)
-    era = earth_rotation_angle(uta, utb)
-    eors = equation_of_origins(rnpb,s)
-    mod2pi(era - eors)
-end
-
-"""
-    equation_of_equinoxes_94(jd1, jd2)
-
-Returns equation of equinoxes for a given 2 part Julian date (TT). (IAU 1994 model)
-
-# Example
-
-```jldoctest
-julia> equation_of_equinoxes_94(2.4578265e6, 0.30434616919175345)
--3.446039061100115e-5
-```
-"""
-function equation_of_equinoxes_94(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-
-    om = rem2pi(sec2rad(@evalpoly t 450160.280 -482890.539 7.455 0.008)
-      + mod(-5.0 * t, 1.0) * 2pi, RoundNearest)
-
-    dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    eps0 = obliquity(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-
-    dpsi*cos(eps0) + sec2rad((0.00264 * sin(om) + 0.000063 * sin(om + om)))
-end
 
 """
     s00a(jd1, jd2)
@@ -842,155 +430,6 @@ function s06a(jd1, jd2)
     s06(jd1, jd2, cip_coords(rbpn)...)
 end
 
-"""
-    equation_of_equinoxes_a00(jd1, jd2)
-
-Returns equation of equinoxes for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> equation_of_equinoxes_a00(2.4578265e6, 0.30434616919175345)
--3.4482238309105874e-5
-```
-"""
-function equation_of_equinoxes_a00(jd1, jd2)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsipr, depspr = precession(iau2000, ep)
-    epsa = obliquity(iau1980, ep) + depspr
-    dpsi, deps = nutation(iau2000a, ep)
-    dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
-end
-
-"""
-    equation_of_equinoxes_b00(jd1, jd2)
-
-Returns equation of equinoxes for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> equation_of_equinoxes_b00(2.4578265e6, 0.30434616919175345)
--3.4482238309105874e-5
-```
-"""
-function equation_of_equinoxes_b00(jd1, jd2)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsipr, depspr = precession(iau2000, ep)
-    epsa = obliquity(iau1980, ep) + depspr
-    dpsi, deps = nutation(iau2000b, ep)
-    dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
-end
-
-
-
-"""
-    greenwich_mean_sidereal_time_a06(uta, utb, tta, ttb, rnpb)
-
-Returns greenwich apparent sidereal time for given two, 2 part Julian dates (UT1, TT).
-
-# Example
-
-```jldoctest
-
-```
-"""
-function greenwich_mean_sidereal_time_a06(uta, utb, tta, ttb)
-    ep = TTEpoch(tta * days, ttb * days, origin=:julian)
-    rnpb = precession_nutation_matrix(iau2006a, ep)
-    greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
-end
-
-"""
-    equation_of_equinoxes_a06(jd1, jd2)
-
-Returns equation of equinoxes for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-julia> equation_of_equinoxes_a06(2.4578265e6, 0.30434616919175345)
--3.448290610741367e-5
-```
-"""
-function equation_of_equinoxes_a06(jd1, jd2)
-    gst06a = greenwich_mean_sidereal_time_a06(0.0, 0.0, jd1, jd2)
-    gmst06 = greenwich_mean_sidereal_time06(0.0, 0.0, jd1, jd2)
-
-    rem2pi(gst06a - gmst06, RoundNearest)
-end
-
-"""
-    greenwich_apparent_sidereal_time94(uta, utb)
-
-Returns greenwich appart sidereal time for given 2 part Julian date (UT1).
-
-# Example
-
-```jldoctest
-julia> greenwich_apparent_sidereal_time94(2.4578265e6, 0.30434616919175345)
-4.9160197844443445
-```
-"""
-function greenwich_apparent_sidereal_time94(uta, utb)
-    gmst82 = greenwich_mean_sidereal_time82(uta, utb)
-    eqeq94 = equation_of_equinoxes_94(uta, utb)
-    mod2pi(gmst82 + eqeq94)
-end
-
-"""
-    greenwich_apparent_sidereal_time_a00(uta, utb, tta, ttb)
-
-Returns Greenwich apparent sidereal time for given two, 2 part Julian date. (UT1, TT)
-
-# Example
-
-```jldoctest
-julia> greenwich_apparent_sidereal_time_a00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-4.959632360790386
-```
-"""
-function greenwich_apparent_sidereal_time_a00(uta, utb, tta, ttb)
-    gmst00 = greenwich_mean_sidereal_time00(uta, utb, tta, ttb)
-    ee00a = equation_of_equinoxes_a00(tta, ttb)
-    mod2pi(gmst00 + ee00a)
-end
-
-"""
-    greenwich_apparent_sidereal_time_b00(uta, utb, tta, ttb)
-
-Returns Greenwich apparent sidereal time for given two, 2 part Julian date. (UT1, TT)
-
-# Example
-
-```jldoctest
-julia> greenwich_apparent_sidereal_time_b00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-4.95963236232993
-```
-"""
-function greenwich_apparent_sidereal_time_b00(uta, utb)
-    gmst00 = greenwich_mean_sidereal_time00(uta, utb, uta, utb)
-    ee00b = equation_of_equinoxes_b00(uta, utb)
-    mod2pi(gmst00 + ee00b)
-end
-
-"""
-    greenwich_apparent_sidereal_time_a06(uta, utb, tta, ttb)
-
-Returns Greenwich apparent sidereal time for given two, 2 part Julian dates. (UT1, TT)
-
-# Example
-
-```jldoctest
-julia> greenwich_apparent_sidereal_time_a06(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009351851851)
-4.959632359298287
-```
-"""
-function greenwich_apparent_sidereal_time_a06(uta, utb, tta, ttb)
-    ep = TTEpoch(tta * days, ttb * days, origin=:julian)
-    rnpb = precession_nutation_matrix(iau2006a, ep)
-    greenwich_apparent_sidereal_time06(uta, utb, tta, ttb, rnpb)
-end
 
 """
     celestial_to_intermediate_frame_of_date(jd1, jd2, x, y)
@@ -1095,7 +534,8 @@ julia> celestial_to_terrestrial_matrix(2.4579405e6, 0.0, 2.4579405e6, -0.0007966
 """
 function celestial_to_terrestrial_matrix(tta, ttb, uta, utb, x, y, xp, yp)
     rc2i = celestial_to_intermediate_frame_of_date(tta, ttb, x, y)
-    era = earth_rotation_angle(uta, utb)
+    ut = UT1Epoch(uta * days, utb * days, origin=:julian)
+    era = earth_rotation_angle(iau2000, ut)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
@@ -1119,7 +559,8 @@ julia> celestial_to_terrestrial_a00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009
 """
 function celestial_to_terrestrial_a00(tta, ttb, uta, utb, xp, yp)
     rc2i = celestial_to_intermediate_matrix_a00(tta, ttb)
-    era = earth_rotation_angle(uta, utb)
+    ut = UT1Epoch(uta * days, utb * days, origin=:julian)
+    era = earth_rotation_angle(iau2000, ut)
     sp = tio_locator(tta, ttb)
 
     rpom = polar_motion(xp, yp, sp)
@@ -1143,7 +584,8 @@ julia> celestial_to_terrestrial_b00(2.4579405e6, 0.0, 2.4579405e6, -0.0007966009
 """
 function celestial_to_terrestrial_b00(tta, ttb, uta, utb, xp, yp)
     rc2i = celestial_to_intermediate_matrix_b00(tta, ttb)
-    era = earth_rotation_angle(uta, utb)
+    ut = UT1Epoch(uta * days, utb * days, origin=:julian)
+    era = earth_rotation_angle(iau2000, ut)
 
     rpom = polar_motion(xp, yp, 0.0)
     return c2tcio(rc2i, era, rpom)
