@@ -23,25 +23,15 @@ export
     mean_longitude_minus_lan,
     polar_motion,
     precession_fukushima_williams06,
-    precession_rate_part_of_nutation,
     s00,
     s06,
     tio_locator,
     xy06,
     greenwich_apparent_sidereal_time06,
     equation_of_equinoxes_94,
-    nutation_matrix80,
-    precession_nutation_a00,
-    precession_nutation_b00,
-    precession_nutation_matrix_a00,
-    precession_nutation_matrix_b00,
     precession_nutation_matrix_a06,
     s00a,
     s00b,
-    nutation_matrix_day_a00,
-    nutation_matrix_day_b00,
-    num06a,
-    nutation_matrix_day,
     xys00a,
     xys00b,
     s06a,
@@ -565,23 +555,6 @@ function greenwich_mean_sidereal_time06(ut1, ut2, tt1, tt2)
 end
 
 """
-    precession_rate_part_of_nutation(jd1, jd2)
-
-Returns precession corrections for a given 2 part Julian date (TT).
-
-# Example
-
-```jldoctest
-julia> precession_rate_part_of_nutation(2400000.5, 53736)
--0.8716465172668347629e-7, -0.7342018386722813087e-8
-```
-"""
-function precession_rate_part_of_nutation(jd1, jd2)
-    t = ((jd1 - J2000) + jd2) / DAYS_PER_CENTURY
-    -sec2rad(0.29965) * t, -sec2rad(0.02524) * t
-end
-
-"""
     equation_of_origins(rnpb, s)
 
 Returns the equation of origins(radians) for given nutation-bias-precession matrix and the CIO locator.
@@ -819,118 +792,6 @@ function equation_of_equinoxes_94(jd1, jd2)
 end
 
 """
-    nutation_matrix80(jd1, jd2)
-
-Returns nutation matrix for a given 2 part Julian date (TDB).
-
-# Example
-
-```jldoctest
-julia> nutation_matrix80(2.4578265e6, 0.30434616919175345)
-3×3 Rotations.RotXZX{Float64}(0.409054, 3.75653e-5, -0.409017):
- 1.0         -3.44666e-5  -1.494e-5
- 3.44661e-5   1.0         -3.66564e-5
- 1.49413e-5   3.66559e-5   1.0
- ```
-"""
-function nutation_matrix80(jd1, jd2)
-    dpsi, deps = nutation(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    epsa = obliquity(iau1980, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
-    nutation_matrix(epsa, dpsi, deps)
-end
-
-"""
-    precession_nutation_a00(jd1, jd2, dpsi, deps)
-
-Returns
-    dpsi, deps
-    epsa
-    rb
-    rp
-    rbp
-    rn
-    rbpn
-for a given 2 part Julian date (TT) and nutations.
-
-# Example
-
-```jldoctest
-julia> precession_nutation_a00(2.4578265e6, 0.30434616919175345)
-(-3.758986507815969e-5, -3.6659048454874034e-5, (0.40905374831590824, [1.0 7.07828e-8 -8.05622e-8; -7.07828e-8 1.0 -3.30604e-8; 8.05622e-8 3.30604e-8 1.0], [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.24146e-6; -0.00167106 -3.18524e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.27421e-6; -0.00167098 -3.1523e-6 0.999999], [1.0 -3.44892e-5 -1.49498e-5; 3.44886e-5 1.0 -3.66593e-5; 1.4951e-5 3.66588e-5 1.0], [0.999991 0.00381152 0.00165589; -0.00381145 0.999993 -3.98758e-5; -0.00165603 3.35641e-5 0.999999]))
-```
-"""
-function precession_nutation_a00(jd1, jd2)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsi, deps = nutation(iau2000a, ep)
-    dpsi, deps, precession_nutation(iau2000, ep, dpsi, deps)
-end
-
-"""
-    precession_nutation_b00(jd1, jd2, dpsi, deps)
-
-Returns
-    dpsi, deps
-    epsa
-    rb
-    rp
-    rbp
-    rn
-    rbpn
-for a given 2 part Julian date (TT) and nutations.
-
-# Example
-
-```jldoctest
-julia> precession_nutation_b00(2.4578265e6, 0.30434616919175345)
-(-3.758913944197044e-5, -3.665743003046017e-5, (0.40905374831590824, [1.0 7.07828e-8 -8.05622e-8; -7.07828e-8 1.0 -3.30604e-8; 8.05622e-8 3.30604e-8 1.0], [0.999991 0.00384587 0.00167106; -0.00384587 0.999993 -3.24146e-6; -0.00167106 -3.18524e-6 0.999999], [0.999991 0.00384594 0.00167098; -0.00384594 0.999993 -3.27421e-6; -0.00167098 -3.1523e-6 0.999999], [1.0 -3.44885e-5 -1.49495e-5; 3.44879e-5 1.0 -3.66577e-5; 1.49508e-5 3.66572e-5 1.0], [0.999991 0.00381152 0.00165589; -0.00381146 0.999993 -3.98741e-5; -0.00165603 3.35625e-5 0.999999]))
-```
-"""
-function precession_nutation_b00(jd1, jd2)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsi, deps = nutation(iau2000b, ep)
-    dpsi, deps, precession_nutation(iau2000, ep, dpsi, deps)
-end
-
-
-"""
-    precession_nutation_matrix_a00(jd1, jd2)
-
-Returns classical NBP matrix for a given 2 part Julian date(TT)
-
-# Example
-
-```jldoctest
-julia> precession_nutation_matrix_a00(2.4578265e6, 0.30434616919175345)
-3×3 Rotations.RotMatrix{3,Float64,9}:
-  0.999991    0.00381152   0.00165589
- -0.00381145  0.999993    -3.98758e-5
- -0.00165603  3.35641e-5   0.999999
-```
-"""
-function precession_nutation_matrix_a00(jd1, jd2)
-    precession_nutation_a00(jd1, jd2)[3][6]
-end
-
-"""
-    precession_nutation_matrix_b00(jd1, jd2)
-
-Returns classical NBP matrix for a given 2 part Julian date(TT)
-
-# Example
-
-```jldoctest
-julia> precession_nutation_matrix_b00(2.4578265e6, 0.30434616919175345)
-3×3 Rotations.RotMatrix{3,Float64,9}:
-  0.999991    0.00381152   0.00165589
- -0.00381146  0.999993    -3.98741e-5
- -0.00165603  3.35625e-5   0.999999
-```
-"""
-function precession_nutation_matrix_b00(jd1, jd2)
-    precession_nutation_b00(jd1, jd2)[3][6]
-end
-
-"""
     precession_nutation_matrix_a06(jd1, jd2)
 
 Returns classical NBP matrix for a given 2 part Julian date(TT)
@@ -947,7 +808,7 @@ julia> precession_nutation_matrix_a06(2.4578265e6, 0.30434616919175345)
 """
 function precession_nutation_matrix_a06(jd1, jd2)
     gamb, phib, psib, epsa = precession_fukushima_williams06(jd1, jd2)
-    dp, de = nutation(iau2006, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
+    dp, de = nutation(iau2006a, TTEpoch(jd1 * days, jd2 * days, origin=:julian))
     fukushima_williams_matrix(gamb, phib, psib + dp, epsa + de)
 end
 """
@@ -963,7 +824,8 @@ julia> s00a(2.4578265e6, 0.30434616919175345)
 ```
 """
 function s00a(jd1, jd2)
-    rbpn = precession_nutation_matrix_a00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000a, ep)
     x, y = cip_coords(rbpn)
     s00(jd1, jd2, x, y)
 end
@@ -981,70 +843,10 @@ julia> s00b(2.4578265e6, 0.30434616919175345)
 ```
 """
 function s00b(jd1, jd2)
-    rbpn = precession_nutation_matrix_b00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000b, ep)
     x, y = cip_coords(rbpn)
     s00(jd1, jd2, x, y)
-end
-
-"""
-    nutation_matrix_day_a00(jd1, jd2)
-
-Returns nutation matrix for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> precession_nutation_a00(2.4578265e6, 0.30434616919175345)[3][5]
-3×3 Rotations.RotXZX{Float64}(0.409054, 3.75891e-5, -0.409017):
- 1.0         -3.44885e-5  -1.49495e-5
- 3.44879e-5   1.0         -3.66577e-5
- 1.49508e-5   3.66572e-5   1.0
-```
-"""
-function nutation_matrix_day_a00(jd1, jd2)
-    precession_nutation_a00(jd1, jd2)[3][5]
-end
-
-"""
-    nutation_matrix_day_b00(jd1, jd2)
-
-Returns nutation matrix for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> precession_nutation_b00(2.4578265e6, 0.30434616919175345)[3][5]
-3×3 Rotations.RotXZX{Float64}(0.409054, 3.75891e-5, -0.409017):
- 1.0         -3.44885e-5  -1.49495e-5
- 3.44879e-5   1.0         -3.66577e-5
- 1.49508e-5   3.66572e-5   1.0
-```
-"""
-function nutation_matrix_day_b00(jd1, jd2)
-    precession_nutation_b00(jd1, jd2)[3][5]
-end
-
-"""
-    nutation_matrix_day(jd1,jd2)
-
-Returns nutation matrix for a given 2 part Julian date(TT).
-
-# Example
-
-```jldoctest
-julia> precession_nutation_b00(2.4578265e6, 0.30434616919175345)[3][5]
-3×3 Rotations.RotXZX{Float64}(0.409054, 3.75891e-5, -0.409017):
- 1.0         -3.44885e-5  -1.49495e-5
- 3.44879e-5   1.0         -3.66577e-5
- 1.49508e-5   3.66572e-5   1.0
-```
-"""
-function nutation_matrix_day(jd1, jd2)
-    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    eps = obliquity(iau1980, ep)
-    dp, de = nutation(iau2006, ep)
-
-    nutation_matrix(eps, dp, de)
 end
 
 """
@@ -1060,7 +862,8 @@ julia> xys00a(2.4578265e6, 0.30434616919175345)
 ```
 """
 function xys00a(jd1, jd2)
-    rbpn = precession_nutation_matrix_a00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000a, ep)
     x, y = cip_coords(rbpn)
     return x, y, s00(jd1, jd2, x, y)
 end
@@ -1078,7 +881,8 @@ julia> xys00b(2.4578265e6, 0.30434616919175345)
 ```
 """
 function xys00b(jd1, jd2)
-    rbpn = precession_nutation_matrix_b00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000b, ep)
     x, y = cip_coords(rbpn)
     return x, y, s00(jd1, jd2, x, y)
 end
@@ -1114,7 +918,7 @@ julia> equation_of_equinoxes_a00(2.4578265e6, 0.30434616919175345)
 """
 function equation_of_equinoxes_a00(jd1, jd2)
     ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
+    dpsipr, depspr = precession(iau2000, ep)
     epsa = obliquity(iau1980, ep) + depspr
     dpsi, deps = nutation(iau2000a, ep)
     dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
@@ -1134,7 +938,7 @@ julia> equation_of_equinoxes_b00(2.4578265e6, 0.30434616919175345)
 """
 function equation_of_equinoxes_b00(jd1, jd2)
     ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
-    dpsipr, depspr = precession_rate_part_of_nutation(jd1, jd2)
+    dpsipr, depspr = precession(iau2000, ep)
     epsa = obliquity(iau1980, ep) + depspr
     dpsi, deps = nutation(iau2000b, ep)
     dpsi * cos(epsa) + equation_of_equinoxes_complementary_terms(jd1, jd2)
@@ -1303,7 +1107,8 @@ julia> celestial_to_intermediate_matrix_a00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function celestial_to_intermediate_matrix_a00(jd1, jd2)
-    rbpn = precession_nutation_matrix_a00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000a, ep)
     celestial_to_intermediate_matrix(jd1, jd2, rbpn)
 end
 
@@ -1323,7 +1128,8 @@ julia> celestial_to_intermediate_matrix_b00(2.4578265e6, 0.30434616919175345)
 ```
 """
 function celestial_to_intermediate_matrix_b00(jd1, jd2)
-    rbpn = precession_nutation_matrix_b00(jd1, jd2)
+    ep = TTEpoch(jd1 * days, jd2 * days, origin=:julian)
+    rbpn = precession_nutation_matrix(iau2000b, ep)
     celestial_to_intermediate_matrix(jd1, jd2, rbpn)
 end
 

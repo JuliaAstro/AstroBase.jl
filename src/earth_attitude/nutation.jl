@@ -218,7 +218,7 @@ function nutation(::IAU2000B, ep::Epoch)
     return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end
 
-function nutation(::IAU2006, ep::Epoch)
+function nutation(::IAU2006A, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
     fj2 = -2.7774e-6 * t
@@ -232,5 +232,11 @@ end
 
 function nutation_matrix(ϵ, δψ, δϵ)
     angle_to_dcm(ϵ, -δψ, -(ϵ + δϵ), :XZX)
+end
+
+function nutation_matrix(iau, ep)
+    δψ, δϵ = nutation(iau, ep)
+    ϵ = obliquity(iau, ep)
+    return nutation_matrix(ϵ, δψ, δϵ)
 end
 

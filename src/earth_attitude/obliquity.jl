@@ -33,13 +33,13 @@ julia> obliquity(iau2006, ep)
 """
 obliquity
 
-function obliquity(::IAU1980, ep::Epoch)
+function obliquity(::IAU1980Model, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
     obl = @evalpoly(t, 84381.448, -46.8150, 0.00059, 0.001813)
     return sec2rad(obl)
 end
 
-function obliquity(::IAU2006, ep::Epoch)
+function obliquity(::IAU2006Model, ep::Epoch)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
     obl = @evalpoly(t, 84381.406, -46.836769, -0.0001831, 0.00200340,
                     -0.000000576, -0.0000000434)

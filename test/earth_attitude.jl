@@ -21,35 +21,59 @@ import ERFA
             @test nut80_act[1] ≈ nut80_exp[1]
             @test nut80_act[2] ≈ nut80_exp[2]
         end
-
         @testset "nut00a" begin
             nut00a_exp = ERFA.nut00a(jd...)
             nut00a_act = nutation(iau2000a, ep)
             @test nut00a_act[1] ≈ nut00a_exp[1]
             @test nut00a_act[2] ≈ nut00a_exp[2]
         end
-
         @testset "nut00b" begin
             nut00b_exp = ERFA.nut00b(jd...)
             nut00b_act = nutation(iau2000b, ep)
             @test nut00b_act[1] ≈ nut00b_exp[1]
             @test nut00b_act[2] ≈ nut00b_exp[2]
         end
-
-        @testset "nut06" begin
-            nut06_exp = ERFA.nut06a(jd...)
-            nut06_act = nutation(iau2006, ep)
-            @test nut06_act[1] ≈ nut06_exp[1]
-            @test nut06_act[2] ≈ nut06_exp[2]
+        @testset "nut06a" begin
+            nut06a_exp = ERFA.nut06a(jd...)
+            nut06a_act = nutation(iau2006a, ep)
+            @test nut06a_act[1] ≈ nut06a_exp[1]
+            @test nut06a_act[2] ≈ nut06a_exp[2]
         end
-
         @testset "numat" begin
             ϵ = obliquity(iau2006, ep)
-            δψ, δϵ = nutation(iau2006, ep)
+            δψ, δϵ = nutation(iau2006a, ep)
             numat_exp = ERFA.numat(ϵ, δψ, δϵ)
             numat_act = nutation_matrix(ϵ, δψ, δϵ)
             @testset for i in eachindex(numat_act, numat_exp)
                 @test numat_act[i] ≈ numat_exp[i]
+            end
+        end
+        @testset "nutm80" begin
+            nutm80_exp = ERFA.nutm80(jd...)
+            nutm80_act = nutation_matrix(iau1980, ep)
+            @testset for i in eachindex(nutm80_act, nutm80_exp)
+                @test nutm80_act[i] ≈ nutm80_exp[i]
+            end
+        end
+        @testset "num00a" begin
+            num00a_exp = ERFA.num00a(jd...)
+            num00a_act = nutation_matrix(iau2000a, ep)
+            @testset for i in eachindex(num00a_act, num00a_exp)
+                @test num00a_act[i] ≈ num00a_exp[i]
+            end
+        end
+        @testset "num00b" begin
+            num00b_exp = ERFA.num00b(jd...)
+            num00b_act = nutation_matrix(iau2000b, ep)
+            @testset for i in eachindex(num00b_act, num00b_exp)
+                @test num00b_act[i] ≈ num00b_exp[i]
+            end
+        end
+        @testset "num06a" begin
+            num06a_exp = ERFA.num06a(jd...)
+            num06a_act = nutation_matrix(iau2006a, ep)
+            @testset for i in eachindex(num06a_act, num06a_exp)
+                @test num06a_act[i] ≈ num06a_exp[i]
             end
         end
     end
@@ -64,7 +88,6 @@ import ERFA
                 @test bi00_act[i] ≈ bi00_exp[i]
             end
         end
-
         @testset "pr00" begin
             pr00_exp = ERFA.pr00(jd...)
             pr00_act = precession(iau2000, ep)
@@ -100,6 +123,50 @@ import ERFA
                         @test act[j] ≈ exp[j]
                     end
                 end
+            end
+        end
+        @testset "pn00a" begin
+            pn00a_exp = ERFA.pn00a(jd...)
+            pn00a_act = precession_nutation(iau2000a, ep)
+            @testset for i in eachindex(pn00a_act, pn00a_exp)
+                if i in 1:3
+                    @test pn00a_act[i] ≈ pn00a_exp[i]
+                else
+                    act = pn00a_act[i]
+                    exp = pn00a_exp[i]
+                    @testset for j in eachindex(act, exp)
+                        @test act[j] ≈ exp[j]
+                    end
+                end
+            end
+        end
+        @testset "pn00b" begin
+            pn00b_exp = ERFA.pn00b(jd...)
+            pn00b_act = precession_nutation(iau2000b, ep)
+            @testset for i in eachindex(pn00b_act, pn00b_exp)
+                if i in 1:3
+                    @test pn00b_act[i] ≈ pn00b_exp[i]
+                else
+                    act = pn00b_act[i]
+                    exp = pn00b_exp[i]
+                    @testset for j in eachindex(act, exp)
+                        @test act[j] ≈ exp[j]
+                    end
+                end
+            end
+        end
+        @testset "pnm00a" begin
+            pnm00a_exp = ERFA.pnm00a(jd...)
+            pnm00a_act = precession_nutation_matrix(iau2000a, ep)
+            @testset for i in eachindex(pnm00a_act, pnm00a_exp)
+                @test pnm00a_act[i] ≈ pnm00a_exp[i]
+            end
+        end
+        @testset "pnm00b" begin
+            pnm00b_exp = ERFA.pnm00b(jd...)
+            pnm00b_act = precession_nutation_matrix(iau2000b, ep)
+            @testset for i in eachindex(pnm00b_act, pnm00b_exp)
+                @test pnm00b_act[i] ≈ pnm00b_exp[i]
             end
         end
     end
@@ -170,40 +237,6 @@ import ERFA
 end
 
 @testset "Dependencies" begin
-    @test nutation_matrix80(2.4578265e6, 0.30434616919175345) ≈ ERFA.nutm80(2.4578265e6, 0.30434616919175345)
-
-    let (a1, b1, c1) = precession_nutation_a00(2.4578265e6, 0.30434616919175345)
-        (a2, b2, c2, d2, e2, f2, g2, h2) = ERFA.pn00a(2.4578265e6, 0.30434616919175345)
-        @test a1 ≈ a2
-        @test b1 ≈ b2
-        @test c1[1] ≈ c2
-        @test c1[2] ≈ d2
-        @test c1[3] ≈ e2
-        @test c1[4] ≈ f2
-        @test c1[5] ≈ g2
-        @test c1[6] ≈ h2
-    end
-
-    let (a1, b1, c1) = precession_nutation_b00(2.4578265e6, 0.30434616919175345)
-        (a2, b2, c2, d2, e2, f2, g2, h2) = ERFA.pn00b(2.4578265e6, 0.30434616919175345)
-        @test a1 ≈ a2
-        @test b1 ≈ b2
-        @test c1[1] ≈ c2
-        @test c1[2] ≈ d2
-        @test c1[3] ≈ e2
-        @test c1[4] ≈ f2
-        @test c1[5] ≈ g2
-        @test c1[6] ≈ h2
-    end
-
-    @test precession_nutation_matrix_a00(2.4578265e6, 0.30434616919175345) ≈ ERFA.pnm00a(2.4578265e6, 0.30434616919175345)
-    @test precession_nutation_matrix_b00(2.4578265e6, 0.30434616919175345) ≈ ERFA.pnm00b(2.4578265e6, 0.30434616919175345)
-    @test precession_nutation_matrix_a06(2.4578265e6, 0.30434616919175345) ≈ ERFA.pnm06a(2.4578265e6, 0.30434616919175345)
-
-    @test nutation_matrix_day_a00(2.4578265e6, 0.30434616919175345) ≈ ERFA.num00a(2.4578265e6, 0.30434616919175345)
-    @test nutation_matrix_day_b00(2.4578265e6, 0.30434616919175345) ≈ ERFA.num00b(2.4578265e6, 0.30434616919175345)
-
-    @test nutation_matrix_day(2.4578265e6, 0.30434616919175345) ≈ ERFA.num06a(2.4578265e6, 0.30434616919175345)
     @test s06a(2.4578265e6, 0.30434616919175345) ≈ ERFA.s06a(2.4578265e6, 0.30434616919175345)
 
     @test equation_of_equinoxes_a00(2.4578265e6, 0.30434616919175345) ≈ ERFA.ee00a(2.4578265e6, 0.30434616919175345)

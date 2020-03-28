@@ -1,4 +1,4 @@
-export precession_nutation
+export precession_nutation, precession_nutation_matrix
 
 function precession_nutation(::IAU2000, ep::Epoch, δψ, δϵ)
     # IAU 2000 precession-rate adjustments.
@@ -10,5 +10,21 @@ function precession_nutation(::IAU2000, ep::Epoch, δψ, δϵ)
     # Nutation matrix
     rn = nutation_matrix(ϵ, δψ, δϵ)
     return ϵ, rb, rp, rbp, rn, rn * rbp
+end
+
+function precession_nutation(iau::IAU2000Model, ep::Epoch)
+    n = nutation(iau, ep)
+    pn = precession_nutation(iau2000, ep, n...)
+    return n..., pn...
+end
+
+function precession_nutation_matrix(iau::IAU2000Model, ep::Epoch)
+    pn = precession_nutation(iau, ep)
+    return pn[end]
+end
+
+function nutation_matrix(iau::IAU2000Model, ep::Epoch)
+    pn = precession_nutation(iau, ep)
+    return pn[end-1]
 end
 
