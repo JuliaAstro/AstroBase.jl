@@ -16,7 +16,6 @@ using ..Bodies: CelestialBody,
     sun,
     grav_param
 using ..Constants: astronomical_unit
-using ..EarthAttitude: obliquity_of_ecliptic_06
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
 using ..Util: sec2rad, normalize_angle
 
@@ -376,17 +375,17 @@ function state!(pos, vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBod
     pos .+= rot * r
     vel .+= rot * v
 
-	return pos, vel
+    return pos, vel
 end
 
 function position!(pos, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
     state!(pos, zeros(3), simon_bretagnon, ep, sun, body)
-    pos
+    return pos
 end
 
 function velocity!(vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBody)
     state!(zeros(3), vel, simon_bretagnon, ep, sun, body)
-    vel
+    return vel
 end
 
 function state!(pos, vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
@@ -394,16 +393,16 @@ function state!(pos, vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::
     rv2 = state!(zeros(3), zeros(3), simon_bretagnon, ep, sun, to)
     pos .+= rv2[1] .- rv1[1]
     vel .+= rv2[2] .- rv1[2]
-    pos, vel
+    return pos, vel
 end
 
 function position!(pos, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
     state!(pos, zeros(3), simon_bretagnon, ep, from, to)
-    pos
+    return pos
 end
 
 function velocity!(vel, ::SimonBretagnon, ep::Epoch, from::CelestialBody, to::CelestialBody)
     state!(zeros(3), vel, simon_bretagnon, ep, from, to)
-    vel
+    return vel
 end
 

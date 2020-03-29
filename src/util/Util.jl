@@ -39,7 +39,7 @@ rad2sec(rad) = rad2deg(rad) * 3600
 sec2deg(sec) = sec / 3600
 deg2sec(deg) = deg * 3600
 
-function normalize_angle(angle, center)
+function normalize_angle(angle, center=0.0)
     angle - 2π * floor((angle + π - center) / 2π)
 end
 
