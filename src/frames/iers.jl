@@ -1,14 +1,16 @@
 import EarthOrientation
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
-using AstroTime: value, julian, julian_twopart, TTEpoch, UT1Epoch, TDBEpoch
+using AstroTime: UTC, julian_period
 using ..EarthAttitude:
     celestial_to_intermediate,
-    earth_rotation_angle,
-    polar_motion,
     cio_locator,
-    tio_locator,
-    cip_coords
+    cip_coords,
+    earth_rotation_angle,
+    iau2000,
+    iau2006,
+    polar_motion,
+    tio_locator
 using ..Util: sec2rad
 
 export
@@ -35,58 +37,57 @@ from_sym(::Val{:ITRF}) = itrf
 add_edge!(FRAMES, :TIRF, :ITRF)
 
 function Rotation(::ICRF, ::CIRF, ep::Epoch)
-    m = precession_nutation(TTEpoch(ep))
-    Rotation{icrf, cirf}(m')
+    m = precession_nutation(ep)
+    return Rotation{icrf, cirf}(m)
 end
 
 function Rotation(::CIRF, ::ICRF, ep::Epoch)
-    m = precession_nutation(TTEpoch(ep))
-    Rotation{cirf, icrf}(m)
+    m = precession_nutation(ep)
+    return Rotation{cirf, icrf}(m')
 end
 
 function Rotation(::CIRF, ::TIRF, ep::Epoch)
-    ut1 = UT1Epoch(ep)
-    era = earth_rotation_angle(value.(julian_twopart(ut1))...)
-    rate = rotation_rate(earth, TDBEpoch(ep))
+    era = earth_rotation_angle(iau2000, ep)
+    rate = rotation_rate(earth, ep)
     m = angleaxis_to_dcm(era, [0, 0, 1])
     m′ = ddcm(m, [0, 0, rate])
-    Rotation{cirf, tirf}(m, m′)
+    return Rotation{cirf, tirf}(m, m′)
 end
 
 function Rotation(::TIRF, ::CIRF, ep::Epoch)
-    ut1 = UT1Epoch(ep)
-    era = earth_rotation_angle(value.(julian_twopart(ut1))...)
-    rate = rotation_rate(earth, TDBEpoch(ep))
+    era = earth_rotation_angle(iau2000, ep)
+    rate = rotation_rate(earth, ep)
     m = angleaxis_to_dcm(-era, [0, 0, 1])
     m′ = ddcm(m, [0, 0, -rate])
-    Rotation{tirf, cirf}(m, m′)
+    return Rotation{tirf, cirf}(m, m′)
 end
 
-function polarmotion(ep::TTEpoch)
-    xp, yp = EarthOrientation.polarmotion(value(julian(ep)))
+function polarmotion(ep::Epoch)
+    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
+    xp, yp = EarthOrientation.polarmotion(jd)
     xp = sec2rad(xp)
     yp = sec2rad(yp)
-    sp00 = tio_locator(value.(julian_twopart(ep))...)
-    reshape(polar_motion(xp, yp, sp00), (3,3))
+    sp00 = tio_locator(iau2000, ep)
+    return polar_motion(iau2000, xp, yp, sp00)
 end
 
-function precession_nutation(ep::TTEpoch)
-    dx, dy = EarthOrientation.precession_nutation00(value(julian(ep)))
-    jd1, jd2 = value.(julian_twopart(ep))
+function precession_nutation(ep::Epoch)
+    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
+    dx, dy = EarthOrientation.precession_nutation00(jd)
     x, y = cip_coords(iau2006, ep)
     s = cio_locator(iau2006, ep, x, y)
     x += sec2rad(dx/1000.0)
     y += sec2rad(dy/1000.0)
-    reshape(celestial_to_intermediate(x, y, s), (3,3))
+    return celestial_to_intermediate(x, y, s)
 end
 
 function Rotation(::TIRF, ::ITRF, ep::Epoch)
-    m = polarmotion(TTEpoch(ep))
-    Rotation{tirf, itrf}(m')
+    m = polarmotion(ep)
+    Rotation{tirf, itrf}(m)
 end
 
 function Rotation(::ITRF, ::TIRF, ep::Epoch)
-    m = polarmotion(TTEpoch(ep))
-    Rotation{itrf, tirf}(m)
+    m = polarmotion(ep)
+    Rotation{itrf, tirf}(m')
 end
 
