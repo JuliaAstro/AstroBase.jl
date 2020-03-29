@@ -1,9 +1,9 @@
-using AstroTime: SECONDS_PER_DAY, TDB, TT, UT1Epoch, fractionofday, j2000, value, julian_period, UT1
-using ..Util: normalize_angle
+using AstroTime: Epoch, SECONDS_PER_DAY, TDB, TT, UT1, julian_period
+using ..Util: normalize_angle, sec2rad
 
 export apparent_sidereal, earth_rotation_angle, equinoxes, mean_sidereal
 
-function earth_rotation_angle(::IAU2000, ep)
+function earth_rotation_angle(::IAU2000, ep::Epoch)
     t = julian_period(ep; scale=UT1, raw=true)
     f = t % 1.0
     return mod2pi(2π * (f + 0.7790572732640 + 0.00273781191135448t))
@@ -117,7 +117,7 @@ function mean_sidereal(::IAU2000, ep::Epoch; scale=TT)
 end
 
 function mean_sidereal(::IAU2006, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
     gmst0 = @evalpoly(
         t,
         0.014506,

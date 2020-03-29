@@ -1,7 +1,7 @@
-using AstroTime: Epoch, TT, TTEpoch, centuries, j2000, value, julian_period
+using AstroTime: Epoch, TT, centuries, julian_period
 using ReferenceFrameRotations: angle_to_dcm
 
-using ..Util: normalize_angle
+using ..Util: normalize_angle, sec2rad
 
 export nutation, nutation_matrix
 
@@ -117,7 +117,6 @@ end
 
 function nutation(::IAU2000A, ep::Epoch; scale=TT)
     t = julian_period(ep; scale=scale, unit=centuries, raw=true)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
 
     el = fundamental(luna, t)
     f  = fundamental(luna, Longitude(), t)
@@ -220,7 +219,7 @@ function nutation(::IAU2000B, ep::Epoch; scale=TT)
 end
 
 function nutation(::IAU2006A, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
 
     fj2 = -2.7774e-6 * t
     δψ, δϵ = nutation(iau2000a, ep)

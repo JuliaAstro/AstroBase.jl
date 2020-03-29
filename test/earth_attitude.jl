@@ -6,7 +6,7 @@ import ERFA
 @testset "Earth Attitude" begin
     @testset "Fundamental Arguments" begin
         ep = UTCEpoch(2020, 3, 16, 18, 15, 32.141)
-        t = ep |> TDBEpoch |> j2000 |> centuries |> value
+        t = julian_period(ep; scale=TDB, unit=centuries, raw=true)
         longitude = AstroBase.EarthAttitude.Longitude()
         elongation = AstroBase.EarthAttitude.Elongation()
         node = AstroBase.EarthAttitude.AscendingNode()

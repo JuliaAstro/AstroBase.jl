@@ -1,6 +1,9 @@
 using ..Bodies
+using ..Util: sec2rad
 
 export fundamental
+
+const ARCSECONDS_IN_CIRCLE = 1296000.0
 
 function fundamental(::Sun, t)
     p = @evalpoly(t, 1287104.793048, 129596581.0481, -0.5532, 0.000136, -0.00001149)
@@ -42,3 +45,4 @@ fundamental(::Saturn, t) = mod2pi(0.874016757 + 21.3299104960t)
 fundamental(::Uranus, t) = mod2pi(5.481293872 + 7.4781598567t)
 fundamental(::Neptune, t) = mod2pi(5.311886287 + 3.8133035638t)
 fundamental(t) = @evalpoly(t, 0.0, 0.024381750, 0.00000538691)
+

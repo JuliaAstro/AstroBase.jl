@@ -1,4 +1,5 @@
-using AstroTime: Epoch, TT, TTEpoch, centuries, j2000, value
+using AstroTime: Epoch, TT, centuries, julian_period
+using ..Util: sec2rad
 
 export
     bias,
@@ -22,7 +23,7 @@ function precession(::IAU2000, ep::Epoch; scale=TT)
 end
 
 function fukushima_williams(::IAU2006, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
 
     γ = @evalpoly(
         t,
@@ -63,7 +64,7 @@ function fukushima_williams_matrix(γ, ϕ, ψ, ϵ)
 end
 
 function bias_precession_matrix(::IAU2000, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
 
     ϵ₀ = sec2rad(84381.448)
 
