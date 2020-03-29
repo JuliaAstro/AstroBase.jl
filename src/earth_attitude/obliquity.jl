@@ -1,4 +1,4 @@
-using AstroTime: Epoch, TTEpoch, centuries, j2000, value
+using AstroTime: Epoch, TT, TTEpoch, centuries, j2000, value, julian_period
 
 export obliquity
 
@@ -33,9 +33,10 @@ julia> obliquity(iau2006, ep)
 """
 obliquity
 
-function obliquity(::IAU1980Model, ep::Epoch)
+function obliquity(::IAU1980Model, ep::Epoch; scale=TT)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
-    obl = @evalpoly(t, 84381.448, -46.8150, 0.00059, 0.001813)
+    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
+    obl = @evalpoly(t, 84381.448, -46.8150, -0.00059, 0.001813)
     return sec2rad(obl)
 end
 

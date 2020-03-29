@@ -1,4 +1,4 @@
-using AstroTime: Epoch, TTEpoch, centuries, j2000, value
+using AstroTime: Epoch, TT, TTEpoch, centuries, j2000, value, julian_period
 using ReferenceFrameRotations: angle_to_dcm
 
 using ..Util: normalize_angle
@@ -82,8 +82,8 @@ include(joinpath("constants", "nutation_1980.jl"))
 include(joinpath("constants", "nutation_2000a.jl"))
 include(joinpath("constants", "nutation_2000b.jl"))
 
-function nutation(::IAU1980, ep)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+function nutation(::IAU1980, ep; scale=TT)
+    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
 
     el_poly = @evalpoly t 485866.733 715922.633 31.310 0.064
     el = normalize_angle(sec2rad(el_poly) + (1325.0 * t % 1.0) * 2π)
@@ -115,7 +115,8 @@ function nutation(::IAU1980, ep)
     return δψ, δϵ
 end
 
-function nutation(::IAU2000A, ep::Epoch)
+function nutation(::IAU2000A, ep::Epoch; scale=TT)
+    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
     t = ep |> TTEpoch |> j2000 |> centuries |> value
 
     el = fundamental(luna, t)
@@ -187,8 +188,8 @@ function nutation(::IAU2000A, ep::Epoch)
     return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end
 
-function nutation(::IAU2000B, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+function nutation(::IAU2000B, ep::Epoch; scale=TT)
+    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
 
     el  = (485868.249036 + (1717915923.2178) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
     elp = (1287104.79305 + (129596581.0481) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad

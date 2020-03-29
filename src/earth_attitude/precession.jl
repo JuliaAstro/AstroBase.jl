@@ -1,4 +1,4 @@
-using AstroTime: Epoch, TTEpoch, centuries, j2000, value
+using AstroTime: Epoch, TT, TTEpoch, centuries, j2000, value
 
 export
     bias,
@@ -14,8 +14,8 @@ function bias(::IAU2000)
     return δψ_b, δϵ_b, δra₀
 end
 
-function precession(::IAU2000, ep::Epoch)
-    t = ep |> TTEpoch |> j2000 |> centuries |> value
+function precession(::IAU2000, ep::Epoch; scale=TT)
+    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
     precor = sec2rad(-0.29965)
     oblcor = sec2rad(-0.02524)
     return precor * t, oblcor * t

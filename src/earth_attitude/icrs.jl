@@ -248,11 +248,19 @@ function celestial_to_terrestrial_cio(::IAU2000, ep::Epoch, x, y, xp, yp)
     return celestial_to_terrestrial_cio(rc2i, era, rpom)
 end
 
-function celestial_to_terrestrial_cio(iau::IAU2000Model, ep::Epoch, xp, yp)
-    rc2i = celestial_to_intermediate(iau, ep)
+function celestial_to_terrestrial_cio(::IAU2000A, ep::Epoch, xp, yp)
+    rc2i = celestial_to_intermediate(iau2000a, ep)
     era = earth_rotation_angle(iau2000, ep)
     sp = tio_locator(iau2000, ep)
     rpom = polar_motion(iau2000, xp, yp, sp)
+
+    return celestial_to_terrestrial_cio(rc2i, era, rpom)
+end
+
+function celestial_to_terrestrial_cio(iau::IAU2000B, ep::Epoch, xp, yp)
+    rc2i = celestial_to_intermediate(iau2000b, ep)
+    era = earth_rotation_angle(iau2000, ep)
+    rpom = polar_motion(iau2000, xp, yp, 0.0)
 
     return celestial_to_terrestrial_cio(rc2i, era, rpom)
 end
