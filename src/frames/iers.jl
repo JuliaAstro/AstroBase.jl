@@ -1,7 +1,6 @@
 import EarthOrientation
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
-using AstroTime: UTC, julian_period
 using ..EarthAttitude:
     celestial_to_intermediate,
     cio_locator,
@@ -11,6 +10,7 @@ using ..EarthAttitude:
     iau2006,
     polar_motion,
     tio_locator
+using ..Time: UTC, julian_period
 using ..Util: sec2rad
 
 export

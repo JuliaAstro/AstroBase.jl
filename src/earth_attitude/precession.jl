@@ -1,4 +1,4 @@
-using AstroTime: Epoch, TT, centuries, julian_period
+using ..Time: Epoch, TT, centuries, julian_period
 using ..Util: sec2rad
 
 export

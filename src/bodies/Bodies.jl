@@ -2,8 +2,9 @@ module Bodies
 
 import Base: parent
 
-using AstroTime: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
+
+using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds
 
 export CelestialBody,
     NAIFId,

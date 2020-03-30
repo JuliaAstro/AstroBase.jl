@@ -1,10 +1,10 @@
-import Base: ∘
-
-using AstroTime: Epoch
-
 using LinearAlgebra: I
 using ReferenceFrameRotations: compose_rotation
 using StaticArrays: SMatrix, SDiagonal
+
+using ..Time: Epoch
+
+import Base: ∘
 
 export
     Rotation,

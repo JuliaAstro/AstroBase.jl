@@ -1,7 +1,8 @@
-using AstroTime: Period, Epoch, TimeScale
 using Roots: find_zero
 
-import AstroTime: unit
+using ..Time: Period, Epoch, TimeScale
+
+import ..Time: unit
 import ..Interfaces: AbstractTrajectory
 
 export Trajectory, initial, final, state, events, times,

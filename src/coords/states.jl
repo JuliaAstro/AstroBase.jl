@@ -1,9 +1,9 @@
-using AstroTime: Epoch, TimeScale
 using LinearAlgebra: promote_leaf_eltypes
 using StaticArrays: SVector
 
 using ..Bodies: CelestialBody, earth, grav_param
 using ..Frames: AbstractFrame, icrf
+using ..Time: Epoch, TimeScale
 
 import Base: ==
 import ..Interfaces: AbstractState,

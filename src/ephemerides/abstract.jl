@@ -1,4 +1,3 @@
-using AstroTime: Epoch
 using ..Bodies:
     CelestialBody,
     NAIFId,
@@ -6,6 +5,7 @@ using ..Bodies:
     naifid,
     path_ids,
     ssb
+using ..Time: Epoch
 import ..Interfaces:
     AbstractEphemeris,
     position,

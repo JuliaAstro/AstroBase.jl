@@ -1,7 +1,7 @@
 using Test
 import AstroBase
 
-using AstroTime: Epoch, TDBEpoch, SECONDS_PER_DAY, j2000, seconds, value, julian_twopart
+using AstroBase.Time: Epoch, TDBEpoch, SECONDS_PER_DAY, j2000, seconds, value, julian_twopart
 using AstroBase.Ephemerides
 using AstroBase.Bodies
 using AstroBase.Constants: astronomical_unit

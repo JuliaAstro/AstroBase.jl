@@ -1,6 +1,7 @@
-using AstroTime: Epoch, Period, unit, value
 # using DataInterpolations: CubicSpline
 using DataInterpolations
+
+using ..Time: Epoch, Period, unit, value
 
 export TimeSeries
 

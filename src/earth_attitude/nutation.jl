@@ -1,6 +1,6 @@
-using AstroTime: Epoch, TT, centuries, julian_period
 using ReferenceFrameRotations: angle_to_dcm
 
+using ..Time: Epoch, TT, centuries, julian_period
 using ..Util: normalize_angle, sec2rad
 
 export nutation, nutation_matrix

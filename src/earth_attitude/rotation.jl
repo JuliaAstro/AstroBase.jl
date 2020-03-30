@@ -1,4 +1,4 @@
-using AstroTime: Epoch, SECONDS_PER_DAY, TDB, TT, UT1, julian_period
+using ..Time: Epoch, SECONDS_PER_DAY, TDB, TT, UT1, julian_period
 using ..Util: normalize_angle, sec2rad
 
 export apparent_sidereal, earth_rotation_angle, equinoxes, mean_sidereal

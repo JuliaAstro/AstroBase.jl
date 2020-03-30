@@ -1,6 +1,6 @@
-using AstroTime: Epoch, TT, centuries, julian_period
 using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
+using ..Time: Epoch, TT, centuries, julian_period
 using ..Util: sec2rad
 
 export

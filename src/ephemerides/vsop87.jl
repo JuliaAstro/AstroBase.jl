@@ -2,7 +2,6 @@ using MuladdMacro
 using Parameters: @with_kw
 using StaticArrays: @SMatrix
 
-using AstroTime: Epoch, TDBEpoch, j2000, centuries, value, SECONDS_PER_CENTURY
 using ..Bodies:
     SolarSystemBarycenter,
     Sun,
@@ -15,6 +14,7 @@ using ..Bodies:
     Uranus,
     Neptune
 using ..Constants: astronomical_unit
+using ..Time: Epoch, TDBEpoch, j2000, centuries, value, SECONDS_PER_CENTURY
 
 export VSOP87
 

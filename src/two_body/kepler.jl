@@ -1,5 +1,5 @@
 using LinearAlgebra: cross, norm
-import AstroTime: seconds
+import ..Time: seconds
 
 export kepler, period
 

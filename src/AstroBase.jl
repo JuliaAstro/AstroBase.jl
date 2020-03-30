@@ -2,14 +2,13 @@ module AstroBase
 
 using Reexport
 
-@reexport using AstroTime
-
 struct AstroException <: Exception
     msg::String
 end
 
 Base.showerror(io::IO, err::AstroException) = print(io, err.msg)
 
+include(joinpath("time", "Time.jl"))
 include(joinpath("constants", "Constants.jl"))
 include(joinpath("interfaces", "Interfaces.jl"))
 include(joinpath("util", "Util.jl"))
@@ -23,6 +22,7 @@ include(joinpath("coords", "Coords.jl"))
 # include(joinpath("n_body", "NBody.jl"))
 # include(joinpath("astrometry", "Astrometry.jl"))
 
+@reexport using .Time
 @reexport using .Constants
 @reexport using .Interfaces
 @reexport using .Util

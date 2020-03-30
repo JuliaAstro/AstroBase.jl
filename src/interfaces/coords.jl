@@ -1,4 +1,4 @@
-import AstroTime: timescale
+import ..Time: timescale
 
 export AbstractCoord,
     AbstractState,
