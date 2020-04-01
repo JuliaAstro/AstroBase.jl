@@ -243,7 +243,7 @@ import ERFA
         @testset "c2ibpn" begin
             rnpb = precession_nutation_matrix(iau2000a, ep)
             c2ibpn_act = celestial_to_intermediate(iau2000, ep, rnpb)
-            c2ibpn_exp = ERFA.c2ibpn(tt..., Array(rnpb))
+            c2ibpn_exp = ERFA.c2ibpn(tt..., rnpb)
             @testset for i in eachindex(c2ibpn_act, c2ibpn_exp)
                 @test c2ibpn_act[i] ≈ c2ibpn_exp[i] atol=atol
             end
@@ -269,8 +269,8 @@ import ERFA
             c = polar_motion(iau2000, xys...)
             d_act = celestial_to_terrestrial_cio(a, b, c)
             e_act = celestial_to_terrestrial_equinox(a, b, c)
-            d_exp = ERFA.c2tcio(Array(a), b, Array(c))
-            e_exp = ERFA.c2teqx(Array(a), b, Array(c))
+            d_exp = ERFA.c2tcio(a, b, c)
+            e_exp = ERFA.c2teqx(a, b, c)
             @testset for i in eachindex(d_act, d_exp)
                 @test d_act[i] ≈ d_exp[i] atol=atol
             end
@@ -324,7 +324,7 @@ import ERFA
             rnpb = precession_nutation_matrix(iau2000a, ep)
             x, y = cip_coords(rnpb)
             s = cio_locator(iau2000, ep, x, y)
-            @test equation_of_origins(rnpb, s) ≈ ERFA.eors(Array(rnpb), s) atol=atol
+            @test equation_of_origins(rnpb, s) ≈ ERFA.eors(rnpb, s) atol=atol
         end
         @testset "pom00" begin
             xp = π/4
@@ -429,7 +429,7 @@ import ERFA
         end
         @testset "gst06" begin
             rnpb = precession_nutation_matrix(iau2006a, ep)
-            @test apparent_sidereal(iau2006, ep, rnpb) ≈ ERFA.gst06(ut..., tt..., Array(rnpb)) atol=atol
+            @test apparent_sidereal(iau2006, ep, rnpb) ≈ ERFA.gst06(ut..., tt..., rnpb) atol=atol
         end
         @testset "gst06a" begin
             @test apparent_sidereal(iau2006a, ep) ≈ ERFA.gst06a(ut..., tt...) atol=atol

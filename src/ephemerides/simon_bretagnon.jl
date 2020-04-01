@@ -81,7 +81,7 @@ using ..Bodies: CelestialBody,
 using ..Constants: astronomical_unit
 using ..Time: TDBEpoch, TTEpoch, centuries, j2000, value, julian_twopart
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
-using ..Util: sec2rad, normalize_angle
+using ..Util: sec_to_rad, normalize2pi
 
 import ..Interfaces: AbstractEphemeris, position!, state!, velocity!
 
@@ -102,22 +102,22 @@ eccentricity(::Mercury, t) = @evalpoly(t,
 	0.0002040653,
 	-28349e-10,
 )
-inclination(::Mercury, t) = sec2rad(@evalpoly(t,
+inclination(::Mercury, t) = sec_to_rad(@evalpoly(t,
 	7.00498625 * 3600,
 	-214.25629,
 	0.28977,
 ))
-ascending_node(::Mercury, t) = sec2rad(@evalpoly(t,
+ascending_node(::Mercury, t) = sec_to_rad(@evalpoly(t,
 	48.33089304 * 3600,
 	-4515.21727,
 	-31.79892,
 ))
-longitude_of_perihelion(::Mercury, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Mercury, t) = sec_to_rad(@evalpoly(t,
 	77.45611904 * 3600,
 	5719.11590,
 	-4.83016,
 ))
-mean_longitude(::Mercury, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Mercury, t) = sec_to_rad(@evalpoly(t,
 	252.25090552 * 3600,
 	5381016286.88982,
 	-1.92789,
@@ -129,22 +129,22 @@ eccentricity(::Venus, t) = @evalpoly(t,
 	-0.0004776521,
 	98127e-10,
 )
-inclination(::Venus, t) = sec2rad(@evalpoly(t,
+inclination(::Venus, t) = sec_to_rad(@evalpoly(t,
 	3.39466189 * 3600,
 	-30.84437,
 	-11.67836,
 ))
-ascending_node(::Venus, t) = sec2rad(@evalpoly(t,
+ascending_node(::Venus, t) = sec_to_rad(@evalpoly(t,
 	76.67992019 * 3600,
 	-10008.48154,
 	-51.32614,
 ))
-longitude_of_perihelion(::Venus, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Venus, t) = sec_to_rad(@evalpoly(t,
 	131.56370300 * 3600,
 	175.48640,
 	-498.48184,
 ))
-mean_longitude(::Venus, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Venus, t) = sec_to_rad(@evalpoly(t,
 	181.97980085 * 3600,
 	2106641364.33548,
 	0.59381,
@@ -156,22 +156,22 @@ eccentricity(::EarthBarycenter, t) = @evalpoly(t,
 	-0.0004203654,
 	-0.0000126734,
 )
-inclination(::EarthBarycenter, t) = sec2rad(@evalpoly(t,
+inclination(::EarthBarycenter, t) = sec_to_rad(@evalpoly(t,
 	0.0,
 	469.97289,
 	-3.35053 ,
 ))
-ascending_node(::EarthBarycenter, t) = sec2rad(@evalpoly(t,
+ascending_node(::EarthBarycenter, t) = sec_to_rad(@evalpoly(t,
 	174.87317577 * 3600,
 	-8679.27034,
 	15.34191,
 ))
-longitude_of_perihelion(::EarthBarycenter, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::EarthBarycenter, t) = sec_to_rad(@evalpoly(t,
 	102.93734808 * 3600,
 	11612.35290,
 	53.27577,
 ))
-mean_longitude(::EarthBarycenter, t) = sec2rad(@evalpoly(t,
+mean_longitude(::EarthBarycenter, t) = sec_to_rad(@evalpoly(t,
 	100.46645683 * 3600,
 	1295977422.83429,
 	-2.04411,
@@ -186,22 +186,22 @@ eccentricity(::Mars, t) = @evalpoly(t,
 	0.0009048438,
 	-80641e-10,
 )
-inclination(::Mars, t) = sec2rad(@evalpoly(t,
+inclination(::Mars, t) = sec_to_rad(@evalpoly(t,
 	1.84972648 * 3600,
 	-293.31722,
 	-8.11830,
 ))
-ascending_node(::Mars, t) = sec2rad(@evalpoly(t,
+ascending_node(::Mars, t) = sec_to_rad(@evalpoly(t,
 	49.55809321 * 3600,
 	-10620.90088,
 	-230.57416,
 ))
-longitude_of_perihelion(::Mars, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Mars, t) = sec_to_rad(@evalpoly(t,
 	336.06023395 * 3600,
 	15980.45908,
 	-62.32800,
 ))
-mean_longitude(::Mars, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Mars, t) = sec_to_rad(@evalpoly(t,
 	355.43299958 * 3600,
 	689050774.93988,
 	0.94264,
@@ -217,22 +217,22 @@ eccentricity(::Jupiter, t) = @evalpoly(t,
 	0.0016322542,
 	-0.0000471366,
 )
-inclination(::Jupiter, t) = sec2rad(@evalpoly(t,
+inclination(::Jupiter, t) = sec_to_rad(@evalpoly(t,
 	1.30326698 * 3600,
 	-71.55890,
 	11.95297,
 ))
-ascending_node(::Jupiter, t) = sec2rad(@evalpoly(t,
+ascending_node(::Jupiter, t) = sec_to_rad(@evalpoly(t,
 	100.46440702 * 3600,
 	6362.03561,
 	326.52178,
 ))
-longitude_of_perihelion(::Jupiter, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Jupiter, t) = sec_to_rad(@evalpoly(t,
 	14.33120687 * 3600,
 	7758.75163,
 	259.95938,
 ))
-mean_longitude(::Jupiter, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Jupiter, t) = sec_to_rad(@evalpoly(t,
 	34.35151874 * 3600,
 	109256603.77991,
 	-30.60378,
@@ -248,22 +248,22 @@ eccentricity(::Saturn, t) = @evalpoly(t,
 	-0.0034664062,
 	-0.0000643639,
 )
-inclination(::Saturn, t) = sec2rad(@evalpoly(t,
+inclination(::Saturn, t) = sec_to_rad(@evalpoly(t,
 	2.48887878 * 3600,
 	91.85195,
 	-17.66225,
 ))
-ascending_node(::Saturn, t) = sec2rad(@evalpoly(t,
+ascending_node(::Saturn, t) = sec_to_rad(@evalpoly(t,
 	113.66550252 * 3600,
 	-9240.19942,
 	-66.23743,
 ))
-longitude_of_perihelion(::Saturn, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Saturn, t) = sec_to_rad(@evalpoly(t,
 	93.05723748 * 3600,
 	20395.49439,
 	190.25952,
 ))
-mean_longitude(::Saturn, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Saturn, t) = sec_to_rad(@evalpoly(t,
 	50.07744430 * 3600,
 	43996098.55732,
 	75.61614,
@@ -279,22 +279,22 @@ eccentricity(::Uranus, t) = @evalpoly(t,
 	-0.0002729293,
 	0.0000078913,
 )
-inclination(::Uranus, t) = sec2rad(@evalpoly(t,
+inclination(::Uranus, t) = sec_to_rad(@evalpoly(t,
 	0.77319689 * 3600,
 	-60.72723,
 	1.25759,
 ))
-ascending_node(::Uranus, t) = sec2rad(@evalpoly(t,
+ascending_node(::Uranus, t) = sec_to_rad(@evalpoly(t,
 	74.00595701 * 3600,
 	2669.15033,
 	145.93964,
 ))
-longitude_of_perihelion(::Uranus, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Uranus, t) = sec_to_rad(@evalpoly(t,
 	173.00529106 * 3600,
 	3215.56238,
 	-34.09288,
 ))
-mean_longitude(::Uranus, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Uranus, t) = sec_to_rad(@evalpoly(t,
     314.05500511 * 3600,
     15424811.93933,
     -1.75083,
@@ -309,22 +309,22 @@ eccentricity(::Neptune, t) = @evalpoly(t,
 	0.0094557470,
 	0.0000603263,
 )
-inclination(::Neptune, t) = sec2rad(@evalpoly(t,
+inclination(::Neptune, t) = sec_to_rad(@evalpoly(t,
 	1.76995259 * 3600,
 	8.12333,
 	0.08135,
 ))
-ascending_node(::Neptune, t) = sec2rad(@evalpoly(t,
+ascending_node(::Neptune, t) = sec_to_rad(@evalpoly(t,
 	131.78405702 * 3600,
 	-221.94322,
 	-0.78728,
 ))
-longitude_of_perihelion(::Neptune, t) = sec2rad(@evalpoly(t,
+longitude_of_perihelion(::Neptune, t) = sec_to_rad(@evalpoly(t,
 	48.12027554 * 3600,
 	1050.71912,
 	27.39717,
 ))
-mean_longitude(::Neptune, t) = sec2rad(@evalpoly(t,
+mean_longitude(::Neptune, t) = sec_to_rad(@evalpoly(t,
 	304.34866548 * 3600,
 	7865503.20744,
 	0.21103,
@@ -425,7 +425,7 @@ function state!(pos, vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBod
     argl = kq1 .* dμ
     a += sum(t * (ca1 .* cos.(arga) .+ sa1 .* sin.(arga)) * 1e-7)
     λm += sum(t * (cl1 .* cos.(argl) .+ sl1 .* sin.(argl)) * 1e-7)
-    λm = normalize_angle(λm, 0.0)
+    λm = normalize2pi(λm, 0.0)
 
     M = λm - ω′
     ω = ω′ - Ω

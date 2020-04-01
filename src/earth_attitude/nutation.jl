@@ -65,7 +65,7 @@
 using ReferenceFrameRotations: angle_to_dcm
 
 using ..Time: Epoch, TT, centuries, julian_period
-using ..Util: normalize_angle, sec2rad
+using ..Util: normalize2pi, sec_to_rad
 
 export nutation, nutation_matrix
 
@@ -150,15 +150,15 @@ function nutation(::IAU1980, ep; scale=TT)
     t = julian_period(ep; scale=scale, unit=centuries, raw=true)
 
     el_poly = @evalpoly t 485866.733 715922.633 31.310 0.064
-    el = normalize_angle(sec2rad(el_poly) + (1325.0 * t % 1.0) * 2π)
+    el = normalize2pi(sec_to_rad(el_poly) + (1325.0 * t % 1.0) * 2π)
     elp_poly = @evalpoly t 1287099.804 1292581.224 -0.577 -0.012
-    elp = normalize_angle(sec2rad(elp_poly) + (99.0 * t % 1.0) * 2π)
+    elp = normalize2pi(sec_to_rad(elp_poly) + (99.0 * t % 1.0) * 2π)
     f_poly = @evalpoly t 335778.877 295263.137 -13.257 0.011
-    f = normalize_angle(sec2rad(f_poly) + (1342.0 * t % 1.0) * 2π)
+    f = normalize2pi(sec_to_rad(f_poly) + (1342.0 * t % 1.0) * 2π)
     d_poly = @evalpoly t 1072261.307 1105601.328 -6.891 0.019
-    d = normalize_angle(sec2rad(d_poly) + (1236.0 * t % 1.0) * 2π)
+    d = normalize2pi(sec_to_rad(d_poly) + (1236.0 * t % 1.0) * 2π)
     om_poly = @evalpoly t 450160.280 -482890.539 7.455 0.008
-    om = normalize_angle(sec2rad(om_poly) + (-5.0 * t % 1.0) * 2π)
+    om = normalize2pi(sec_to_rad(om_poly) + (-5.0 * t % 1.0) * 2π)
 
     dp = 0.0
     de = 0.0
@@ -173,8 +173,8 @@ function nutation(::IAU1980, ep; scale=TT)
         de += c * carg
     end
 
-    δψ = sec2rad(dp * 1e-4)
-    δϵ = sec2rad(de * 1e-4)
+    δψ = sec_to_rad(dp * 1e-4)
+    δϵ = sec_to_rad(de * 1e-4)
 
     return δψ, δϵ
 end
@@ -187,9 +187,9 @@ function nutation(::IAU2000A, ep::Epoch; scale=TT)
     om = fundamental(luna, AscendingNode(), t)
 
     elp_as = @evalpoly t 1287104.79305 129596581.0481 -0.5532 0.000136 -0.00001149
-    elp = sec2rad(elp_as % ARCSECONDS_IN_CIRCLE)
+    elp = sec_to_rad(elp_as % ARCSECONDS_IN_CIRCLE)
     d_as = @evalpoly t 1072260.70369 1602961601.2090 -6.3706 0.006593 -0.00003169
-    d   = sec2rad(d_as % ARCSECONDS_IN_CIRCLE)
+    d   = sec_to_rad(d_as % ARCSECONDS_IN_CIRCLE)
 
     dpls = 0.0
     dels = 0.0
@@ -241,12 +241,12 @@ function nutation(::IAU2000A, ep::Epoch; scale=TT)
     end
 
     # Luni-solar terms
-    δψ_ls = sec2rad(dpls * 1e-7)
-    δϵ_ls = sec2rad(dels * 1e-7)
+    δψ_ls = sec_to_rad(dpls * 1e-7)
+    δϵ_ls = sec_to_rad(dels * 1e-7)
 
     # Planetary terms
-    δψ_pl = sec2rad(dppl * 1e-7)
-    δϵ_pl = sec2rad(depl * 1e-7)
+    δψ_pl = sec_to_rad(dppl * 1e-7)
+    δϵ_pl = sec_to_rad(depl * 1e-7)
 
     return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end
@@ -254,11 +254,11 @@ end
 function nutation(::IAU2000B, ep::Epoch; scale=TT)
     t = julian_period(ep; scale=scale, unit=centuries, raw=true)
 
-    el  = (485868.249036 + (1717915923.2178) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
-    elp = (1287104.79305 + (129596581.0481) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
-    f   = (335779.526232 + (1739527262.8478) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
-    d   = (1072260.70369 + (1602961601.2090) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
-    om  = (450160.398036 + (-6962890.5431) * t) % ARCSECONDS_IN_CIRCLE |> sec2rad
+    el  = (485868.249036 + (1717915923.2178) * t) % ARCSECONDS_IN_CIRCLE |> sec_to_rad
+    elp = (1287104.79305 + (129596581.0481) * t) % ARCSECONDS_IN_CIRCLE |> sec_to_rad
+    f   = (335779.526232 + (1739527262.8478) * t) % ARCSECONDS_IN_CIRCLE |> sec_to_rad
+    d   = (1072260.70369 + (1602961601.2090) * t) % ARCSECONDS_IN_CIRCLE |> sec_to_rad
+    om  = (450160.398036 + (-6962890.5431) * t) % ARCSECONDS_IN_CIRCLE |> sec_to_rad
 
     dp = 0.0
     de = 0.0
@@ -272,12 +272,12 @@ function nutation(::IAU2000B, ep::Epoch; scale=TT)
     end
 
     # Luni-solar terms
-    δψ_ls = sec2rad(dp * 1e-7)
-    δϵ_ls = sec2rad(de * 1e-7)
+    δψ_ls = sec_to_rad(dp * 1e-7)
+    δϵ_ls = sec_to_rad(de * 1e-7)
 
     # Fixed offsets in lieu of planetary terms
-    δψ_pl = sec2rad(-0.135 * 1e-3)
-    δϵ_pl = sec2rad(0.388 * 1e-3)
+    δψ_pl = sec_to_rad(-0.135 * 1e-3)
+    δϵ_pl = sec_to_rad(0.388 * 1e-3)
 
     return δψ_ls + δψ_pl, δϵ_ls + δϵ_pl
 end

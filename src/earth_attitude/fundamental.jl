@@ -63,7 +63,7 @@
 #   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 using ..Bodies
-using ..Util: sec2rad
+using ..Util: sec_to_rad
 
 export fundamental
 
@@ -71,33 +71,33 @@ const ARCSECONDS_IN_CIRCLE = 1296000.0
 
 function fundamental(::Sun, t)
     p = @evalpoly(t, 1287104.793048, 129596581.0481, -0.5532, 0.000136, -0.00001149)
-    return sec2rad(p % ARCSECONDS_IN_CIRCLE)
+    return sec_to_rad(p % ARCSECONDS_IN_CIRCLE)
 end
 
 function fundamental(::Luna, t)
     p = @evalpoly(t, 485868.249036, 1717915923.2178, 31.8792, 0.051635, -0.00024470)
-    return sec2rad(p % ARCSECONDS_IN_CIRCLE)
+    return sec_to_rad(p % ARCSECONDS_IN_CIRCLE)
 end
 
 struct Longitude end
 
 function fundamental(::Luna, ::Longitude, t)
     p = @evalpoly(t, 335779.526232, 1739527262.8478, -12.7512, -0.001037, 0.00000417)
-    return sec2rad(p % ARCSECONDS_IN_CIRCLE)
+    return sec_to_rad(p % ARCSECONDS_IN_CIRCLE)
 end
 
 struct Elongation end
 
 function fundamental(::Luna, ::Elongation, t)
     p = @evalpoly(t, 1072260.703692, 1602961601.2090, -6.3706, 0.006593, -0.00003169)
-    return sec2rad(p % ARCSECONDS_IN_CIRCLE)
+    return sec_to_rad(p % ARCSECONDS_IN_CIRCLE)
 end
 
 struct AscendingNode end
 
 function fundamental(::Luna, ::AscendingNode, t)
     p = @evalpoly(t, 450160.398036, -6962890.5431, 7.4722, 0.007702, -0.00005939)
-    return sec2rad(p % ARCSECONDS_IN_CIRCLE)
+    return sec_to_rad(p % ARCSECONDS_IN_CIRCLE)
 end
 
 fundamental(::Mercury, t) = mod2pi(4.402608842 + 2608.7903141574t)

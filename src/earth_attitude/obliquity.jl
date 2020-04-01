@@ -63,7 +63,7 @@
 #   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 using ..Time: Epoch, TT, centuries, julian_period
-using ..Util: sec2rad
+using ..Util: sec_to_rad
 
 export obliquity
 
@@ -101,13 +101,13 @@ obliquity
 function obliquity(::IAU1980Model, ep::Epoch; scale=TT)
     t = julian_period(ep; scale=scale, unit=centuries, raw=true)
     obl = @evalpoly(t, 84381.448, -46.8150, -0.00059, 0.001813)
-    return sec2rad(obl)
+    return sec_to_rad(obl)
 end
 
 function obliquity(::IAU2006Model, ep::Epoch)
     t = julian_period(ep; scale=TT, unit=centuries, raw=true)
     obl = @evalpoly(t, 84381.406, -46.836769, -0.0001831, 0.00200340,
                     -0.000000576, -0.0000000434)
-    return sec2rad(obl)
+    return sec_to_rad(obl)
 end
 

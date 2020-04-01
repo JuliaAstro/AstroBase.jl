@@ -13,7 +13,7 @@ using ReferenceFrameRotations: angle_to_dcm
 
 using Roots: find_zero, Order5, Order2
 
-using ..Util: angle, azimuth, normalize_angle
+using ..Util: angle, azimuth, normalize2pi
 
 export
     EccentricAnomaly,
@@ -123,7 +123,7 @@ function keplerian(pos, vel, µ, tol=1e-8)
     end
     Ω = mod2pi(Ω)
     ω = mod2pi(ω)
-    ν = normalize_angle(ν, 0.0)
+    ν = normalize2pi(ν, 0.0)
 
     a, ecc, inc, Ω, ω, ν
 end

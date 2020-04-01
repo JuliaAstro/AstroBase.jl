@@ -18,7 +18,7 @@ using ..EarthAttitude:
     polar_motion,
     tio_locator
 using ..Time: UTC, julian_period
-using ..Util: sec2rad
+using ..Util: sec_to_rad
 
 export
     CIRF,
@@ -72,8 +72,8 @@ end
 function polarmotion(ep::Epoch)
     jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
     xp, yp = EarthOrientation.polarmotion(jd)
-    xp = sec2rad(xp)
-    yp = sec2rad(yp)
+    xp = sec_to_rad(xp)
+    yp = sec_to_rad(yp)
     sp00 = tio_locator(iau2000, ep)
     return polar_motion(iau2000, xp, yp, sp00)
 end
@@ -83,8 +83,8 @@ function precession_nutation(ep::Epoch)
     dx, dy = EarthOrientation.precession_nutation00(jd)
     x, y = cip_coords(iau2006, ep)
     s = cio_locator(iau2006, ep, x, y)
-    x += sec2rad(dx/1000.0)
-    y += sec2rad(dy/1000.0)
+    x += sec_to_rad(dx/1000.0)
+    y += sec_to_rad(dy/1000.0)
     return celestial_to_intermediate(x, y, s)
 end
 

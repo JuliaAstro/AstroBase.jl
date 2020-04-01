@@ -65,7 +65,7 @@
 using ReferenceFrameRotations: angle_to_dcm, angleaxis_to_dcm, compose_rotation
 
 using ..Time: Epoch, TT, centuries, julian_period
-using ..Util: sec2rad
+using ..Util: sec_to_rad
 
 export
     celestial_to_intermediate,
@@ -187,8 +187,8 @@ function cip_coords(::IAU2006, ep::Epoch)
         end
         ialast = ia - 1
     end
-    x = sec2rad((xpr + (xyls[1] + xypl[1]) / 1e6))
-    y = sec2rad(ypr + (xyls[2] + xypl[2]) / 1e6)
+    x = sec_to_rad((xpr + (xyls[1] + xypl[1]) / 1e6))
+    y = sec_to_rad(ypr + (xyls[2] + xypl[2]) / 1e6)
 
     return x, y
 end
@@ -242,7 +242,7 @@ function cio_locator(coeffs, terms, ep, x, y)
     end
 
     w0 = @evalpoly(t, w[1], w[2], w[3], w[4], w[5], w[6])
-    return sec2rad(w0) - x * y / 2.0
+    return sec_to_rad(w0) - x * y / 2.0
 end
 
 cio_locator(::IAU2000, ep::Epoch, x, y) = cio_locator(SP_00, S00, ep, x, y)
@@ -268,7 +268,7 @@ end
 
 function tio_locator(::IAU2000, ep)
     t = julian_period(ep; scale=TT, unit=centuries, raw=true)
-    return sec2rad(-47e-6 * t)
+    return sec_to_rad(-47e-6 * t)
 end
 
 function polar_motion(::IAU2000, xp, yp, sp)

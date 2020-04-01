@@ -63,7 +63,7 @@
 #   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 using ..Time: Epoch, SECONDS_PER_DAY, TDB, TT, UT1, julian_period
-using ..Util: normalize_angle, sec2rad
+using ..Util: normalize2pi, sec_to_rad
 
 export apparent_sidereal, earth_rotation_angle, equinoxes, mean_sidereal
 
@@ -78,13 +78,13 @@ include(joinpath("constants", "equinoxes.jl"))
 function equinoxes(::IAU1994, ep::Epoch; scale=TDB)
     t = julian_period(ep; scale=scale, unit=centuries, raw=true)
 
-    ω₀ = sec2rad(@evalpoly(t, 450160.280, -482890.539, 7.455, 0.008))
+    ω₀ = sec_to_rad(@evalpoly(t, 450160.280, -482890.539, 7.455, 0.008))
     ω = mod2pi(ω₀ + (-5.0t % 1.0) * 2π)
 
     δψ, _ = nutation(iau1980, ep; scale=scale)
     ϵ₀ = obliquity(iau1980, ep; scale=scale)
 
-    return δψ * cos(ϵ₀) + sec2rad(0.00264 * sin(ω) + 0.000063 * sin(ω + ω))
+    return δψ * cos(ϵ₀) + sec_to_rad(0.00264 * sin(ω) + 0.000063 * sin(ω + ω))
 end
 
 function equinoxes(::IAU2000, ep::Epoch; scale=TT)
@@ -132,7 +132,7 @@ function equinoxes(::IAU2000, ep::Epoch; scale=TT)
         s1 += x.s * se + x.c * ce
     end
 
-    return sec2rad(s0 + s1 * t)
+    return sec_to_rad(s0 + s1 * t)
 end
 
 function equinoxes(::IAU2000, ep::Epoch, ϵ, δψ; scale=TT)
@@ -149,7 +149,7 @@ end
 function equinoxes(::IAU2006A, ep::Epoch)
     gst06a = apparent_sidereal(iau2006a, ep)
     gmst06 = mean_sidereal(iau2006, ep)
-    return normalize_angle(gst06a - gmst06)
+    return normalize2pi(gst06a - gmst06)
 end
 
 const SECS_TO_RAD = 7.272205216643039903848712e-5
@@ -177,7 +177,7 @@ function mean_sidereal(::IAU2000, ep::Epoch; scale=TT)
         -0.00009344,
         0.00001882,
     )
-    return mod2pi(earth_rotation_angle(iau2000, ep) + sec2rad(gmst0))
+    return mod2pi(earth_rotation_angle(iau2000, ep) + sec_to_rad(gmst0))
 end
 
 function mean_sidereal(::IAU2006, ep::Epoch)
@@ -191,7 +191,7 @@ function mean_sidereal(::IAU2006, ep::Epoch)
         -0.000029956,
         -0.0000000368,
     )
-    return mod2pi(earth_rotation_angle(iau2000, ep) + sec2rad(gmst0))
+    return mod2pi(earth_rotation_angle(iau2000, ep) + sec_to_rad(gmst0))
 end
 
 function apparent_sidereal(::IAU1994, ep::Epoch)
