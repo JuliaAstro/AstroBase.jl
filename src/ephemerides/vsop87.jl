@@ -36,8 +36,10 @@ include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_uranus.jl"))
 include(joinpath(@__DIR__, "..", "..", "gen", "vsop87_neptune.jl"))
 
 const VSOP87_FK5 = @SMatrix [1.0 0.000000440360 -0.000000190919;
-							 -0.000000479966 0.917482137087 -0.397776982902;
-							 0.0 0.397776982902 0.917482137087]
+                             -0.000000479966 0.917482137087 -0.397776982902;
+                             0.0 0.397776982902 0.917482137087]
+
+const AU = astronomical_unit()[1]
 
 @with_kw struct VSOP87 <: AbstractEphemeris
     order::Int = 5; @assert order >= 0; @assert order <= 5
@@ -79,9 +81,9 @@ end
     end
 
     # AU to km
-    r .*= astronomical_unit()
+    r .*= AU
     # AU/millenium to km/s
-    v .*= astronomical_unit() / 10SECONDS_PER_CENTURY
+    v .*= AU / 10SECONDS_PER_CENTURY
 
     VSOP87_FK5 * r, VSOP87_FK5 * v
 end

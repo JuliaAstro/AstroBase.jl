@@ -6,6 +6,7 @@ using Test
 EarthOrientation.update()
 
 @testset "AstroBase" begin
+    include("constants.jl")
     include("util.jl")
     include("earth_attitude.jl")
     include("bodies.jl")

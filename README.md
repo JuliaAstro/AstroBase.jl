@@ -46,5 +46,5 @@ e.g. `using AstroBase.Time`, and provide the following functionality:
 ## Documentation
 
 Please refer to the [documentation](https://JuliaAstro.github.io/AstroBase.jl/stable/)
-for additional information
+for additional information.
 

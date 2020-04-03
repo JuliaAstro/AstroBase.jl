@@ -90,6 +90,7 @@ export SimonBretagnon, simon_bretagnon
 struct SimonBretagnon <: AbstractEphemeris end
 const simon_bretagnon = SimonBretagnon()
 
+const AU = astronomical_unit()[1]
 const ϵ = 0.40909280422232897
 
 function semi_major(body::CelestialBody, t)
@@ -433,7 +434,7 @@ function state!(pos, vel, ::SimonBretagnon, ep::Epoch, ::Sun, body::CelestialBod
 
     μ = grav_param(sun)
 
-    r, v = cartesian(a * astronomical_unit(), e, i, Ω, ω, ν, μ)
+    r, v = cartesian(a * AU, e, i, Ω, ω, ν, μ)
 
     rot = angleaxis_to_dcm(-ϵ, [1, 0, 0])
     pos .+= rot * r

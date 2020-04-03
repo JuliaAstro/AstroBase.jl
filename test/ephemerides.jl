@@ -125,8 +125,8 @@ end
         @testset for (id, body) in enumerate(bodies)
             @testset "ERFA" begin
                 r_erfa, v_erfa = ERFA.plan94(jd1, jd2, id)
-                r_erfa .*= astronomical_unit()
-                v_erfa .*= astronomical_unit()
+                r_erfa .*= astronomical_unit()[1]
+                v_erfa .*= astronomical_unit()[1]
                 v_erfa ./= SECONDS_PER_DAY
                 rv_erfa = (r_erfa, v_erfa)
                 r_act = position!(zeros(3), simon_bretagnon, ep, sun, body)
