@@ -28,8 +28,8 @@ e.g. `using AstroBase.Time`, and provide the following functionality:
 - [`Ephemerides`](https://juliaastro.github.io/AstroBase.jl/dev/modules/ephemerides/):
 	Semi-analytical planetary ephemerides
 - [`Frames`](https://juliaastro.github.io/AstroBase.jl/dev/modules/frames/):
-	Types representing quasi-inertial and rotating references frames and the associates
-	transformations
+	Types representing quasi-inertial, rotating, and topocentric references frames
+	and the associated transformations
 - [`Interfaces`](https://juliaastro.github.io/AstroBase.jl/dev/modules/interfaces/):
 	Abstract types and base functions
 - [`Time`](https://juliaastro.github.io/AstroBase.jl/dev/modules/time/):
