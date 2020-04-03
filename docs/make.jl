@@ -22,6 +22,7 @@ makedocs(
 	    "Ephemerides" => joinpath("modules", "ephemerides.md"),
 	    "Interfaces" => joinpath("modules", "interfaces.md"),
 	    "Reference Frames" => joinpath("modules", "frames.md"),
+	    "Time" => joinpath("modules", "time.md"),
 	    "Two-Body Problem" => joinpath("modules", "two_body.md"),
 	    "Utilities" => joinpath("modules", "util.md"),
 	],
