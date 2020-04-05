@@ -7,6 +7,7 @@
 #
 module Interfaces
 
+include("frames.jl")
 include("ephemerides.jl")
 include("coords.jl")
 

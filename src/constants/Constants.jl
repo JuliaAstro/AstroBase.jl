@@ -449,7 +449,7 @@ for (name, val, err) in RATIOS2
         """
             $($fname)([T=Float64])
 
-        Return the ratio of the mass of $($uname) to the mass of the Sun ``M_S/M_{$($uname)}``
+        Return the ratio of the mass of $($uname) to the mass of the Sun ``M_{$($uname)}/M_S``
         and the associated uncertainty.
 
         # Reference

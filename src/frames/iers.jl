@@ -5,6 +5,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
+
 import EarthOrientation
 using ReferenceFrameRotations: angleaxis_to_dcm, ddcm
 
@@ -28,29 +29,97 @@ export
     itrf,
     tirf
 
-struct CIRF <: InertialFrame end
-const cirf = CIRF()
-from_sym(::Val{:CIRF}) = cirf
-add_edge!(FRAMES, :ICRF, :CIRF)
+@frame cirf type=CIRF parent=icrf
+@frame tirf type=TIRF parent=cirf rotating=true
+@frame itrf type=ITRF parent=tirf rotating=true
 
-struct TIRF <: RotatingFrame end
-const tirf = TIRF()
-from_sym(::Val{:TIRF}) = tirf
-add_edge!(FRAMES, :CIRF, :TIRF)
+"""
+    CIRF
 
-struct ITRF <: RotatingFrame end
-const itrf = ITRF()
-from_sym(::Val{:ITRF}) = itrf
-add_edge!(FRAMES, :TIRF, :ITRF)
+A type representing the Celestial Intermediate Reference Frame (CIRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+CIRF
+
+"""
+    cirf
+
+The singleton instance of the [`CIRF`](@ref) type representing the Celestial Intermediate
+Reference Frame (CIRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+cirf
+
+"""
+    TIRF
+
+A type representing the Terrestrial Intermediate Reference Frame (TIRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+TIRF
+
+"""
+    tirf
+
+The singleton instance of the [`TIRF`](@ref) type representing the Terrestrial Intermediate
+Reference Frame (TIRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+tirf
+
+"""
+    ITRF
+
+A type representing the International Terrestrial Reference Frame (ITRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+ITRF
+
+"""
+    itrf
+
+The singleton instance of the [`ITRF`](@ref) type representing the International Terrestrial
+Reference Frame (ITRF).
+
+# Reference
+
+- [SOFA](http://www.iausofa.org/publications/sofa_pn.pdf)
+"""
+itrf
+
+function precession_nutation(ep::Epoch)
+    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
+    dx, dy = EarthOrientation.precession_nutation00(jd)
+    x, y = cip_coords(iau2006, ep)
+    s = cio_locator(iau2006, ep, x, y)
+    x += sec_to_rad(dx * 1e-3)
+    y += sec_to_rad(dy * 1e-3)
+    return celestial_to_intermediate(x, y, s)
+end
 
 function Rotation(::ICRF, ::CIRF, ep::Epoch)
     m = precession_nutation(ep)
-    return Rotation{icrf, cirf}(m)
+    return Rotation(icrf, cirf, m)
 end
 
 function Rotation(::CIRF, ::ICRF, ep::Epoch)
     m = precession_nutation(ep)
-    return Rotation{cirf, icrf}(m')
+    return Rotation(cirf, icrf, m')
 end
 
 function Rotation(::CIRF, ::TIRF, ep::Epoch)
@@ -58,7 +127,7 @@ function Rotation(::CIRF, ::TIRF, ep::Epoch)
     rate = rotation_rate(earth, ep)
     m = angleaxis_to_dcm(era, [0, 0, 1])
     m′ = ddcm(m, [0, 0, rate])
-    return Rotation{cirf, tirf}(m, m′)
+    return Rotation(cirf, tirf, m, m′)
 end
 
 function Rotation(::TIRF, ::CIRF, ep::Epoch)
@@ -66,7 +135,7 @@ function Rotation(::TIRF, ::CIRF, ep::Epoch)
     rate = rotation_rate(earth, ep)
     m = angleaxis_to_dcm(-era, [0, 0, 1])
     m′ = ddcm(m, [0, 0, -rate])
-    return Rotation{tirf, cirf}(m, m′)
+    return Rotation(tirf, cirf, m, m′)
 end
 
 function polarmotion(ep::Epoch)
@@ -78,23 +147,13 @@ function polarmotion(ep::Epoch)
     return polar_motion(iau2000, xp, yp, sp00)
 end
 
-function precession_nutation(ep::Epoch)
-    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
-    dx, dy = EarthOrientation.precession_nutation00(jd)
-    x, y = cip_coords(iau2006, ep)
-    s = cio_locator(iau2006, ep, x, y)
-    x += sec_to_rad(dx/1000.0)
-    y += sec_to_rad(dy/1000.0)
-    return celestial_to_intermediate(x, y, s)
-end
-
 function Rotation(::TIRF, ::ITRF, ep::Epoch)
     m = polarmotion(ep)
-    Rotation{tirf, itrf}(m)
+    Rotation(tirf, itrf, m)
 end
 
 function Rotation(::ITRF, ::TIRF, ep::Epoch)
     m = polarmotion(ep)
-    Rotation{itrf, tirf}(m')
+    Rotation(itrf, tirf, m')
 end
 

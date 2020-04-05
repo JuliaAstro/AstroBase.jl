@@ -15,6 +15,11 @@ export AbstractEphemeris,
     state,
     state!
 
+"""
+    AbstractEphemeris
+
+Abstract supertype for ephemerides.
+"""
 abstract type AbstractEphemeris end
 
 function position! end
