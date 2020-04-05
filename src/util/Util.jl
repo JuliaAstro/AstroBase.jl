@@ -64,8 +64,7 @@
 #
 module Util
 
-using AccurateArithmetic: dot_oro
-using LinearAlgebra: norm, ⋅, ×, normalize
+using LinearAlgebra: norm, ⋅, ×, normalize, dot
 using StaticArrays: SVector
 
 export plane_section, point_on_limb, spherical_to_cartesian
@@ -127,10 +126,16 @@ function plane_section(ellipsoid, plane_point, plane_normal)
     pe = plane_point ./ ellipsoid
     alpha = ue ⋅ ue
     beta = ve ⋅ ve
-    gamma = dot_oro(ue, ve)
-    delta = dot_oro(pe, ue)
-    epsilon = dot_oro(pe, ve)
-    zeta = dot_oro([pe; 1.0], [pe; -1.0])
+    gamma = dot(ue, ve)
+    delta = dot(pe, ue)
+    epsilon = dot(pe, ve)
+    zeta = dot([pe; 1.0], [pe; -1.0])
+    # TODO: Check whether actually we need a more accurate dot product.
+    # The deps of AccurateArithmetics.jl are not stable enough.
+    # gamma = dot_oro(ue, ve)
+    # delta = dot_oro(pe, ue)
+    # epsilon = dot_oro(pe, ve)
+    # zeta = dot_oro([pe; 1.0], [pe; -1.0])
 
     if abs(gamma) < floatmin(Float64)
         tan_theta = 0.0
@@ -145,9 +150,13 @@ function plane_section(ellipsoid, plane_point, plane_normal)
     co = sqrt(cos2)
     si = tan_theta * co
 
-    denom = dot_oro([gamma, -alpha], [gamma, beta])
-    tau_c = dot_oro([beta, -gamma], [delta, epsilon]) / denom
-    nu_c = dot_oro([alpha, -gamma], [epsilon, delta]) / denom
+    # TODO: See above
+    # denom = dot_oro([gamma, -alpha], [gamma, beta])
+    # tau_c = dot_oro([beta, -gamma], [delta, epsilon]) / denom
+    # nu_c = dot_oro([alpha, -gamma], [epsilon, delta]) / denom
+    denom = dot([gamma, -alpha], [gamma, beta])
+    tau_c = dot([beta, -gamma], [delta, epsilon]) / denom
+    nu_c = dot([alpha, -gamma], [epsilon, delta]) / denom
 
     twogcs = 2 * gamma * cos_sin
     A = alpha * cos2 + beta * sin2 + twogcs
