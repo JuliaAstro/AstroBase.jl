@@ -81,14 +81,14 @@ function bias(::IAU2000)
 end
 
 function precession(::IAU2000, ep::Epoch; scale=TT)
-    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=scale, unit=centuries)
     precor = sec_to_rad(-0.29965)
     oblcor = sec_to_rad(-0.02524)
     return precor * t, oblcor * t
 end
 
 function fukushima_williams(::IAU2006, ep::Epoch)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
 
     γ = @evalpoly(
         t,
@@ -129,7 +129,7 @@ function fukushima_williams_matrix(γ, ϕ, ψ, ϵ)
 end
 
 function bias_precession_matrix(::IAU2000, ep::Epoch)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
 
     ϵ₀ = sec_to_rad(84381.448)
 

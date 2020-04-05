@@ -103,7 +103,7 @@ Reference Frame (ITRF).
 itrf
 
 function precession_nutation(ep::Epoch)
-    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
+    jd = julian_period(Float64, ep; scale=UTC, origin=:julian)
     dx, dy = EarthOrientation.precession_nutation00(jd)
     x, y = cip_coords(iau2006, ep)
     s = cio_locator(iau2006, ep, x, y)
@@ -139,7 +139,7 @@ function Rotation(::TIRF, ::CIRF, ep::Epoch)
 end
 
 function polarmotion(ep::Epoch)
-    jd = julian_period(ep; scale=UTC, origin=:julian, raw=true)
+    jd = julian_period(Float64, ep; scale=UTC, origin=:julian)
     xp, yp = EarthOrientation.polarmotion(jd)
     xp = sec_to_rad(xp)
     yp = sec_to_rad(yp)

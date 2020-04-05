@@ -88,14 +88,23 @@ end
 
 ∘(rot1::Rotation, rot2::Rotation) = compose(rot1, rot2)
 
-function Rotation(frame1, frame2, ep::Epoch)
-    frames = path_frames(frame1, frame2)
-    rot = Rotation(frames[1], frames[2], ep)
-    length(frames) == 2 && return rot
+function Rotation(from::F1, to::F2, ep::Epoch) where {F1<:AbstractFrame,F2<:AbstractFrame}
+    frames = path_frames(from, to)
+    return _Rotation(ep, frames...)
+end
 
-    for (f1, f2) in zip(frames[2:end-1], frames[3:end])
-        rot = rot ∘ Rotation(f1, f2, ep)
+@generated function _Rotation(ep::Epoch, path::AbstractFrame...)
+    f1 = path[1]
+    f2 = path[2]
+    expr = :(Rotation($f1(), $f2(), ep))
+    for i in 2:length(path) - 1
+        f1 = path[i]
+        f2 = path[i+1]
+        expr = :(compose($expr, Rotation($f1(), $f2(), ep)))
     end
-    rot
+    return quote
+        Base.@_inline_meta
+        $expr
+    end
 end
 

@@ -105,7 +105,7 @@ cip_coords(rbpn::AbstractMatrix) = rbpn[3,1], rbpn[3,2]
 include(joinpath("constants", "cip_coords.jl"))
 
 function cip_coords(::IAU2006, ep::Epoch)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
 
     # Powers of T.
     pt = [t^i for i = 0:6]
@@ -212,7 +212,7 @@ end
 include(joinpath("constants", "cio_locator.jl"))
 
 function cio_locator(coeffs, terms, ep, x, y)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
 
     l = fundamental(luna, t)
     lp = fundamental(sun, t)
@@ -268,7 +268,7 @@ function cip_coords_cio_locator(iau::IAU2000Model, ep)
 end
 
 function tio_locator(::IAU2000, ep)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
     return sec_to_rad(-47e-6 * t)
 end
 
@@ -294,7 +294,7 @@ function celestial_to_intermediate(::IAU2000, ep::Epoch, rbpn)
 end
 
 function celestial_to_intermediate(iau::IAU2000Model, ep::Epoch)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
     rbpn = precession_nutation_matrix(iau, ep)
     return celestial_to_intermediate(iau2000, ep, rbpn)
 end

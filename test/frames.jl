@@ -24,11 +24,14 @@ furnsh(path(pck))
         v = randn(3)
 
         rv = (r, v)
+        rvv = [r; v]
         r1, v1 = rot(r, v)
         rv1 = rot(rv)
+        rvv1 = rot(rvv)
         @test r1 == r
         @test v1 == v
         @test rv1 == rv
+        @test rvv1 == rvv
 
         comp = rot ∘ rot
         r1, v1 = comp(r, v)
@@ -144,3 +147,4 @@ furnsh(path(pck))
 end
 
 kclear()
+

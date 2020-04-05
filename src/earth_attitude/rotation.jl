@@ -69,7 +69,7 @@ using ..Util: normalize2pi, sec_to_rad
 export apparent_sidereal, earth_rotation_angle, equinoxes, mean_sidereal
 
 function earth_rotation_angle(::IAU2000, ep::Epoch)
-    t = julian_period(ep; scale=UT1, raw=true)
+    t = julian_period(Float64, ep; scale=UT1)
     f = t % 1.0
     return mod2pi(2π * (f + 0.7790572732640 + 0.00273781191135448t))
 end
@@ -77,7 +77,7 @@ end
 include(joinpath("constants", "equinoxes.jl"))
 
 function equinoxes(::IAU1994, ep::Epoch; scale=TDB)
-    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=scale, unit=centuries)
 
     ω₀ = sec_to_rad(@evalpoly(t, 450160.280, -482890.539, 7.455, 0.008))
     ω = mod2pi(ω₀ + (-5.0t % 1.0) * 2π)
@@ -89,7 +89,7 @@ function equinoxes(::IAU1994, ep::Epoch; scale=TDB)
 end
 
 function equinoxes(::IAU2000, ep::Epoch; scale=TT)
-    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=scale, unit=centuries)
 
     l = fundamental(luna, t)
     lp = fundamental(sun, t)
@@ -156,8 +156,8 @@ end
 const SECS_TO_RAD = 7.272205216643039903848712e-5
 
 function mean_sidereal(::IAU1982, ep::Epoch)
-    t = julian_period(ep; scale=UT1, unit=centuries, raw=true)
-    f = julian_period(ep; scale=UT1, raw=true) % 1.0 * SECONDS_PER_DAY
+    t = julian_period(Float64, ep; scale=UT1, unit=centuries)
+    f = julian_period(Float64, ep; scale=UT1) % 1.0 * SECONDS_PER_DAY
     gmst0 = @evalpoly(
         t,
         24110.54841 - SECONDS_PER_DAY / 2.0 + f,
@@ -169,7 +169,7 @@ function mean_sidereal(::IAU1982, ep::Epoch)
 end
 
 function mean_sidereal(::IAU2000, ep::Epoch; scale=TT)
-    t = julian_period(ep; scale=scale, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=scale, unit=centuries)
     gmst0 = @evalpoly(
         t,
         0.014506,
@@ -182,7 +182,7 @@ function mean_sidereal(::IAU2000, ep::Epoch; scale=TT)
 end
 
 function mean_sidereal(::IAU2006, ep::Epoch)
-    t = julian_period(ep; scale=TT, unit=centuries, raw=true)
+    t = julian_period(Float64, ep; scale=TT, unit=centuries)
     gmst0 = @evalpoly(
         t,
         0.014506,
