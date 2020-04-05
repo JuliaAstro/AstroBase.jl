@@ -18,13 +18,14 @@ for name in Bodies.ALL_NAMES
 
     @eval begin
         @frame $cname type=$frame parent=icrf rotating=true
+        export $cname, $frame
 
         function Rotation(::ICRF, ::$frame, ep::Epoch)
             tdb = TDBEpoch(ep)
             body = $(Symbol(name))()
             angles = euler_angles(body, tdb)
             rates = collect(euler_rates(body, tdb))
-            m = angle_to_dcm(euler..., :ZXZ)
+            m = angle_to_dcm(angles..., :ZXZ)
 
             return Rotation(icrf, $cname, m, rates)
         end

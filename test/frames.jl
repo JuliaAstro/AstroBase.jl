@@ -37,7 +37,7 @@ furnsh(path(pck))
         @test v1 == v
         @test rv1 == rv
 
-        exp_path = [:IAUEarth, :ICRF, :CIRF, :TIRF, :ITRF]
+        exp_path = [iau_earth, icrf, cirf, tirf, itrf]
         @test AstroBase.Frames.path_frames(iau_earth, itrf) == exp_path
     end
     @testset "Composition" begin
@@ -45,15 +45,15 @@ furnsh(path(pck))
         et = value(seconds(j2000(ep)))
         rot = Rotation(iau_earth, iau_io, ep)
         m_act = rot.m
-        m′_act = rot.m′
+        dm_act = rot.dm
         s_exp = sxform("IAU_EARTH", "IAU_IO", et)
         m_exp = s_exp[1:3, 1:3]
-        m′_exp = s_exp[4:6, 1:3]
+        dm_exp = s_exp[4:6, 1:3]
         @testset for i in eachindex(m_act, m_exp)
-            @test m_act[i] ≈ m_exp[i] atol = 1e-8
+            @test m_act[i] ≈ m_exp[i] atol=1e-8
         end
-        @testset for i in eachindex(m′_act, m′_exp)
-            @test m′_act[i] ≈ m′_exp[i] atol = 1e-6
+        @testset for i in eachindex(dm_act, dm_exp)
+            @test dm_act[i] ≈ dm_exp[i] atol=1e-6
         end
     end
     @testset "IAU" begin
@@ -66,22 +66,22 @@ furnsh(path(pck))
                 frame = @eval $(Symbol("IAU", body_name))()
                 rot = Rotation(icrf, frame, ep)
                 m_act = rot.m
-                m′_act = rot.m′
+                dm_act = rot.dm
                 s_exp = tisbod("J2000", id, et)
                 m_exp = s_exp[1:3, 1:3]
-                m′_exp = s_exp[4:6, 1:3]
+                dm_exp = s_exp[4:6, 1:3]
                 @testset for i in eachindex(m_act, m_exp)
-                    @test m_act[i] ≈ m_exp[i] atol = 1e-8
+                    @test m_act[i] ≈ m_exp[i] atol=1e-8
                 end
-                @testset for i in eachindex(m′_act, m′_exp)
-                    @test m′_act[i] ≈ m′_exp[i] atol = 1e-6
+                @testset for i in eachindex(dm_act, dm_exp)
+                    @test dm_act[i] ≈ dm_exp[i] atol=1e-6
                 end
             end
         end
         rot1 = Rotation(iau_mercury, iau_earth, ep)
         rot2 = Rotation(iau_mercury, iau_earth, UT1Epoch(ep))
         @test rot1.m == rot2.m
-        @test rot1.m′ == rot2.m′
+        @test rot1.dm == rot2.dm
     end
     @testset "IERS" begin
         # Reference values from Orekit (http://www.orekit.org)
@@ -139,7 +139,7 @@ furnsh(path(pck))
         rot1 = Rotation(icrf, itrf, ep)
         rot2 = Rotation(icrf, itrf, UT1Epoch(ep))
         @test rot1.m == rot2.m
-        @test rot1.m′ == rot2.m′
+        @test rot1.dm == rot2.dm
     end
 end
 

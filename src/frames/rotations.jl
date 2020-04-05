@@ -28,10 +28,14 @@ struct Rotation{F1<:AbstractFrame,F2<:AbstractFrame,T,DT}
     target::F2
     m::SMatrix{3,3,T}
     dm::SMatrix{3,3,DT}
-end
-
-function Rotation(origin, target, m::AbstractMatrix, dm::AbstractMatrix=zeros(3, 3))
-    Rotation(origin, target, m, dm)
+    function Rotation(
+        origin::F1,
+        target::F2,
+        m::AbstractMatrix{T},
+        dm::AbstractMatrix{DT}=zeros(T, 3, 3),
+    ) where {F1,F2,T,DT}
+        new{F1,F2,T,DT}(origin, target, m, dm)
+    end
 end
 
 function Rotation(origin, target, m::AbstractMatrix, angular::AbstractVector)
@@ -53,14 +57,15 @@ function Base.inv(rot::Rotation)
 end
 
 function apply!(rot::Rotation, pos, vel)
-    pos = rot.m * pos
     vel = rot.dm * pos + rot.m * vel
+    pos = rot.m * pos
     return pos, vel
 end
 
 apply(rot::Rotation, pos, vel) = apply!(rot, copy(pos), copy(vel))
+apply(rot::Rotation, posvel::Tuple) = apply(rot, posvel[1], posvel[2])
 
-function apply!(rot::Rotation, vec)
+function apply!(rot::Rotation, vec::AbstractVector)
     n = length(vec)
     n < 3 && throw(ArgumentError("`vec` must have at least 3 elements."))
     pos = vec[1:3]
@@ -73,10 +78,11 @@ end
 apply(rot::Rotation, vec) = apply!(rot, copy(vec))
 
 (rot::Rotation)(pos, vel) = apply(rot, pos, vel)
-(rot::Rotation)(vec) = apply(rot, vec)
+(rot::Rotation)(posvel::Tuple) = apply(rot, posvel[1], posvel[2])
+(rot::Rotation)(vec::AbstractVector) = apply(rot, vec)
 
 function compose(rot1::Rotation{F1, F}, rot2::Rotation{F, F2}) where {F, F1, F2}
-    Rotation{F1, F2}(rot2.m * rot1.m, rot2.dm * rot1.m + rot2.m * rot1.dm)
+    Rotation(F1(), F2(), rot2.m * rot1.m, rot2.dm * rot1.m + rot2.m * rot1.dm)
 end
 
 ∘(rot1::Rotation, rot2::Rotation) = compose(rot1, rot2)
@@ -87,7 +93,7 @@ function Rotation(frame1, frame2, ep::Epoch)
     length(frames) == 2 && return rot
 
     for (f1, f2) in zip(frames[2:end-1], frames[3:end])
-        rot = rot ∘ Rotation(from_sym(f1), from_sym(f2), ep)
+        rot = rot ∘ Rotation(f1, f2, ep)
     end
     rot
 end

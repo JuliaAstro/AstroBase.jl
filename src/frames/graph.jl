@@ -7,7 +7,7 @@ export ICRF, icrf, @frame
 
 const FRAMES = ItemGraph{AbstractFrame}(SimpleGraph())
 
-path_frames(frame1, frame2) = items(FRAMES, name1, name2)
+path_frames(from, to) = items(FRAMES, from, to)
 
 register_frame!(frame) = add_vertex!(FRAMES, frame)
 link_frames!(frame1, frame2) = add_edge!(FRAMES, frame1, frame2)
