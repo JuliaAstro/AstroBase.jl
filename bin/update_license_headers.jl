@@ -14,7 +14,6 @@ header =
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-
 """
 
 for (root, dirs, files) in walkdir("src")
@@ -29,10 +28,12 @@ for (root, dirs, files) in walkdir("src")
             end
         else
             n = length(header)
-            str[1:n] == header && continue
+            str1 = header * str[n+1:end]
+            str1 = replace(str, r"#\n([a-z])"=>s"#\n\n\1"; count=1)
+            str1 == str && continue
             println("Updated header for: ", fp)
             open(fp, "w") do f
-                write(f, header * str[n+1:end])
+                write(f, str1)
             end
         end
     end

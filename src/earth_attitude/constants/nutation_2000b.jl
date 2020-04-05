@@ -5,6 +5,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
+
 const NUTATION_2000B = [
    # 1-10
    NutationLuniSolar( 0, 0, 0, 0,1, -172064161.0, -174666.0, 33386.0, 92052331.0, 9086.0, 15377.0),
