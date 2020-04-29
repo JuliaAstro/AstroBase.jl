@@ -164,7 +164,7 @@ function nutation(::IAU1980, ep; scale=TT)
     dp = 0.0
     de = 0.0
 
-    for x in reverse(NUTATION_1980)
+    for x in Iterators.reverse(NUTATION_1980)
         arg = x.nl * el + x.nlp * elp + x.nf  * f + x.nd  * d + x.nom * om
         sarg, carg = sincos(arg)
 
@@ -195,7 +195,7 @@ function nutation(::IAU2000A, ep::Epoch; scale=TT)
     dpls = 0.0
     dels = 0.0
 
-    for x in reverse(NUTATION_2000A_LS)
+    for x in Iterators.reverse(NUTATION_2000A_LS)
         arg = mod2pi(x.nl * el + x.nlp * elp + x.nf * f + x.nd * d + x.nom * om)
         sarg, carg = sincos(arg)
 
@@ -221,7 +221,7 @@ function nutation(::IAU2000A, ep::Epoch; scale=TT)
     dppl = 0.0
     depl = 0.0
 
-    for x in reverse(NUTATION_2000A_PL)
+    for x in Iterators.reverse(NUTATION_2000A_PL)
         arg = mod2pi(x.nl * al +
                      x.nf * af   +
                      x.nd * ad   +
@@ -264,7 +264,7 @@ function nutation(::IAU2000B, ep::Epoch; scale=TT)
     dp = 0.0
     de = 0.0
 
-    for x in reverse(NUTATION_2000B)
+    for x in Iterators.reverse(NUTATION_2000B)
         arg = mod2pi(x.nl * el + x.nlp * elp + x.nf * f + x.nd * d + x.nom * om)
         sarg, carg = sincos(arg)
 

@@ -149,7 +149,7 @@ function cip_coords(::IAU2006, ep::Epoch)
     xyls = zeros(2)
 
     ialast = NAMP
-    for ifreq in reverse(eachindex(FUN_PL))
+    for ifreq in Iterators.reverse(eachindex(FUN_PL))
         arg = 0.0
         for i in eachindex(fa)
             m = FUN_PL[ifreq][i]
@@ -169,7 +169,7 @@ function cip_coords(::IAU2006, ep::Epoch)
         ialast = ia - 1
     end
 
-    for ifreq in reverse(eachindex(FUN_LS))
+    for ifreq in Iterators.reverse(eachindex(FUN_LS))
         arg = 0.0
         for i in 1:5
            m = FUN_LS[ifreq][i]
@@ -226,7 +226,7 @@ function cio_locator(coeffs, terms, ep, x, y)
     w = copy(coeffs)
 
     for (i, t) in enumerate(terms)
-        for x in reverse(t)
+        for x in Iterators.reverse(t)
             a = (
                 x.nl * l +
                 x.nlp * lp +

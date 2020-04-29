@@ -103,7 +103,7 @@ function equinoxes(::IAU2000, ep::Epoch; scale=TT)
     s0 = 0.0
     s1 = 0.0
 
-    for x in reverse(E0)
+    for x in Iterators.reverse(E0)
         eq = (
             x.nl * l +
             x.nlp * lp +
@@ -118,7 +118,7 @@ function equinoxes(::IAU2000, ep::Epoch; scale=TT)
         s0 += x.s * se + x.c * ce
     end
 
-    for x in reverse(E1)
+    for x in Iterators.reverse(E1)
         eq = (
             x.nl * l +
             x.nlp * lp +
