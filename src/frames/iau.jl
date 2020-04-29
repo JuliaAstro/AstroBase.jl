@@ -25,9 +25,8 @@ for name in Bodies.ALL_NAMES
             tdb = TDBEpoch(ep)
             body = $(Symbol(name))()
             angles = euler_angles(body, tdb)
-            rates = collect(euler_rates(body, tdb))
+            rates = euler_rates(body, tdb)
             m = angle_to_dcm(angles..., :ZXZ)
-
             return Rotation(icrf, $cname, m, rates)
         end
 

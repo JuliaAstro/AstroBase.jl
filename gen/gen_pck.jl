@@ -62,10 +62,12 @@ open("pck.jl", "w") do f
             ra = zeros(n)
             ra′ = deg2rad.(bodvrd(id, "NUT_PREC_RA"))
             ra[1:length(ra′)] .+= ra′
-            write(f, "alpha(::Type{Float64}, ::$body) = [$(join(ra, ", "))]\n")
+            write(f, "alpha(::Type{Float64}, ::$body) = ($(join(ra, ", ")))\n")
             write(f, "alpha(::$body) = alpha(Float64, $body())\n")
         catch err
             err isa SpiceError || rethrow(err)
+            write(f, "alpha(::Type{Float64}, ::$body) = ()\n")
+            write(f, "alpha(::$body) = alpha(Float64, $body())\n")
         end
 
         # Declination
@@ -89,10 +91,12 @@ open("pck.jl", "w") do f
             dec = zeros(n)
             dec′ = deg2rad.(bodvrd(id, "NUT_PREC_DEC"))
             dec[1:length(dec′)] .+= dec′
-            write(f, "delta(::Type{Float64}, ::$body) = [$(join(dec, ", "))]\n")
+            write(f, "delta(::Type{Float64}, ::$body) = ($(join(dec, ", ")))\n")
             write(f, "delta(::$body) = delta(Float64, $body())\n")
         catch err
             err isa SpiceError || rethrow(err)
+            write(f, "delta(::Type{Float64}, ::$body) = ()\n")
+            write(f, "delta(::$body) = alpha(Float64, $body())\n")
         end
 
         # Rotation
@@ -116,22 +120,34 @@ open("pck.jl", "w") do f
             pm = zeros(n)
             pm′ = deg2rad.(bodvrd(id, "NUT_PREC_PM"))
             pm[1:length(pm′)] .+= pm′
-            write(f, "omega(::Type{Float64}, ::$body) = [$(join(pm, ", "))]\n")
+            write(f, "omega(::Type{Float64}, ::$body) = ($(join(pm, ", ")))\n")
             write(f, "omega(::$body) = omega(Float64, $body())\n")
         catch err
             err isa SpiceError || rethrow(err)
+            write(f, "omega(::Type{Float64}, ::$body) = ()\n")
+            write(f, "omega(::$body) = alpha(Float64, $body())\n")
         end
 
         # Nutation / Precession
         try
-            length(id) != 3 && continue
+            if length(id) != 3
+                write(f, "theta0(::Type{Float64}, ::$body) = ()\n")
+                write(f, "theta0(::$body) = theta0(Float64, $body())\n")
+                write(f, "theta1(::Type{Float64}, ::$body) = ()\n")
+                write(f, "theta1(::$body) = theta1(Float64, $body())\n")
+                continue
+            end
             np = deg2rad.(reshape(bodvrd(id[1:1], "NUT_PREC_ANGLES"), 2, :))
-            write(f, "theta0(::Type{Float64}, ::$body) = [$(join(np[1,:], ", "))]\n")
+            write(f, "theta0(::Type{Float64}, ::$body) = ($(join(np[1,:], ", ")))\n")
             write(f, "theta0(::$body) = theta0(Float64, $body())\n")
-            write(f, "theta1(::Type{Float64}, ::$body) = [$(join(np[2,:], ", "))]\n")
+            write(f, "theta1(::Type{Float64}, ::$body) = ($(join(np[2,:], ", ")))\n")
             write(f, "theta1(::$body) = theta1(Float64, $body())\n")
         catch err
             err isa SpiceError || rethrow(err)
+            write(f, "theta0(::Type{Float64}, ::$body) = ()\n")
+            write(f, "theta0(::$body) = theta0(Float64, $body())\n")
+            write(f, "theta1(::Type{Float64}, ::$body) = ()\n")
+            write(f, "theta1(::$body) = theta1(Float64, $body())\n")
         end
     end
 end

@@ -8,7 +8,7 @@
 
 using LinearAlgebra: I
 using ReferenceFrameRotations: ddcm
-using StaticArrays: SMatrix, SDiagonal
+using StaticArrays: SMatrix, SVector
 
 using ..Interfaces: AbstractFrame
 using ..Time: Epoch
@@ -39,8 +39,8 @@ struct Rotation{F1<:AbstractFrame,F2<:AbstractFrame,T,DT}
     end
 end
 
-function Rotation(origin, target, m::AbstractMatrix, angular::AbstractVector)
-    dm = ddcm(m, angular)
+function Rotation(origin, target, m::AbstractMatrix, angular)
+    dm = ddcm(m, SVector(angular))
     return Rotation(origin, target, m, dm)
 end
 

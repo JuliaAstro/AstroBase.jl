@@ -12,7 +12,7 @@ import Base: parent
 
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
-using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds
+using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds, julian_period
 
 export CelestialBody,
     NAIFId,
@@ -51,6 +51,18 @@ function equatorial_radius end
 function subplanetary_radius end
 function along_orbit_radius end
 
+function alpha end
+function alpha0 end
+function alpha1 end
+function delta end
+function delta0 end
+function delta1 end
+function omega end
+function omega0 end
+function omega1 end
+function theta0 end
+function theta1 end
+
 function ellipsoid(body::CelestialBody)
     subplanetary_radius(body), along_orbit_radius(body), polar_radius(body)
 end
@@ -77,84 +89,93 @@ naifid(::Sun) = 10
 from_naifid(::Val{10}) = sun
 add_edge!(BODIES, 0, 10)
 
-alpha0(::CelestialBody) = 0.0
-alpha1(::CelestialBody) = 0.0
-alpha2(::CelestialBody) = 0.0
-delta0(::CelestialBody) = 0.0
-delta1(::CelestialBody) = 0.0
-delta2(::CelestialBody) = 0.0
-omega0(::CelestialBody) = 0.0
-omega1(::CelestialBody) = 0.0
-omega2(::CelestialBody) = 0.0
-alpha(::CelestialBody) = zeros(1)
-delta(::CelestialBody) = zeros(1)
-omega(::CelestialBody) = zeros(1)
-theta0(::CelestialBody) = zeros(1)
-theta1(::CelestialBody) = zeros(1)
-
 const Δtc = SECONDS_PER_CENTURY
 const Δtd = SECONDS_PER_DAY
 
-theta(b::CelestialBody, t) = theta0(b) .+ theta1(b) .* t / Δtc
+theta(b::CelestialBody, t) = theta0(b) .+ theta1(b) .* t ./ Δtc
 
 function right_ascension(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     α = alpha(b)
     α₀ = alpha0(b)
     α₁ = alpha1(b)
     α₂ = alpha2(b)
     θ = theta(b, t)
-    α₀ + α₁ * t / Δtc + α₂ * t^2 / Δtc^2 + sum(α .* sin.(θ))
+    α_pn = zero(α₀)
+    for i in eachindex(α)
+        α_pn += α[i] * sin(θ[i])
+    end
+    return α₀ + α₁ * t / Δtc + α₂ * t^2 / Δtc^2 + α_pn
 end
 
 function declination(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     δ = delta(b)
     δ₀ = delta0(b)
     δ₁ = delta1(b)
     δ₂ = delta2(b)
     θ = theta(b, t)
-    δ₀ + δ₁ * t / Δtc + δ₂ * t^2 / Δtc^2 + sum(δ .* cos.(θ))
+    δ_pn = zero(δ₀)
+    for i in eachindex(δ)
+        δ_pn += δ[i] * cos(θ[i])
+    end
+    return δ₀ + δ₁ * t / Δtc + δ₂ * t^2 / Δtc^2 + δ_pn
 end
 
 function rotation_angle(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     ω = omega(b)
     ω₀ = omega0(b)
     ω₁ = omega1(b)
     ω₂ = omega2(b)
     θ = theta(b, t)
-    ω₀ + ω₁ * t / Δtd + ω₂ * t^2 / Δtd^2 + sum(ω .* sin.(θ))
+    ω_pn = zero(ω₀)
+    for i in eachindex(ω)
+        ω_pn += ω[i] * sin(θ[i])
+    end
+    return ω₀ + ω₁ * t / Δtd + ω₂ * t^2 / Δtd^2 + ω_pn
 end
 
 function right_ascension_rate(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     α = alpha(b)
     α₁ = alpha1(b)
     α₂ = alpha2(b)
     θ = theta(b, t)
     θ₁ = theta1(b)
-    α₁ / Δtc + 2 * α₂ * t / Δtc^2 + sum(α .* θ₁ ./ Δtc .* cos.(θ))
+    α_pn = zero(α₁)
+    for i in eachindex(α)
+        α_pn += α[i] * θ₁[i] / Δtc * cos(θ[i])
+    end
+    return α₁ / Δtc + 2α₂ * t / Δtc^2 + α_pn
 end
 
 function declination_rate(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     δ = delta(b)
     δ₁ = delta1(b)
     δ₂ = delta2(b)
     θ = theta(b, t)
     θ₁ = theta1(b)
-    δ₁ / Δtc + 2 * δ₂ * t / Δtc^2 - sum(δ .* θ₁ ./ Δtc .* sin.(θ))
+    δ_pn = zero(δ₁)
+    for i in eachindex(δ)
+        δ_pn += δ[i] * θ₁[i] / Δtc * sin(θ[i])
+    end
+    return δ₁ / Δtc + 2δ₂ * t / Δtc^2 - δ_pn
 end
 
 function rotation_rate(b::CelestialBody, ep)
-    t = value(seconds(j2000(ep)))
+    t = julian_period(Float64, ep; unit=seconds)
     ω = omega(b)
     ω₁ = omega1(b)
     ω₂ = omega2(b)
     θ = theta(b, t)
     θ₁ = theta1(b)
-    ω₁ / Δtd + 2 * ω₂ * t / Δtd^2 + sum(ω .* θ₁ ./ Δtc .* cos.(θ))
+    ω_pn = zero(ω₁)
+    for i in eachindex(ω)
+        ω_pn += ω[i] * θ₁[i] / Δtc * cos(θ[i])
+    end
+    return ω₁ / Δtd + 2ω₂ * t / Δtd^2 + ω_pn
 end
 
 function euler_angles(b::CelestialBody, ep)
