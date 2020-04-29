@@ -16,7 +16,7 @@ end
 
 Base.showerror(io::IO, err::AstroException) = print(io, err.msg)
 
-include(joinpath("time", "Time.jl"))
+include(joinpath("Time", "Time.jl"))
 include(joinpath("constants", "Constants.jl"))
 include(joinpath("interfaces", "Interfaces.jl"))
 include(joinpath("util", "Util.jl"))

@@ -1,13 +1,16 @@
 # Astronomical Time
 
+This module is a simple wrapper for [AstroTime.jl](https://github.com/JuliaAstro/AstroTime.jl)
+which offers tools for astronomical time keeping.
+
 ```@meta
 DocTestSetup = quote
-    using AstroBase
+    using AstroTime
 end
 ```
 
 ```@autodocs
-Modules = [AstroBase.Time]
+Modules = [AstroTime]
 Private = false
 ```
 
