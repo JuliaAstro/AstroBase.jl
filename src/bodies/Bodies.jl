@@ -12,6 +12,11 @@ import Base: parent
 
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
+using ..Interfaces: CelestialBody, Barycenter, Planet, NaturalSatellite, MinorBody, NAIFId
+import ..Interfaces: grav_param, mean_radius, polar_radius, equatorial_radius, subplanetary_radius,
+    along_orbit_radius, ellipsoid,
+    alpha, alpha0, alpha1, delta, delta0, delta1, omega, omega0, omega1, theta0, theta1
+
 using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds, julian_period
 
 export CelestialBody,
@@ -39,33 +44,8 @@ export CelestialBody,
     subplanetary_radius,
     sun
 
-const NAIFId = Int
 const BODIES = ItemGraph{NAIFId, NAIFId}(SimpleGraph())
 
-abstract type CelestialBody end
-
-function grav_param end
-function mean_radius end
-function polar_radius end
-function equatorial_radius end
-function subplanetary_radius end
-function along_orbit_radius end
-
-function alpha end
-function alpha0 end
-function alpha1 end
-function delta end
-function delta0 end
-function delta1 end
-function omega end
-function omega0 end
-function omega1 end
-function theta0 end
-function theta1 end
-
-function ellipsoid(body::CelestialBody)
-    subplanetary_radius(body), along_orbit_radius(body), polar_radius(body)
-end
 
 Base.show(io::IO, body::CelestialBody) = print(io, string(nameof(typeof(body))))
 
@@ -73,7 +53,6 @@ from_naifid(id::NAIFId) = from_naifid(Val(id))
 
 path_ids(from::CelestialBody, to::CelestialBody) = items(BODIES, naifid(from), naifid(to))
 
-abstract type Barycenter <: CelestialBody end
 
 struct SolarSystemBarycenter <: Barycenter end
 const ssb = SolarSystemBarycenter()

@@ -8,7 +8,6 @@
 
 export MinorBody, pluto, Pluto, pluto_barycenter, PlutoBarycenter
 
-abstract type MinorBody <: CelestialBody end
 
 const MINOR_BODY_NAMES = (
     "Ceres",

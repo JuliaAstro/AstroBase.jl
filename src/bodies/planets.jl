@@ -6,7 +6,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-abstract type Planet <: CelestialBody end
 
 const PLANET_NAMES = (
     "Mercury",

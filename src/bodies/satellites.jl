@@ -6,7 +6,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-abstract type NaturalSatellite <: CelestialBody end
 
 export deimos, Deimos, phobos, Phobos, luna, Luna, moon, charon, Charon
 
