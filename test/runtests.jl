@@ -1,9 +1,9 @@
 using AstroBase
-import EarthOrientation
+import AstroTime
 using ERFA
 using Test
 
-EarthOrientation.update()
+AstroTime.load_test_eop()
 
 @testset "AstroBase" begin
     include("constants.jl")
