@@ -8,8 +8,6 @@
 
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
-using ..Interfaces: AbstractFrame, InertialFrame, RotatingFrame
-
 export ICRF, icrf, @frame
 
 const FRAMES = ItemGraph{AbstractFrame}(SimpleGraph())

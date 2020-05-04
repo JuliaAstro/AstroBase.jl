@@ -30,8 +30,6 @@ e.g. `using AstroBase.Time`, and provide the following functionality:
 - [`Frames`](https://juliaastro.github.io/AstroBase.jl/dev/modules/frames/):
 	Types representing quasi-inertial, rotating, and topocentric references frames
 	and the associated transformations
-- [`Interfaces`](https://juliaastro.github.io/AstroBase.jl/dev/modules/interfaces/):
-	Abstract types and base functions
 - [`Time`](https://juliaastro.github.io/AstroBase.jl/dev/modules/time/):
 	A wrapper for the [AstroTime.jl](https://github.com/JuliaAstro/AstroTime.jl) package
 - [`TwoBody`](https://juliaastro.github.io/AstroBase.jl/dev/modules/two_body/):

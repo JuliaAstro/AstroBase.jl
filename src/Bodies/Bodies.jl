@@ -12,15 +12,7 @@ import Base: parent
 
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 
-using ..Interfaces: CelestialBody, Barycenter, Planet, NaturalSatellite, MinorBody, NAIFId
-import ..Interfaces: grav_param, mean_radius, polar_radius, equatorial_radius, subplanetary_radius,
-    along_orbit_radius, ellipsoid,
-    right_ascension_coeffs, nutation_precession_coeffs,
-    declination_coeffs, rotation_coeffs,
-    right_ascension, right_ascension_rate, declination, declination_rate, rotation_angle, rotation_rate,
-    euler_angles, euler_rates
-
-using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds, julian_period
+using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, seconds, julian_period
 
 export CelestialBody,
     NAIFId,
@@ -46,6 +38,8 @@ export CelestialBody,
     ssb,
     subplanetary_radius,
     sun
+
+include("abstract.jl")
 
 const BODIES = ItemGraph{NAIFId, NAIFId}(SimpleGraph())
 

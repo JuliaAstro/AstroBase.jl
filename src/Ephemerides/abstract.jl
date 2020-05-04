@@ -14,14 +14,30 @@ using ..Bodies:
     path_ids,
     ssb
 using ..Time: Epoch
-import ..Interfaces:
-    AbstractEphemeris,
+
+import Base: position
+
+export AbstractEphemeris,
     position,
     position!,
-    state,
-    state!,
     velocity,
-    velocity!
+    velocity!,
+    state,
+    state!
+
+"""
+    AbstractEphemeris
+
+Abstract supertype for ephemerides.
+"""
+abstract type AbstractEphemeris end
+
+function position! end
+function velocity end
+function velocity! end
+function state end
+function state! end
+
 
 for f in (:position, :velocity)
     fmut = Symbol(f, "!")

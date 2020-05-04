@@ -8,6 +8,7 @@
 
 module Frames
 
+include("abstract.jl")
 include("graph.jl")
 include("rotations.jl")
 include("iau.jl")

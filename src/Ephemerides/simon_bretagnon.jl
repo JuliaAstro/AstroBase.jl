@@ -84,8 +84,6 @@ using ..Time: TDBEpoch, TTEpoch, centuries, j2000, value, julian_twopart
 using ..TwoBody: cartesian, transform, mean_anomaly, true_anomaly
 using ..Util: sec_to_rad, normalize2pi
 
-import ..Interfaces: AbstractEphemeris, position!, state!, velocity!
-
 export SimonBretagnon, simon_bretagnon
 
 struct SimonBretagnon <: AbstractEphemeris end

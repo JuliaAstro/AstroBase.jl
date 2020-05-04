@@ -20,7 +20,6 @@ makedocs(
 	    "Coordinates" => joinpath("modules", "coords.md"),
 	    "Earth Attitude" => joinpath("modules", "earth_attitude.md"),
 	    "Ephemerides" => joinpath("modules", "ephemerides.md"),
-	    "Interfaces" => joinpath("modules", "interfaces.md"),
 	    "Reference Frames" => joinpath("modules", "frames.md"),
 	    "Time" => joinpath("modules", "time.md"),
 	    "Two-Body Problem" => joinpath("modules", "two_body.md"),

@@ -18,7 +18,6 @@ Base.showerror(io::IO, err::AstroException) = print(io, err.msg)
 
 include(joinpath("Time", "Time.jl"))
 include(joinpath("Constants", "Constants.jl"))
-include(joinpath("Interfaces", "Interfaces.jl"))
 include(joinpath("Util", "Util.jl"))
 include(joinpath("Bodies", "Bodies.jl"))
 include(joinpath("EarthAttitude", "EarthAttitude.jl"))
@@ -32,7 +31,6 @@ include(joinpath("Coords", "Coords.jl"))
 
 @reexport using .Time
 @reexport using .Constants
-@reexport using .Interfaces
 @reexport using .Util
 @reexport using .Bodies
 @reexport using .EarthAttitude

@@ -10,7 +10,6 @@ using LinearAlgebra: I
 using ReferenceFrameRotations: ddcm
 using StaticArrays: SMatrix, SVector
 
-using ..Interfaces: AbstractFrame
 using ..Time: Epoch
 
 import Base: ∘

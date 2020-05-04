@@ -11,7 +11,6 @@ using Roots: find_zero
 using ..Time: Period, Epoch, TimeScale
 
 import ..Time: unit
-import ..Interfaces: AbstractTrajectory
 
 export Trajectory, initial, final, state, events, times,
     LogEntry, count_id, id, epoch, detector,

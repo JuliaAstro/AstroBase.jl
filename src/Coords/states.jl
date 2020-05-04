@@ -14,14 +14,6 @@ using ..Frames: AbstractFrame, icrf
 using ..Time: Epoch, TimeScale
 
 import Base: ==
-import ..Interfaces: AbstractState,
-    centralbody,
-    epoch,
-    position,
-    refframe,
-    state,
-    timescale,
-    velocity
 import ..TwoBody: period, cartesian, keplerian
 
 export State, KeplerianState, pos_type, vel_type, period

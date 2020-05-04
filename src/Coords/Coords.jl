@@ -8,6 +8,7 @@
 
 module Coords
 
+include("abstract.jl")
 include("states.jl")
 include("conversions.jl")
 include("bodyfixed.jl")

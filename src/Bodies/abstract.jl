@@ -1,7 +1,3 @@
-#
-# Copyright (c) 2018-2020 Helge Eichhorn and the AstroBase.jl contributors
-#
-# This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
@@ -52,6 +48,10 @@ abstract type MinorBody <: CelestialBody end
     NAIFId
 
 An integer code for identifying celestial bodies and other objects in space.
+
+# References
+
+- [NASA NAIF](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html)
 """
 const NAIFId = Int
 
@@ -59,12 +59,78 @@ const NAIFId = Int
     grav_param([T=Float64,] body::CelestialBody)
 
 Return the gravitational parameter ``\\mu = GM`` for `body` in km^3/s^2.
+
+# Example
+
+```jldoctest
+julia> grav_param(earth)
+398600.435436096
+```
 """
 function grav_param end
+
+"""
+    mean_radius([T=Float64,] body::CelestialBody)
+
+Return the mean radius for `body` in km.
+
+# Example
+
+```jldoctest
+julia> mean_radius(earth)
+6371.008366666666
+```
+"""
 function mean_radius end
+
+"""
+    mean_radius([T=Float64,] body::CelestialBody)
+
+Return the mean radius for `body` in km.
+
+# Example
+
+```jldoctest
+```
+"""
 function polar_radius end
+
+"""
+    mean_radius([T=Float64,] body::CelestialBody)
+
+Return the mean radius for `body` in km.
+
+# Example
+
+```jldoctest
+```
+"""
 function equatorial_radius end
+
+"""
+    mean_radius([T=Float64,] body::CelestialBody)
+
+Return the mean radius for `body` in km.
+
+# Example
+
+```jldoctest
+```
+"""
 function subplanetary_radius end
+
+"""
+    mean_radius([T=Float64,] body::CelestialBody)
+
+Return the mean radius for `body` in km.
+
+# Example
+
+```jldoctest
+julia> along_orbit_radius(earth)
+6378.1366
+```
+"""
 function along_orbit_radius end
 
 function right_ascension_coeffs end
@@ -72,12 +138,9 @@ function declination_coeffs end
 function rotation_coeffs end
 function nutation_precession_coeffs end
 
-const Δtc = SECONDS_PER_CENTURY
-const Δtd = SECONDS_PER_DAY
-
 @inline function theta(::Type{T}, body, t) where T
     θ₀, θ₁ = nutation_precession_coeffs(T, body)
-    return θ₀ .+ θ₁ .* t ./ Δtc
+    return θ₀ .+ θ₁ .* t ./ SECONDS_PER_CENTURY
 end
 
 for func in (:right_ascension, :declination, :rotation)
@@ -89,16 +152,16 @@ for func in (:right_ascension, :declination, :rotation)
     dt = func == :rotation ? :SECONDS_PER_DAY : :SECONDS_PER_CENTURY
     func = func == :rotation ? :rotation_angle : func
     @eval begin
-        @inline function $func(::Type{T}, ::Type{TT}, body, ep) where {T, TT}
-            t = julian_period(TT, ep; unit=seconds)
+        @inline function $func(::Type{T}, ::Type{PT}, body, ep) where {T, PT}
+            t = julian_period(PT, ep; unit=seconds)
             c₀, c₁, c₂, c = $coeffs(T, body)
             c_np = isempty(c) ? zero(T) : sum(c .* $trig.(theta(T, body, t)))
             return c₀ + c₁ * t / $dt + c₂ * t^2 / $dt^2 + c_np
         end
         $func(body, ep) = $func(Float64, Float64, body, ep)
 
-        @inline function $rate(::Type{T}, ::Type{TT}, body, ep) where {T, TT}
-            t = julian_period(TT, ep; unit=seconds)
+        @inline function $rate(::Type{T}, ::Type{PT}, body, ep) where {T, PT}
+            t = julian_period(PT, ep; unit=seconds)
             _, c₁, c₂, c = $coeffs(T, body)
             _, θ₁ = nutation_precession_coeffs(T, body)
             c_np = isempty(c) ? zero(T) :
