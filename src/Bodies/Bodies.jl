@@ -15,7 +15,10 @@ using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
 using ..Interfaces: CelestialBody, Barycenter, Planet, NaturalSatellite, MinorBody, NAIFId
 import ..Interfaces: grav_param, mean_radius, polar_radius, equatorial_radius, subplanetary_radius,
     along_orbit_radius, ellipsoid,
-    alpha, alpha0, alpha1, delta, delta0, delta1, omega, omega0, omega1, theta0, theta1
+    right_ascension_coeffs, nutation_precession_coeffs,
+    declination_coeffs, rotation_coeffs,
+    right_ascension, right_ascension_rate, declination, declination_rate, rotation_angle, rotation_rate,
+    euler_angles, euler_rates
 
 using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, value, j2000, seconds, julian_period
 
@@ -68,102 +71,6 @@ naifid(::Sun) = 10
 from_naifid(::Val{10}) = sun
 add_edge!(BODIES, 0, 10)
 
-const Δtc = SECONDS_PER_CENTURY
-const Δtd = SECONDS_PER_DAY
-
-theta(b::CelestialBody, t) = theta0(b) .+ theta1(b) .* t ./ Δtc
-
-function right_ascension(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    α = alpha(b)
-    α₀ = alpha0(b)
-    α₁ = alpha1(b)
-    α₂ = alpha2(b)
-    θ = theta(b, t)
-    α_pn = zero(α₀)
-    for i in eachindex(α)
-        α_pn += α[i] * sin(θ[i])
-    end
-    return α₀ + α₁ * t / Δtc + α₂ * t^2 / Δtc^2 + α_pn
-end
-
-function declination(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    δ = delta(b)
-    δ₀ = delta0(b)
-    δ₁ = delta1(b)
-    δ₂ = delta2(b)
-    θ = theta(b, t)
-    δ_pn = zero(δ₀)
-    for i in eachindex(δ)
-        δ_pn += δ[i] * cos(θ[i])
-    end
-    return δ₀ + δ₁ * t / Δtc + δ₂ * t^2 / Δtc^2 + δ_pn
-end
-
-function rotation_angle(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    ω = omega(b)
-    ω₀ = omega0(b)
-    ω₁ = omega1(b)
-    ω₂ = omega2(b)
-    θ = theta(b, t)
-    ω_pn = zero(ω₀)
-    for i in eachindex(ω)
-        ω_pn += ω[i] * sin(θ[i])
-    end
-    return ω₀ + ω₁ * t / Δtd + ω₂ * t^2 / Δtd^2 + ω_pn
-end
-
-function right_ascension_rate(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    α = alpha(b)
-    α₁ = alpha1(b)
-    α₂ = alpha2(b)
-    θ = theta(b, t)
-    θ₁ = theta1(b)
-    α_pn = zero(α₁)
-    for i in eachindex(α)
-        α_pn += α[i] * θ₁[i] / Δtc * cos(θ[i])
-    end
-    return α₁ / Δtc + 2α₂ * t / Δtc^2 + α_pn
-end
-
-function declination_rate(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    δ = delta(b)
-    δ₁ = delta1(b)
-    δ₂ = delta2(b)
-    θ = theta(b, t)
-    θ₁ = theta1(b)
-    δ_pn = zero(δ₁)
-    for i in eachindex(δ)
-        δ_pn += δ[i] * θ₁[i] / Δtc * sin(θ[i])
-    end
-    return δ₁ / Δtc + 2δ₂ * t / Δtc^2 - δ_pn
-end
-
-function rotation_rate(b::CelestialBody, ep)
-    t = julian_period(Float64, ep; unit=seconds)
-    ω = omega(b)
-    ω₁ = omega1(b)
-    ω₂ = omega2(b)
-    θ = theta(b, t)
-    θ₁ = theta1(b)
-    ω_pn = zero(ω₁)
-    for i in eachindex(ω)
-        ω_pn += ω[i] * θ₁[i] / Δtc * cos(θ[i])
-    end
-    return ω₁ / Δtd + 2ω₂ * t / Δtd^2 + ω_pn
-end
-
-function euler_angles(b::CelestialBody, ep)
-    right_ascension(b, ep) + π/2, π/2 - declination(b, ep), mod2pi(rotation_angle(b, ep))
-end
-
-function euler_rates(b::CelestialBody, ep)
-    right_ascension_rate(b, ep), -declination_rate(b, ep), rotation_rate(b, ep)
-end
 
 include("planets.jl")
 include("minor.jl")

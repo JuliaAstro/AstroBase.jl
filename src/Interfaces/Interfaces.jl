@@ -8,6 +8,8 @@
 
 module Interfaces
 
+using ..Time: SECONDS_PER_CENTURY, SECONDS_PER_DAY, julian_period, seconds
+
 include("bodies.jl")
 include("frames.jl")
 include("ephemerides.jl")
