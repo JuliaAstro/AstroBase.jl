@@ -214,7 +214,7 @@ end
 
 
 """
-   spherical_to_cartesian(theta, phi)
+    spherical_to_cartesian(theta, phi)
 
 Convert spherical coordinates to Cartesian.
 
@@ -233,12 +233,12 @@ Convert spherical coordinates to Cartesian.
 - [ERFA](https://github.com/liberfa/erfa/blob/master/src/s2c.c)
 """
 function spherical_to_cartesian(theta, phi)
-   cp = cos(phi);
-   x = cos(theta) * cp;
-   y = sin(theta) * cp;
-   z = sin(phi);
+    cp = cos(phi);
+    x = cos(theta) * cp;
+    y = sin(theta) * cp;
+    z = sin(phi);
 
-   return x, y, z
+    return x, y, z
 end
 
 end
