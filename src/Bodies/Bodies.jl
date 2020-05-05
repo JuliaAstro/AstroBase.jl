@@ -8,64 +8,19 @@
 
 module Bodies
 
-import Base: parent
-
 using ItemGraphs: ItemGraph, SimpleGraph, add_edge!, add_vertex!, items
-
 using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, seconds, julian_period
 
-export CelestialBody,
-    NAIFId,
-    SolarSystemBarycenter,
-    Sun,
-    along_orbit_radius,
-    declination,
-    declination_rate,
-    ellipsoid,
-    equatorial_radius,
-    euler_angles,
-    euler_rates,
-    from_naifid,
-    grav_param,
-    mean_radius,
-    naifid,
-    parent,
-    polar_radius,
-    right_ascension,
-    right_ascension_rate,
-    rotation_angle,
-    rotation_rate,
-    ssb,
-    subplanetary_radius,
-    sun
+import Base: parent
+
+export CelestialBody, NAIFId, SolarSystemBarycenter, Sun,
+    along_orbit_radius, declination, declination_rate, ellipsoid, equatorial_radius,
+    euler_angles, euler_rates, from_naifid, grav_param, mean_radius, naifid,
+    parent, polar_radius, right_ascension, right_ascension_rate,
+    rotation_angle, rotation_rate, ssb, subplanetary_radius, sun
 
 include("abstract.jl")
-
-const BODIES = ItemGraph{NAIFId, NAIFId}(SimpleGraph())
-
-
-Base.show(io::IO, body::CelestialBody) = print(io, string(nameof(typeof(body))))
-
-from_naifid(id::NAIFId) = from_naifid(Val(id))
-
-path_ids(from::CelestialBody, to::CelestialBody) = items(BODIES, naifid(from), naifid(to))
-
-
-struct SolarSystemBarycenter <: Barycenter end
-const ssb = SolarSystemBarycenter()
-Base.show(io::IO, ::SolarSystemBarycenter) = print(io, "Solar System Barycenter")
-naifid(::SolarSystemBarycenter) = 0
-from_naifid(::Val{0}) = ssb
-add_vertex!(BODIES, 0)
-
-struct Sun <: CelestialBody end
-const sun = Sun()
-parent(::Sun) = ssb
-naifid(::Sun) = 10
-from_naifid(::Val{10}) = sun
-add_edge!(BODIES, 0, 10)
-
-
+include("graph.jl")
 include("planets.jl")
 include("minor.jl")
 include("satellites.jl")

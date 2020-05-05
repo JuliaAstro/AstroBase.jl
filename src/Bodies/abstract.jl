@@ -41,6 +41,9 @@ Abstract supertype for minor solar system bodies.
 """
 abstract type MinorBody <: CelestialBody end
 
+# TODO: Use three-arg form?
+Base.show(io::IO, body::CelestialBody) = print(io, string(nameof(typeof(body))))
+
 """
     NAIFId
 
@@ -51,6 +54,28 @@ An integer code for identifying celestial bodies and other objects in space.
 - [NASA NAIF](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html)
 """
 const NAIFId = Int
+
+"""
+    naifid(body::CelestialBody) -> NAIFId
+
+Return the NAIF ID code for `body`.
+
+# References
+
+- [NASA NAIF](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html)
+"""
+function naifid end
+
+"""
+    from_naifid(id)
+
+Return a celestial body instance based on its NAIF ID code.
+
+# References
+
+- [NASA NAIF](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html)
+"""
+from_naifid(id::NAIFId) = from_naifid(Val(id))
 
 """
     grav_param([T=Float64,] body::CelestialBody)
@@ -328,7 +353,7 @@ function rotation_rate end
     euler_angles([[T=Float64,] PT=Float64,], body, ep)
 
 Return the orientation of the body-fixed frame of `body` w.r.t. the ICRF at epoch `ep` as a
-set of Euler angles in rad with rotation order *ZXZ*.
+set of Euler angles in rad with rotation order ZXZ.
 
 # Example
 
@@ -351,7 +376,7 @@ end
     euler_rates([[T=Float64,] PT=Float64,], body, ep)
 
 Return the rate of change of orientation of the body-fixed frame of `body` w.r.t. the ICRF
-at epoch `ep` as a set of Euler angle rates in rad/s with rotation order *ZXZ*.
+at epoch `ep` as a set of Euler angle rates in rad/s with rotation order ZXZ.
 
 # Example
 
