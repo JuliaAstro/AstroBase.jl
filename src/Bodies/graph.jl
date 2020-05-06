@@ -38,10 +38,11 @@ julia> naifid(rupert)
 ```
 """
 macro body(name::Symbol, id::Int, super::Symbol, args...)
-    name_comps = uppercasefirst.(split(String(name), '_'))
-    str = join(name_comps, " ")
-    typ = Symbol(join(name_comps))
+    name_str = String(name)
+    typ_str = join(uppercasefirst.(split(name_str, '_')))
+    typ = Symbol(typ_str)
     parent = nothing
+    _export = false
     if !(super in (:CelestialBody, :Barycenter, :Planet, :NaturalSatellite, :MinorBody))
         throw(ArgumentError("Invalid supertype: $super"))
     end
@@ -53,45 +54,51 @@ macro body(name::Symbol, id::Int, super::Symbol, args...)
             val = a.args[2]
             val isa Symbol || throw(ArgumentError("Invalid argument: $a"))
             typ = val
-            str = join(split(String(typ), r"(?=[A-Z])"), " ")
         elseif a.args[1] == :parent
             val = a.args[2]
             val isa Symbol || throw(ArgumentError("Invalid argument: $a"))
             parent = val
+        elseif a.args[1] == :_export
+            val = a.args[2]
+            val isa Bool || throw(ArgumentError("Invalid argument: $a"))
+            _export = val
         end
     end
+    parts = split(String(typ), r"(?=[A-Z1-9])")
+    show_str = join(parts, " ")
+    doc_str = parts[end] == "Barycenter" ? join(["the"; parts], " ") : show_str
+    super_str = String(super)
     reg = if parent === nothing
         :(register_body!($id))
     else
         :(link_bodies!(naifid($parent), $id))
     end
+    exp = _export ? :(export $name, $typ) : :()
     id_expr = :(naifid(::$typ) = $id)
     fromid_expr = :(from_naifid(::Val{$id}) = $name)
     return quote
+        """
+            $($typ_str) <: $($super_str)
+
+        A type representing $($doc_str).
+        """
         struct $(esc(typ)) <: $(esc(super)) end
+
+        """
+            $($name_str)
+
+        The singleton instance of the [`$($typ_str)`](@ref) type.
+        """
         const $(esc(name)) = $(esc(typ))()
-        Base.show(io::IO, ::$(esc(typ))) = print(io, "$($str)")
+        Base.show(io::IO, ::$(esc(typ))) = print(io, "$($show_str)")
         $(esc(id_expr))
         $(esc(fromid_expr))
         $(esc(reg))
+        $(esc(exp))
         nothing
     end
 end
 
-@body ssb 0 Barycenter type=SolarSystemBarycenter
-@body sun 10 CelestialBody parent=ssb
-
-# struct SolarSystemBarycenter <: Barycenter end
-# const ssb = SolarSystemBarycenter()
-# Base.show(io::IO, ::SolarSystemBarycenter) = print(io, "Solar System Barycenter")
-# naifid(::SolarSystemBarycenter) = 0
-# from_naifid(::Val{0}) = ssb
-# add_vertex!(BODIES, 0)
-#
-# struct Sun <: CelestialBody end
-# const sun = Sun()
-# parent(::Sun) = ssb
-# naifid(::Sun) = 10
-# from_naifid(::Val{10}) = sun
-# add_edge!(BODIES, 0, 10)
+@body ssb 0 Barycenter type=SolarSystemBarycenter _export=true
+@body sun 10 CelestialBody parent=ssb _export=true
 

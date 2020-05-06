@@ -6,34 +6,22 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-
-export deimos, Deimos, phobos, Phobos, luna, Luna, moon, charon, Charon
-
 # Earth
 
-struct Luna <: NaturalSatellite end
-const luna = Luna()
+@body luna 301 NaturalSatellite parent=earth_barycenter _export=true
+
+"""
+    moon
+
+`moon` is an alias for [`luna`](@ref).
+"""
 const moon = luna
-parent(::Luna) = earth_barycenter
-naifid(::Luna) = 301
-from_naifid(::Val{301}) = luna
-add_edge!(BODIES, 3, 301)
+export moon
 
 # Mars
 
-struct Phobos <: NaturalSatellite end
-const phobos = Phobos()
-parent(::Phobos) = mars_barycenter
-naifid(::Phobos) = 401
-from_naifid(::Val{401}) = phobos
-add_edge!(BODIES, 4, 401)
-
-struct Deimos <: NaturalSatellite end
-const deimos = Deimos()
-parent(::Deimos) = mars_barycenter
-naifid(::Deimos) = 402
-from_naifid(::Val{402}) = deimos
-add_edge!(BODIES, 4, 402)
+@body phobos 401 NaturalSatellite parent=mars_barycenter _export=true
+@body deimos 402 NaturalSatellite parent=mars_barycenter _export=true
 
 # Jupiter
 
@@ -92,27 +80,14 @@ const JUPITER_SATELLITE_NAMES = (
 )
 
 for (i, body) in enumerate(JUPITER_SATELLITE_NAMES[1:end-1])
-    typ = Symbol(body)
-    sym = Symbol(lowercase(body))
+    name = Symbol(lowercase(body))
     id = 500 + i
-    add_edge!(BODIES, 5, id)
     @eval begin
-        struct $typ <: NaturalSatellite end
-        const $sym = $typ()
-        parent(::$typ) = jupiter_barycenter
-        naifid(::$typ) = $id
-        from_naifid(::Val{$id}) = $sym
-        export $sym, $typ
+        @body $name $id NaturalSatellite parent=jupiter_barycenter _export=true
     end
 end
 
-struct Dia <: NaturalSatellite end
-const dia = Dia()
-parent(::Dia) = jupiter_barycenter
-naifid(::Dia) = 553
-from_naifid(::Val{553}) = dia
-add_edge!(BODIES, 5, 553)
-export dia, Dia
+@body dia 553 NaturalSatellite parent=jupiter_barycenter _export=true
 
 # Saturn
 
@@ -173,17 +148,10 @@ const SATURN_SATELLITE_NAMES = (
 )
 
 for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
-    typ = Symbol(body)
-    sym = Symbol(lowercase(body))
+    name = Symbol(lowercase(body))
     id = 600 + i
-    add_edge!(BODIES, 6, id)
     @eval begin
-        struct $typ <: NaturalSatellite end
-        const $sym = $typ()
-        parent(::$typ) = saturn_barycenter
-        naifid(::$typ) = $id
-        from_naifid(::Val{$id}) = $sym
-        export $sym, $typ
+        @body $name $id NaturalSatellite parent=saturn_barycenter _export=true
     end
 end
 
@@ -220,17 +188,10 @@ const URANUS_SATELLITE_NAMES = (
 )
 
 for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
-    typ = Symbol(body)
-    sym = Symbol(lowercase(body))
+    name = Symbol(lowercase(body))
     id = 700 + i
-    add_edge!(BODIES, 7, id)
     @eval begin
-        struct $typ <: NaturalSatellite end
-        const $sym = $typ()
-        parent(::$typ) = uranus_barycenter
-        naifid(::$typ) = $id
-        from_naifid(::Val{$id}) = $sym
-        export $sym, $typ
+        @body $name $id NaturalSatellite parent=uranus_barycenter _export=true
     end
 end
 
@@ -253,17 +214,10 @@ const NEPTUNE_SATELLITE_NAMES = (
 )
 
 for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
-    typ = Symbol(body)
-    sym = Symbol(lowercase(body))
+    name = Symbol(lowercase(body))
     id = 800 + i
-    add_edge!(BODIES, 8, id)
     @eval begin
-        struct $typ <: NaturalSatellite end
-        const $sym = $typ()
-        parent(::$typ) = neptune_barycenter
-        naifid(::$typ) = $id
-        from_naifid(::Val{$id}) = $sym
-        export $sym, $typ
+        @body $name $id NaturalSatellite parent=neptune_barycenter _export=true
     end
 end
 
@@ -278,16 +232,10 @@ const PLUTO_SATELLITE_NAMES = (
 )
 
 for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
-    typ = Symbol(body)
-    sym = Symbol(lowercase(body))
+    name = Symbol(lowercase(body))
     id = 900 + i
-    add_edge!(BODIES, 9, id)
     @eval begin
-        struct $typ <: NaturalSatellite end
-        const $sym = $typ()
-        parent(::$typ) = pluto_barycenter
-        naifid(::$typ) = $id
-        from_naifid(::Val{$id}) = $sym
-        export $sym, $typ
+        @body $name $id NaturalSatellite parent=pluto_barycenter _export=true
     end
 end
+
