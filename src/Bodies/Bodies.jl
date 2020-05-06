@@ -17,7 +17,8 @@ export CelestialBody, NAIFId, SolarSystemBarycenter, Sun,
     along_orbit_radius, declination, declination_rate, ellipsoid, equatorial_radius,
     euler_angles, euler_rates, from_naifid, grav_param, mean_radius, naifid,
     parent, polar_radius, right_ascension, right_ascension_rate,
-    rotation_angle, rotation_rate, ssb, subplanetary_radius, sun
+    rotation_angle, rotation_rate, ssb, subplanetary_radius, sun,
+    @body
 
 include("abstract.jl")
 include("graph.jl")
