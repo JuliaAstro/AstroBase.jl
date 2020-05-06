@@ -17,7 +17,7 @@ path_ids(from::CelestialBody, to::CelestialBody) = items(BODIES, naifid(from), n
     @body(name, id, supertype, type=Name, parent=nothing)
 
 Define a new celestial `body` with NAIF `id` and `supertype` which is the singleton
-instance of `type`. Optionally, provide a `parent` body or pseudo-body.
+instance of `type`. Optionally, provide a `parent` (pseudo-)body.
 
 # Example
 
