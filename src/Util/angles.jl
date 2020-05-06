@@ -34,6 +34,7 @@ Convert `x` from degrees to radians.
 ```jldoctest
 julia> deg_to_rad(90)
 1.5707963267948966
+```
 """
 deg_to_rad(x) = deg2rad(x)
 
@@ -47,6 +48,7 @@ Convert `x` from radians to degrees.
 ```jldoctest
 julia> rad_to_deg(π/2)
 90
+```
 """
 rad_to_deg(x) = rad2deg(x)
 
