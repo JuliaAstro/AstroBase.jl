@@ -86,7 +86,7 @@ end
     # AU/millenium to km/s
     v .*= AU / 10SECONDS_PER_CENTURY
 
-    VSOP87_FK5 * r, VSOP87_FK5 * v
+    return VSOP87_FK5 * r, VSOP87_FK5 * v
 end
 
 for body in ("Sun", "Mercury", "Venus", "Earth", "Mars",
@@ -96,18 +96,18 @@ for body in ("Sun", "Mercury", "Venus", "Earth", "Mars",
     n = Symbol("VSOP_", uppercase(body), "_NUM")
     @eval begin
         function position!(arr, eph::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::$b)
-            _vsop($c, $n, eph.order, eph.terms, ep)[1]
+            return _vsop($c, $n, eph.order, eph.terms, ep)[1]
         end
 
         function velocity!(arr, eph::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::$b)
-            _vsop($c, $n, eph.order, eph.terms, ep)[2]
+            return _vsop($c, $n, eph.order, eph.terms, ep)[2]
         end
 
         function state!(r0, v0, eph::VSOP87, ep::Epoch, ::SolarSystemBarycenter, ::$b)
             r1, v1 = _vsop($c, $n, eph.order, eph.terms, ep)
             r0 .+= r1
             v0 .+= v1
-            r0, v0
+            return r0, v0
         end
     end
 end
@@ -121,16 +121,15 @@ function state!(pos, vel, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::Cele
     rv2 = state!(zeros(3), zeros(3), vsop, ep, ssb, to)
     pos .+= (rv2[1] .- rv1[1])
     vel .+= (rv2[2] .- rv1[2])
-    pos, vel
+    return pos, vel
 end
 
 function position!(pos, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::CelestialBody)
     state!(pos, zeros(3), vsop, ep, from, to)
-    pos
+    return pos
 end
 
 function velocity!(vel, vsop::VSOP87, ep::Epoch, from::CelestialBody, to::CelestialBody)
     state!(zeros(3), vel, vsop, ep, from, to)
-    vel
+    return vel
 end
-
