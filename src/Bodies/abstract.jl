@@ -31,9 +31,58 @@ abstract type Planet <: CelestialBody end
 """
     NaturalSatellite <: CelestialBody
 
-Abstract supertype for natural satellites (moons).
+Abstract supertype for all natural satellites (moons).
 """
 abstract type NaturalSatellite <: CelestialBody end
+
+"""
+    EarthSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Earth.
+"""
+abstract type EarthSatellite <: NaturalSatellite end
+
+"""
+    MarsSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Mars.
+"""
+abstract type MarsSatellite <: NaturalSatellite end
+
+"""
+    JupiterSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Jupiter.
+"""
+abstract type JupiterSatellite <: NaturalSatellite end
+
+"""
+    SaturnSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Saturn.
+"""
+abstract type SaturnSatellite <: NaturalSatellite end
+
+"""
+    UranusSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Uranus.
+"""
+abstract type UranusSatellite <: NaturalSatellite end
+
+"""
+    NeptuneSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Neptune.
+"""
+abstract type NeptuneSatellite <: NaturalSatellite end
+
+"""
+    PlutoSatellite <: NaturalSatellite
+
+Abstract supertype for natural satellites (moons) of Pluto.
+"""
+abstract type PlutoSatellite <: NaturalSatellite end
 
 """
     MinorBody <: CelestialBody
@@ -217,12 +266,12 @@ julia> ellipsoid(earth)
     (2011): 101-135.
 """
 function ellipsoid(::Type{T}, body) where {T}
-    subplanetary_radius(T, body), along_orbit_radius(T, body), polar_radius(T, body)
+    return subplanetary_radius(T, body), along_orbit_radius(T, body), polar_radius(T, body)
 end
 ellipsoid(body) = ellipsoid(Float64, body)
 
 """
-    right_ascension([[T=Float64,] PT=Float64,], body, ep)
+    right_ascension([[T=Float64,] PT=Float64,] body, ep)
 
 Return the right ascension of the body-fixed frame of `body` w.r.t. the ICRF at epoch `ep`
 in rad.
@@ -243,7 +292,7 @@ julia> right_ascension(earth, TTEpoch(2000, 1, 1))
 function right_ascension end
 
 """
-    right_ascension_rate([[T=Float64,] PT=Float64,], body, ep)
+    right_ascension_rate([[T=Float64,] PT=Float64,] body, ep)
 
 Return the right ascension rate of change of the body-fixed frame of `body` w.r.t. the
 ICRF at epoch `ep` in rad/s.
@@ -264,7 +313,7 @@ julia> right_ascension_rate(earth, TTEpoch(2000, 1, 1))
 function right_ascension_rate end
 
 """
-    declination([[T=Float64,] PT=Float64,], body, ep)
+    declination([[T=Float64,] PT=Float64,] body, ep)
 
 Return the declination of the body-fixed frame of `body` w.r.t. the ICRF at epoch `ep` in
 rad.
@@ -285,7 +334,7 @@ julia> declination(earth, TTEpoch(2000, 1, 1))
 function declination end
 
 """
-    declination_rate([[T=Float64,] PT=Float64,], body, ep)
+    declination_rate([[T=Float64,] PT=Float64,] body, ep)
 
 Return the declination rate of change of the body-fixed frame of `body` w.r.t. the
 ICRF at epoch `ep` in rad/s.
@@ -306,7 +355,7 @@ julia> declination_rate(earth, TTEpoch(2000, 1, 1))
 function declination_rate end
 
 """
-    rotation_angle([[T=Float64,] PT=Float64,], body, ep)
+    rotation_angle([[T=Float64,] PT=Float64,] body, ep)
 
 Return the rotation angle of the body-fixed frame of `body` w.r.t. the ICRF at epoch `ep` in
 rad.
@@ -327,7 +376,7 @@ julia> rotation_angle(earth, TTEpoch(2000, 1, 1))
 function rotation_angle end
 
 """
-    rotation_rate([[T=Float64,] PT=Float64,], body, ep)
+    rotation_rate([[T=Float64,] PT=Float64,] body, ep)
 
 Return the rotation rate of change of the body-fixed frame of `body` w.r.t. the
 ICRF at epoch `ep` in rad/s.
@@ -348,7 +397,7 @@ julia> rotation_rate(earth, TTEpoch(2000, 1, 1))
 function rotation_rate end
 
 """
-    euler_angles([[T=Float64,] PT=Float64,], body, ep)
+    euler_angles([[T=Float64,] PT=Float64,] body, ep)
 
 Return the orientation of the body-fixed frame of `body` w.r.t. the ICRF at epoch `ep` as a
 set of Euler angles in rad with rotation order ZXZ.
@@ -371,7 +420,7 @@ function euler_angles(b::CelestialBody, ep)
 end
 
 """
-    euler_rates([[T=Float64,] PT=Float64,], body, ep)
+    euler_rates([[T=Float64,] PT=Float64,] body, ep)
 
 Return the rate of change of orientation of the body-fixed frame of `body` w.r.t. the ICRF
 at epoch `ep` as a set of Euler angle rates in rad/s with rotation order ZXZ.

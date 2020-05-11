@@ -48,6 +48,16 @@ furnsh(joinpath(@__DIR__, "..", "gen", "gm_de431.tpc"),
                 end
             end
         end
+
+        if bodfnd(id, "RADII")
+            @testset "Radii" begin
+                exp = bodvcd(id, "RADII")
+                act = ellipsoid(body)
+                @test act[1] ≈ exp[1]
+                @test act[2] ≈ exp[2]
+                @test act[3] ≈ exp[3]
+            end
+        end
     end
     @test AstroBase.Bodies.path_ids(luna, earth) == [301, 3, 399]
     @test AstroBase.Bodies.path_ids(luna, io) == [301, 3, 0, 5, 501]

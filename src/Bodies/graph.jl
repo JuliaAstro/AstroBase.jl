@@ -13,6 +13,22 @@ link_bodies!(id1, id2) = add_edge!(BODIES, id1, id2)
 
 path_ids(from::CelestialBody, to::CelestialBody) = items(BODIES, naifid(from), naifid(to))
 
+const BODY_TYPES = (
+    :CelestialBody,
+    :Barycenter,
+    :Planet,
+    :MinorBody,
+    :NaturalSatellite,
+    :EarthSatellite,
+    :MarsSatellite,
+    :JupiterSatellite,
+    :SaturnSatellite,
+    :UranusSatellite,
+    :NeptuneSatellite,
+    :UranusSatellite,
+    :PlutoSatellite,
+)
+
 """
     @body(name, id, supertype, type=Name, parent=nothing)
 
@@ -43,7 +59,7 @@ macro body(name::Symbol, id::Int, super::Symbol, args...)
     typ = Symbol(typ_str)
     parent = nothing
     _export = false
-    if !(super in (:CelestialBody, :Barycenter, :Planet, :NaturalSatellite, :MinorBody))
+    if !(super in BODY_TYPES)
         throw(ArgumentError("Invalid supertype: $super"))
     end
     for a in args
@@ -54,6 +70,7 @@ macro body(name::Symbol, id::Int, super::Symbol, args...)
             val = a.args[2]
             val isa Symbol || throw(ArgumentError("Invalid argument: $a"))
             typ = val
+            typ_str = String(typ)
         elseif a.args[1] == :parent
             val = a.args[2]
             val isa Symbol || throw(ArgumentError("Invalid argument: $a"))
@@ -66,16 +83,17 @@ macro body(name::Symbol, id::Int, super::Symbol, args...)
     end
     parts = split(String(typ), r"(?=[A-Z1-9])")
     show_str = join(parts, " ")
-    doc_str = parts[end] == "Barycenter" ? join(["the"; parts], " ") : show_str
+    doc_str = parts[end] in ("Barycenter", "Sun") ? join(["the"; parts], " ") : show_str
     super_str = String(super)
     reg = if parent === nothing
-        :(register_body!($id))
+        :(Bodies.register_body!($id))
     else
-        :(link_bodies!(naifid($parent), $id))
+        :(Bodies.link_bodies!(naifid($parent), $id))
     end
     exp = _export ? :(export $name, $typ) : :()
-    id_expr = :(naifid(::$typ) = $id)
-    fromid_expr = :(from_naifid(::Val{$id}) = $name)
+    parent_expr = parent !== nothing ? :(parent(::$typ) = $parent) : :()
+    id_expr = :(Bodies.naifid(::$typ) = $id)
+    fromid_expr = :(Bodies.from_naifid(::Val{$id}) = $name)
     return quote
         """
             $($typ_str) <: $($super_str)
@@ -94,6 +112,7 @@ macro body(name::Symbol, id::Int, super::Symbol, args...)
         $(esc(id_expr))
         $(esc(fromid_expr))
         $(esc(reg))
+        $(esc(parent_expr))
         $(esc(exp))
         nothing
     end

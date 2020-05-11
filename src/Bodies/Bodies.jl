@@ -13,7 +13,9 @@ using ..Time: SECONDS_PER_DAY, SECONDS_PER_CENTURY, seconds, julian_period
 
 import Base: parent
 
-export CelestialBody, Barycenter, Planet, NaturalSatellite, MinorBody, NAIFId,
+export CelestialBody, Barycenter, Planet,MinorBody, NAIFId,
+    NaturalSatellite, EarthSatellite, MarsSatellite, JupiterSatellite,
+    SaturnSatellite, UranusSatellite, NeptuneSatellite, PlutoSatellite,
     along_orbit_radius, declination, declination_rate, ellipsoid, equatorial_radius,
     euler_angles, euler_rates, from_naifid, grav_param, mean_radius, naifid,
     parent, polar_radius, right_ascension, right_ascension_rate,

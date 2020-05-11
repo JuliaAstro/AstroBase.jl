@@ -9,36 +9,48 @@
 @body pluto_barycenter 9 Barycenter parent=ssb _export=true
 @body pluto 999 MinorBody parent=pluto_barycenter _export=true
 
+# We have data for these minor bodies from pck00010.tpc and gm_de431.tpc.
+
 const MINOR_BODY_NAMES = (
+    "Borrelly",
+    "Halley",
+    "Tempel1",
+    "Wild2",
     "Ceres",
     "Pallas",
     "Vesta",
-    "Psyche",
     "Lutetia",
-    "Ida",
+    "Kleopatra",
+    "Mathilde",
     "Eros",
     "Davida",
-    "Gaspra",
     "Steins",
+    "Toutatis",
     "Itokawa",
-    "Tempel1",
-    "Borrelly",
+    "Ida",
+    "Gaspra",
+    "Psyche",
 )
 
 const MINOR_BODY_IDS = (
+    1000005,
+    1000036,
+    1000093,
+    1000107,
     2000001,
     2000002,
     2000004,
-    2000016,
     2000021,
-    2431010,
+    2000216,
+    2000253,
     2000433,
     2000511,
-    9511010,
     2002867,
+    2004179,
     2025143,
-    1000093,
-    1000005,
+    2431010,
+    9511010,
+    2000016,
 )
 
 for (id, body) in zip(MINOR_BODY_IDS, MINOR_BODY_NAMES)

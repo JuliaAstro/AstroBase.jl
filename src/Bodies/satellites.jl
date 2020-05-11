@@ -8,7 +8,7 @@
 
 # Earth
 
-@body luna 301 NaturalSatellite parent=earth_barycenter _export=true
+@body luna 301 EarthSatellite parent=earth_barycenter _export=true
 
 """
     moon
@@ -20,8 +20,8 @@ export moon
 
 # Mars
 
-@body phobos 401 NaturalSatellite parent=mars_barycenter _export=true
-@body deimos 402 NaturalSatellite parent=mars_barycenter _export=true
+@body phobos 401 MarsSatellite parent=mars_barycenter _export=true
+@body deimos 402 MarsSatellite parent=mars_barycenter _export=true
 
 # Jupiter
 
@@ -83,11 +83,11 @@ for (i, body) in enumerate(JUPITER_SATELLITE_NAMES[1:end-1])
     name = Symbol(lowercase(body))
     id = 500 + i
     @eval begin
-        @body $name $id NaturalSatellite parent=jupiter_barycenter _export=true
+        @body $name $id JupiterSatellite parent=jupiter_barycenter _export=true
     end
 end
 
-@body dia 553 NaturalSatellite parent=jupiter_barycenter _export=true
+@body dia 553 JupiterSatellite parent=jupiter_barycenter _export=true
 
 # Saturn
 
@@ -151,7 +151,7 @@ for (i, body) in enumerate(SATURN_SATELLITE_NAMES)
     name = Symbol(lowercase(body))
     id = 600 + i
     @eval begin
-        @body $name $id NaturalSatellite parent=saturn_barycenter _export=true
+        @body $name $id SaturnSatellite parent=saturn_barycenter _export=true
     end
 end
 
@@ -191,7 +191,7 @@ for (i, body) in enumerate(URANUS_SATELLITE_NAMES)
     name = Symbol(lowercase(body))
     id = 700 + i
     @eval begin
-        @body $name $id NaturalSatellite parent=uranus_barycenter _export=true
+        @body $name $id UranusSatellite parent=uranus_barycenter _export=true
     end
 end
 
@@ -217,7 +217,7 @@ for (i, body) in enumerate(NEPTUNE_SATELLITE_NAMES)
     name = Symbol(lowercase(body))
     id = 800 + i
     @eval begin
-        @body $name $id NaturalSatellite parent=neptune_barycenter _export=true
+        @body $name $id NeptuneSatellite parent=neptune_barycenter _export=true
     end
 end
 
@@ -235,7 +235,7 @@ for (i, body) in enumerate(PLUTO_SATELLITE_NAMES)
     name = Symbol(lowercase(body))
     id = 900 + i
     @eval begin
-        @body $name $id NaturalSatellite parent=pluto_barycenter _export=true
+        @body $name $id PlutoSatellite parent=pluto_barycenter _export=true
     end
 end
 
