@@ -5,7 +5,7 @@ file = "pck00010.tpc"
 furnsh(file)
 
 ids = Set([])
-re = r"BODY(?<id>[0-9]+)_PM\s+="
+re = r"BODY(?<id>[0-9]+)_(RADII|PM)\s+="
 lines = open(readlines, file)
 for line in lines
     s = string(line)
@@ -44,37 +44,41 @@ open("pck.jl", "w") do f
         functions = ("right_ascension", "declination", "rotation")
         names = ("RA", "DEC", "PM")
 
-        for (func, name) in zip(functions, names)
-            val = zeros(3)
-            sval = deg2rad.(bodvrd(id, name == "PM" ? name : "POLE_$name"))
-            val[1:length(sval)] .+= sval
-            val_np = Float64[]
+        try
+            for (func, name) in zip(functions, names)
+                val = zeros(3)
+                sval = deg2rad.(bodvrd(id, name == "PM" ? name : "POLE_$name"))
+                val[1:length(sval)] .+= sval
+                val_np = Float64[]
+                try
+                    n = length(bodvrd(id[1:1], "NUT_PREC_ANGLES")) ÷ 2
+                    tmp = zeros(n)
+                    sval = deg2rad.(bodvrd(id, "NUT_PREC_$name"))
+                    tmp[1:length(sval)] .+= sval
+                    append!(val_np, tmp)
+                catch err
+                    err isa SpiceError || rethrow(err)
+                end
+                data = (val..., Tuple(val_np))
+                write(f, template(body, "$(func)_coeffs", data))
+            end
+
+            # Nutation / Precession
+            if length(id) != 3
+                write(f, template(body, "nutation_precession_coeffs", ((),())))
+                continue
+            end
             try
-                n = length(bodvrd(id[1:1], "NUT_PREC_ANGLES")) ÷ 2
-                tmp = zeros(n)
-                sval = deg2rad.(bodvrd(id, "NUT_PREC_$name"))
-                tmp[1:length(sval)] .+= sval
-                append!(val_np, tmp)
+                np = deg2rad.(reshape(bodvrd(id[1:1], "NUT_PREC_ANGLES"), 2, :))
+                theta0 = Tuple(np[1,:])
+                theta1 = Tuple(np[2,:])
+                write(f, template(body, "nutation_precession_coeffs", (theta0, theta1)))
             catch err
                 err isa SpiceError || rethrow(err)
+                write(f, template(body, "nutation_precession_coeffs", ((),())))
             end
-            data = (val..., Tuple(val_np))
-            write(f, template(body, "$(func)_coeffs", data))
-        end
-
-        # Nutation / Precession
-        if length(id) != 3
-            write(f, template(body, "nutation_precession_coeffs", ((),())))
-            continue
-        end
-        try
-            np = deg2rad.(reshape(bodvrd(id[1:1], "NUT_PREC_ANGLES"), 2, :))
-            theta0 = Tuple(np[1,:])
-            theta1 = Tuple(np[2,:])
-            write(f, template(body, "nutation_precession_coeffs", (theta0, theta1)))
         catch err
             err isa SpiceError || rethrow(err)
-            write(f, template(body, "nutation_precession_coeffs", ((),())))
         end
     end
 end
