@@ -47,7 +47,7 @@ Convert `x` from radians to degrees.
 
 ```jldoctest
 julia> rad_to_deg(π/2)
-90
+90.0
 ```
 """
 rad_to_deg(x) = rad2deg(x)
@@ -102,7 +102,7 @@ Convert `x` from degrees to arcseconds.
 # Example
 
 ```jldoctest
-julia> deg_to_sec(90)
+julia> deg_to_sec(90.0)
 324000.0
 ```
 """

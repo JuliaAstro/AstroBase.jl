@@ -91,8 +91,8 @@ Return the nutation components for a given epoch and model.
 julia> ep = TTEpoch(2020, 1, 1)
 2020-01-01T00:00:00.000 TT
 
-julia> nutation(iau2006, ep)
-(-7.996558232098883e-5, -8.25141288270117e-6)
+julia> nutation(iau2006a, ep)
+(-7.996558234083069e-5, -8.251412879483326e-6)
 ```
 
 # References
