@@ -27,7 +27,7 @@ makedocs(
 	],
     ],
     # strict = true,
-    doctest = false,
+    # doctest = false,
 )
 
 deploydocs(
