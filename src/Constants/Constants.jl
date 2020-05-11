@@ -16,6 +16,8 @@ using ..Time:
     TerrestrialTime
 
 export
+    KiloMeter,
+    Meter,
     astronomical_unit,
     drift_rate,
     earth_rotation_angle_j2000,
@@ -34,17 +36,24 @@ export
     speed_of_light,
     tdb0
 
-abstract type Unit end
+"""
+    Meter
 
-struct Meter <: Unit end
-const m = Meter()
-struct KiloMeter <: Unit end
-const km = KiloMeter()
+A singleton type for returning constants in SI units.
+"""
+struct Meter end
+
+"""
+    KiloMeter
+
+A singleton type for returning constants in km-based units (the default).
+"""
+struct KiloMeter end
 
 const SPEED_OF_LIGHT = 2.99792458e8 # m/s
 
 """
-    speed_of_light([[T=Float64], unit=km])
+    speed_of_light([[T=Float64], unit=KiloMeter()])
 
 Return the speed of light ``c``.
 
@@ -55,8 +64,8 @@ Return the speed of light ``c``.
     *Celestial Mechanics and Dynamical Astronomy* 110.4 (2011): 293.
 """
 speed_of_light(::Type{Float64}, ::Meter) = SPEED_OF_LIGHT
-speed_of_light(::Type{Float64}, ::KiloMeter) = speed_of_light(Float64, m) * 1e-3
-speed_of_light() = speed_of_light(Float64, km)
+speed_of_light(::Type{Float64}, ::KiloMeter) = speed_of_light(Float64, Meter()) * 1e-3
+speed_of_light() = speed_of_light(Float64, KiloMeter())
 
 const GAUSSIAN_GRAVITATIONAL_CONSTANT = 1.720209895e-2 # dimensionless
 
@@ -165,7 +174,7 @@ const G = 6.67428e-11 # m³/(kg * s²)
 const G_ERR = 6.7e-15 # m³/(kg * s²)
 
 """
-    gravitational_const([[T=Float64], unit=km])
+    gravitational_const([[T=Float64], unit=KiloMeter()])
 
 Return the gravitational constant ``G`` and the associated uncertainty.
 
@@ -176,14 +185,14 @@ Return the gravitational constant ``G`` and the associated uncertainty.
     *Celestial Mechanics and Dynamical Astronomy* 110.4 (2011): 293.
 """
 gravitational_const(::Type{Float64}, ::Meter) = G, G_ERR
-gravitational_const(::Type{Float64}, ::KiloMeter) = gravitational_const(Float64, m) .* 1e-9
-gravitational_const() = gravitational_const(Float64, km)
+gravitational_const(::Type{Float64}, ::KiloMeter) = gravitational_const(Float64, Meter()) .* 1e-9
+gravitational_const() = gravitational_const(Float64, KiloMeter())
 
 const AU = 1.49597870700e11 # m
 const AU_ERR = 3 # m
 
 """
-    astronomical_unit([[T=Float64], unit=km])
+    astronomical_unit([[T=Float64], unit=KiloMeter()])
 
 Return the astronomical unit ``au`` and the associated uncertainty.
 
@@ -194,8 +203,8 @@ Return the astronomical unit ``au`` and the associated uncertainty.
     *Celestial Mechanics and Dynamical Astronomy* 110.4 (2011): 293.
 """
 astronomical_unit(::Type{Float64}, ::Meter) = AU, AU_ERR
-astronomical_unit(::Type{Float64}, ::KiloMeter) = astronomical_unit(Float64, m) .* 1e-3
-astronomical_unit() = astronomical_unit(Float64, km)
+astronomical_unit(::Type{Float64}, ::KiloMeter) = astronomical_unit(Float64, Meter()) .* 1e-3
+astronomical_unit() = astronomical_unit(Float64, KiloMeter())
 
 const LC = 1.48082686741e-8 # dimensionless
 const LC_ERR = 2e-17 # dimensionless
@@ -227,7 +236,7 @@ const GM_S_TDB = 1.32712440041e20 # m³/s²
 const GM_S_TDB_ERR = 1e10 # m³/s²
 
 """
-    heliocentric_gravitational_const([[[T=Float64], scale=TDB], unit=km])
+    heliocentric_gravitational_const([[[T=Float64], scale=TDB], unit=KiloMeter()])
 
 Return the heliocentric gravitational constant ``GM_S`` and the associated uncertainty.
 
@@ -251,15 +260,15 @@ heliocentric_gravitational_const(
     ::Type{Float64},
     scale,
     ::KiloMeter,
-) = heliocentric_gravitational_const(Float64, scale, m) .* 1e-9
-heliocentric_gravitational_const(s) = heliocentric_gravitational_const(Float64, s, km)
-heliocentric_gravitational_const() = heliocentric_gravitational_const(Float64, TDB, km)
+) = heliocentric_gravitational_const(Float64, scale, Meter()) .* 1e-9
+heliocentric_gravitational_const(s) = heliocentric_gravitational_const(Float64, s, KiloMeter())
+heliocentric_gravitational_const() = heliocentric_gravitational_const(Float64, TDB, KiloMeter())
 
 const AE = 6.3781366e6 # m
 const AE_ERR = 1e-1 # m
 
 """
-    equatorial_radius_earth([[T=Float64], unit=km])
+    equatorial_radius_earth([[T=Float64], unit=KiloMeter()])
 
 Return the equatorial radius of Earth ``a\\_E`` and the associated uncertainty.
 
@@ -270,8 +279,8 @@ Return the equatorial radius of Earth ``a\\_E`` and the associated uncertainty.
     *Celestial Mechanics and Dynamical Astronomy* 110.4 (2011): 293.
 """
 equatorial_radius_earth(::Type{Float64}, ::Meter) = AE, AE_ERR
-equatorial_radius_earth(::Type{Float64}, ::KiloMeter) = equatorial_radius_earth(Float64, m) .* 1e-3
-equatorial_radius_earth() = equatorial_radius_earth(Float64, km)
+equatorial_radius_earth(::Type{Float64}, ::KiloMeter) = equatorial_radius_earth(Float64, Meter()) .* 1e-3
+equatorial_radius_earth() = equatorial_radius_earth(Float64, KiloMeter())
 
 const J2 = 1.0826359e-3 # m
 const J2_ERR = 1e-10 # m
@@ -315,7 +324,7 @@ const GM_E_TDB = 3.986004356e14 # m³/s²
 const GM_E_TDB_ERR = 8e5 # m³/s²
 
 """
-    geocentric_gravitational_const([[[T=Float64], scale=TDB], unit=km])
+    geocentric_gravitational_const([[[T=Float64], scale=TDB], unit=KiloMeter()])
 
 Return the geocentric gravitational constant ``GM_E`` and the associated uncertainty.
 
@@ -344,9 +353,9 @@ geocentric_gravitational_const(
     ::Type{Float64},
     scale,
     ::KiloMeter,
-) = geocentric_gravitational_const(Float64, scale, m) .* 1e-9
-geocentric_gravitational_const(s) = geocentric_gravitational_const(Float64, s, km)
-geocentric_gravitational_const() = geocentric_gravitational_const(Float64, TDB, km)
+) = geocentric_gravitational_const(Float64, scale, Meter()) .* 1e-9
+geocentric_gravitational_const(s) = geocentric_gravitational_const(Float64, s, KiloMeter())
+geocentric_gravitational_const() = geocentric_gravitational_const(Float64, TDB, KiloMeter())
 
 const W0 = 6.26368560e7 # m²/s²
 const W0_ERR = 5e-1 # m²/s²
@@ -354,7 +363,7 @@ const W0_ERR = 5e-1 # m²/s²
 """
     geoid_potential([T=Float64])
 
-Return ``J_2`` dynamical form factor of Earth and the associated uncertainty.
+Return the geoid potential and the associated uncertainty.
 
 # Reference
 
@@ -363,8 +372,8 @@ Return ``J_2`` dynamical form factor of Earth and the associated uncertainty.
     *Celestial Mechanics and Dynamical Astronomy* 110.4 (2011): 293.
 """
 geoid_potential(::Type{Float64}, ::Meter) = W0, W0_ERR
-geoid_potential(::Type{Float64}, ::KiloMeter) = geoid_potential(Float64, m) .* 1e-6
-geoid_potential() = geoid_potential(Float64, km)
+geoid_potential(::Type{Float64}, ::KiloMeter) = geoid_potential(Float64, Meter()) .* 1e-6
+geoid_potential() = geoid_potential(Float64, KiloMeter())
 
 const OMEGA = 7.292115e-5 # rad/s
 
