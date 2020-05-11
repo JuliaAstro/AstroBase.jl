@@ -50,6 +50,7 @@ for f in (:position, :velocity)
                        kwargs...
                       ) where T<:CelestialBody
             arr .+= 0.0
+            return arr
         end
 
         function $fmut(arr,
@@ -63,7 +64,7 @@ for f in (:position, :velocity)
             for (origin, target) in zip(path[1:end-1], path[2:end])
                 $fmut(arr, eph, ep, origin, target; kwargs...)
             end
-            arr
+            return arr
         end
 
         function $f(eph::AbstractEphemeris,
