@@ -5,30 +5,23 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# using DataInterpolations: CubicSpline
-using DataInterpolations
 
 using ..Time: Epoch, Period, unit, value
+using ..Util: CubicSpline
 
 export TimeSeries
 
-struct TimeSeries{S,TT,U,PT,T} <: AbstractArray{T,1}
-    epoch::Epoch{S,TT}
-    time::Vector{Period{U,PT}}
+struct TimeSeries{S,ET,PT<:Period,T} <: AbstractArray{T,1}
+    epoch::Epoch{S,ET}
+    time::Vector{PT}
     data::Vector{T}
-    # interp::BSplineInterpolation{Array{DType,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},Array{Float64,1},true,DType}
-    interp
-    function TimeSeries(epoch::Epoch{S,TT}, time, data) where {S,TT}
-        @show time_array = collect(time)
-        @show U = unit(time_array[1])
-        @show PT = eltype(time_array[1])
-        @show T = eltype(data)
-        # interp = BSplineInterpolation(data, float(value.(time)), 3, :ArcLen, :Average)
-        interp = CubicSpline(data, float(value.(time)))
-        @show typeof(epoch)
-        @show typeof(time_array)
-        @show typeof(data)
-        new{S,TT,U,PT,T}(epoch, time_array, data, interp)
+    interp::CubicSpline{Float64,T}
+    function TimeSeries(ep::Epoch{S,ET}, t, u) where {S,ET}
+        time_array = collect(t)
+        PT = eltype(time_array)
+        T = eltype(u)
+        interp = CubicSpline(float(value.(time_array)), u)
+        new{S,ET,PT,T}(ep, time_array, u, interp)
     end
 end
 

@@ -23,18 +23,18 @@ end
     b = similar(y, n)
     c = similar(y, 4, n-1)
     @views begin
-        dx = diff(x);
-        dxr = dx
-        slope = diff(y) ./ dxr
+        dx = diff(x)
+        slope = diff(y) ./ dx
+
         d[2:end-1] .= 2 .* (dx[1:end-1] .+ dx[2:end])
         du[2:end] .= dx[1:end-1]
         dl[1:end-1] .= dx[2:end]
+        b[2:end-1] .= 3 * (dx[2:end] .* slope[1:end-1]
+            .+ dx[1:end-1] .* slope[2:end])
 
         # Not-a-knot boundary conditions
         d[1] = dx[2]
         du[1] = x[3] - x[1]
-        b[2:end-1] .= 3 * (dx[2:end] .* slope[1:end-1]
-            .+ dx[1:end-1] .* slope[2:end])
         δ = x[3] - x[1]
         b[1] = ((dx[1] + 2δ) * dx[2] * slope[1]
             + dx[1]^2 * slope[2]) / δ
@@ -43,14 +43,15 @@ end
         δ = x[end] - x[end-2]
         b[end] = ((dx[end]^2 * slope[end-1]
                 + (2δ + dx[end]) * dx[end-1] * slope[end]) / δ)
+
         A = Tridiagonal(dl, d, du)
         s = A \ b
         t = (s[1:end-1] .+ s[2:end] .- 2 .* slope) ./ dx
 
-        c[1,:] = y[1:end-1]
-        c[2,:] = s[1:end-1]
-        c[3,:] = (slope .- s[1:end-1]) ./ dx .- t
-        c[4,:] = t ./ dx
+        c[1,:] .= y[1:end-1]
+        c[2,:] .= s[1:end-1]
+        c[3,:] .= (slope .- s[1:end-1]) ./ dx .- t
+        c[4,:] .= t ./ dx
     end
 
     return CubicSpline(n, x, y, c)

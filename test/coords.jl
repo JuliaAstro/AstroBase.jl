@@ -78,16 +78,16 @@ k0_exp = KeplerianState(s0_exp)
                 frame=iau_mars, scale=TDB, body=mars) ≈ mars_rot
         end
     end
-    # @testset "Time Series" begin
-    #     t = 1seconds:4seconds
-    #     u = collect(1.0:4.0)
-    #     ep = UTCEpoch(2000, 1, 1)
-    #     ts = TimeSeries(ep, t, u)
-    #     @test collect(ts) == [1.0, 2.0, 3.0, 4.0]
-    #     @test ts[1] == 1.0
-    #     @test ts(1.5seconds) ≈ 1.5
-    #     @test ts(ep + 1.5seconds) ≈ 1.5
-    # end
+    @testset "Time Series" begin
+        t = 1seconds:4seconds
+        u = collect(1.0:4.0)
+        ep = UTCEpoch(2000, 1, 1)
+        ts = TimeSeries(ep, t, u)
+        @test collect(ts) == [1.0, 2.0, 3.0, 4.0]
+        @test ts[1] == 1.0
+        @test ts(1.5seconds) ≈ 1.5
+        @test ts(ep + 1.5seconds) ≈ 1.5
+    end
     # @testset "Trajectories" begin
     #     @testset "Transpose - Array of Arrays" begin
     #         a = [[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]]
