@@ -4,6 +4,21 @@ using Test
 import SPICE
 
 @testset "Utils" begin
+    @testset "Cubic Spline" begin
+        x = [-1.45971551, -1.27401241, -1.24858571, -0.98854859, -0.85262672,
+             -0.36269993,  0.12312452,  0.20519359,  0.82698527,  1.18579896]
+        x_rev = reverse(x)
+        y = [-1.12016875,  0.53793553, -0.32205336, -0.73225522,  0.53240318,
+             -0.42591753,  0.96449187,  0.2450982 , -0.68313154,  0.52273895];
+        spl = CubicSpline(x, y)
+        spl_rev = CubicSpline(x_rev, y)
+        @test spl(1.0) ≈ -0.07321713407025687
+        @test spl_rev(1.0) ≈ -0.0765278000823969
+        @test spl(-Inf) == y[1]
+        @test spl(Inf) == y[end]
+        @test_throws ArgumentError CubicSpline(x, y[1:end-1])
+        @test_throws ArgumentError CubicSpline(x[1:3], y[1:3])
+    end
     @testset "Angles" begin
         x = randn()
         @test deg_to_rad(rad_to_deg(x)) ≈ x

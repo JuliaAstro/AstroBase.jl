@@ -65,12 +65,14 @@
 
 module Util
 
-using LinearAlgebra: norm, ⋅, ×, normalize, dot
+using LinearAlgebra: Tridiagonal, norm, ⋅, ×, normalize, dot
 using StaticArrays: SVector
 
+export CubicSpline
 export plane_section, point_on_limb, spherical_to_cartesian
 
 include("angles.jl")
+include("interpolation.jl")
 include("linear_algebra.jl")
 
 function angular_velocity(ψ, δψ, θ, δθ, ϕ, δϕ)
