@@ -12,7 +12,26 @@ struct CubicSpline{XT,T}
     c::Matrix{T}
 end
 
-@inbounds function CubicSpline(x, y)
+"""
+    CubicSpline(x, y)
+
+Construct a cubic spline interpolator. `x` and `y` must have the same length and
+at least four elements.
+
+# Example
+
+```jldoctest
+julia> x = 1:5;
+
+julia> y = [2.0, 5.0, 3.2, 4.8, 6.7];
+
+julia> spl = CubicSpline(x, y);
+
+julia> spl(3.5)
+3.5921875
+```
+"""
+function CubicSpline(x, y)
     n = length(x)
     n < 4 && throw(ArgumentError("At least four points are needed."))
     length(y) != n && throw(ArgumentError("`x` and `y` must have the same length."))
@@ -54,7 +73,7 @@ end
         c[4,:] .= t ./ dx
     end
 
-    return CubicSpline(n, x, y, c)
+    return CubicSpline(n, collect(x), y, c)
 end
 
 @inbounds function evaluate(spl::CubicSpline, x1)
