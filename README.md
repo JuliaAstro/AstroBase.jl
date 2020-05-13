@@ -17,6 +17,8 @@ AstroBase.jl provides a number of submodules which can be individually imported,
 e.g. `using AstroBase.Time`, and provide the following functionality:
 
 <!-- FIXME: Use link to stable docs once this is about to be published -->
+- [`Astrometry`](https://juliaastro.github.io/AstroBase.jl/dev/modules/astrometry/):
+	Astrometric functions
 - [`Bodies`](https://juliaastro.github.io/AstroBase.jl/dev/modules/bodies/):
 	Types representing celestial bodies and associated constants
 - [`Constants`](https://juliaastro.github.io/AstroBase.jl/dev/modules/constants/):

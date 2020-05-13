@@ -29,6 +29,24 @@ Apply aberration to transform natural direction into proper direction.
 
 Returns the proper direction to source (unit vector).
 
+# Example
+
+```jldoctest
+julia> pnat = [-0.76321968546737951,-0.60869453983060384,-0.21676408580639883];
+
+julia> v = [2.1044018893653786e-5,-8.9108923304429319e-5,-3.8633714797716569e-5];
+
+julia> s = 0.99980921395708788;
+
+julia> bm1 = 0.99999999506209258;
+
+julia> act = aberration(pnat, v, s, bm1)
+3-element Array{Float64,1}:
+ -0.7631631094219556
+ -0.6087553082505591
+ -0.21679262693684712
+```
+
 # References
 
 - [ERFA - ab](https://github.com/liberfa/erfa/blob/master/src/ab.c)

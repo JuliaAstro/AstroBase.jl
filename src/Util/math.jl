@@ -211,6 +211,8 @@ Return the Euclidean (L2) distance between vectors `v1` and `v2`.
 # Example
 
 ```jldoctest
+julia> distance([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+1.4142135623730951
 ```
 """
 distance(v1, v2) = norm(v1 .- v2)

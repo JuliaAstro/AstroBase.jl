@@ -15,6 +15,7 @@ makedocs(
     pages = [
 	"Home" => "index.md",
 	"Modules" => [
+	    "Astrometry" => joinpath("modules", "astrometry.md"),
 	    "Celestial Bodies" => joinpath("modules", "bodies.md"),
 	    "Constants" => joinpath("modules", "constants.md"),
 	    "Coordinates" => joinpath("modules", "coords.md"),
@@ -26,8 +27,6 @@ makedocs(
 	    "Utilities" => joinpath("modules", "util.md"),
 	],
     ],
-    # strict = true,
-    # doctest = false,
 )
 
 deploydocs(
