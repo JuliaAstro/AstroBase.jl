@@ -35,7 +35,8 @@ using AstroBase.Time: TCB, TCG, TDB, TT
     @test obliquity_j2000()[1] ≈ 8.4381406e4
     @test obliquity_j2000()[2] ≈ 1e-3
     @test speed_of_light() ≈ 2.99792458e5
-    @test tdb0() == -6.55e-5
+    @test tdb0() ≈ -6.55e-5
+    @test schwarzschild_radius_sun() ≈ 1.97412574336e-8
 
     @test mass_ratio_moon()[1] ≈ 1.23000371e-2
     @test mass_ratio_moon()[2] ≈ 4e-10

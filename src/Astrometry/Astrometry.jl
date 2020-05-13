@@ -8,4 +8,37 @@
 
 module Astrometry
 
+using LinearAlgebra: ⋅, normalize
+using ..Constants: schwarzschild_radius_sun
+
+export aberration
+
+"""
+    aberration(pnat, v, s, bm1)
+
+Apply aberration to transform natural direction into proper direction.
+
+# Arguments
+
+- `pnat`: Natural direction to the source (unit vector)
+- `v`: Observer barycentric velocity in units of c
+- `s`: Distance between the Sun and the observer (au)
+- `bm1`: : Reciprocal of Lorenz factor ``\\sqrt{1-|v|^2}``
+
+# Output
+
+Returns the proper direction to source (unit vector).
+
+# References
+
+- [ERFA - ab](https://github.com/liberfa/erfa/blob/master/src/ab.c)
+"""
+function aberration(pnat, v, s, bm1)
+    pdv = pnat ⋅ v
+    w1 = 1.0 + pdv / (1.0 + bm1)
+    w2 = schwarzschild_radius_sun() / s
+    p = @. pnat * bm1 + w1 * v + w2 * (v - pdv * pnat)
+    return normalize(p)
+end
+
 end

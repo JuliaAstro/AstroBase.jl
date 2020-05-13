@@ -25,9 +25,9 @@ include(joinpath("TwoBody", "TwoBody.jl"))
 include(joinpath("Ephemerides", "Ephemerides.jl"))
 include(joinpath("Frames", "Frames.jl"))
 include(joinpath("Coords", "Coords.jl"))
+include(joinpath("Astrometry", "Astrometry.jl"))
 
 # include(joinpath("NBody", "NBody.jl"))
-# include(joinpath("Astrometry", "Astrometry.jl"))
 
 @reexport using .Time
 @reexport using .Constants
@@ -38,7 +38,6 @@ include(joinpath("Coords", "Coords.jl"))
 @reexport using .Ephemerides
 @reexport using .Frames
 @reexport using .Coords
-
-# @reexport using .Astrometry
+@reexport using .Astrometry
 
 end # module

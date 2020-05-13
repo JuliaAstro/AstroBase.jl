@@ -33,6 +33,7 @@ export
     mass_ratio_moon,
     mean_angular_velocity_earth,
     obliquity_j2000,
+    schwarzschild_radius_sun,
     speed_of_light,
     tdb0
 
@@ -492,6 +493,20 @@ associated uncertainty.
 """
 obliquity_j2000(::Type{Float64}) = EPS, EPS_ERR
 obliquity_j2000() = obliquity_j2000(Float64)
+
+const SCHWARZSCHILD_RADIUS_SUN = 1.97412574336e-8 # au
+
+"""
+    schwarzschild_radius_sun([T=Float64])
+
+Return the Schwarzschild radius of the Sun in au.
+
+# Reference
+
+- [ERFA - Constants](https://github.com/liberfa/erfa/blob/master/src/erfam.h)
+"""
+schwarzschild_radius_sun(::Type{Float64}) = SCHWARZSCHILD_RADIUS_SUN
+schwarzschild_radius_sun() = schwarzschild_radius_sun(Float64)
 
 end
 

@@ -63,6 +63,18 @@
 #   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+"""
+    angle(v1, v2)
+
+Returns the angle between vectors `v1` and `v2` in rad.
+
+# Example
+
+```jldoctest
+julia> rad_to_deg(angle([1.0, 0.0, 0.0], [0.0, 1.0, 0.0]))
+90.0
+```
+"""
 function Base.angle(v1, v2)
     normprod = norm(v1) * norm(v2)
     if normprod == 0.0
@@ -191,6 +203,16 @@ function plane_section(ellipsoid, plane_point, plane_normal)
     end
 end
 
+"""
+    distance(v1, v2)
+
+Return the Euclidean (L2) distance between vectors `v1` and `v2`.
+
+# Example
+
+```jldoctest
+```
+"""
 distance(v1, v2) = norm(v1 .- v2)
 
 function isinside(ellipsoid, point)
