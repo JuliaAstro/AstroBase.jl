@@ -19,7 +19,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 AstroTime = "^0.6"
-EarthOrientation = "^0.6"
+EarthOrientation = "^0.6, 0.7"
 ItemGraphs = "^0.4"
 MuladdMacro = "^0.2"
 Parameters = "^0.12"
