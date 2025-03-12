@@ -16,7 +16,7 @@ jobs:
           # - "1.0"
           - "1"
           - "nightly"
-          - "1.10"
+          - "min"
           - "lts"
         os:
           - ubuntu-latest
