@@ -7,3 +7,12 @@ OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
 SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+AstroTime = "^0.7"
+ERFA = "^1"
+LinearAlgebra = "^1.6"
+OrdinaryDiffEq = "^6"
+RemoteFiles = "^0.5"
+SPICE = "^0.2"
+Test = "^1.6"
