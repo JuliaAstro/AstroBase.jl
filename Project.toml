@@ -18,24 +18,15 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-AstroTime = "^0.6"
-EarthOrientation = "^0.6"
+AstroTime = "^0.7"
+EarthOrientation = "^0.7"
 ItemGraphs = "^0.4"
+LinearAlgebra = "^1.6"
 MuladdMacro = "^0.2"
-Parameters = "^0.12"
-Reexport = "^0.2"
-ReferenceFrameRotations = "^0.5"
-Roots = "^0.8.4, 1.0"
-SpecialFunctions = "^0.8, 0.10"
+Parameters = "^0.12, ^0.13"
+Reexport = "^1"
+ReferenceFrameRotations = "^3"
+Roots = "^2"
+SpecialFunctions = "^2"
 StaticArrays = "^1"
-julia = "^1"
-
-[extras]
-ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
-OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
-SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "ERFA", "OrdinaryDiffEq", "SPICE", "RemoteFiles"]
+julia = "^1.6"

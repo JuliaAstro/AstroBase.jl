@@ -6,12 +6,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-using ..Time: Epoch, Period, unit, value
+using ..Time: Epoch, AstroPeriod, unit, value
 using ..Util: CubicSpline
 
 export TimeSeries
 
-struct TimeSeries{S,ET,PT<:Period,T} <: AbstractArray{T,1}
+struct TimeSeries{S,ET,PT<:AstroPeriod,T} <: AbstractVector{T}
     epoch::Epoch{S,ET}
     time::Vector{PT}
     data::Vector{T}
@@ -25,7 +25,7 @@ struct TimeSeries{S,ET,PT<:Period,T} <: AbstractArray{T,1}
     end
 end
 
-function (ts::TimeSeries)(p::Period)
+function (ts::TimeSeries)(p::AstroPeriod)
     p < ts.time[1] && throw(ArgumentError("`p` is too small"))
     p > ts.time[end] && throw(ArgumentError("`p` is too large"))
     return ts.interp(value(p))

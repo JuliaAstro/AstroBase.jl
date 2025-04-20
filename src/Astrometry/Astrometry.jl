@@ -41,7 +41,7 @@ julia> s = 0.99980921395708788;
 julia> bm1 = 0.99999999506209258;
 
 julia> act = aberration(pnat, v, s, bm1)
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  -0.7631631094219556
  -0.6087553082505591
  -0.21679262693684712
